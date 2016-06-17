@@ -33,5 +33,9 @@ public class HurCpu {
         
         CommodityUpdateProcessor commodityUpdateProcessor = new CommodityUpdateProcessor();
         commodityUpdateProcessor.init();
+        
+        while(true){
+            Thread.sleep(100000);
+        }
     }
 }

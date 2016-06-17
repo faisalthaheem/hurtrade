@@ -13,19 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.computedsynergy.hurtrade.sharedcomponents.models.interfaces;
+package com.computedsynergy.hurtrade.sharedcomponents.transformers;
 
-import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
-import java.util.List;
+import com.google.gson.Gson;
+import spark.ResponseTransformer;
 
 /**
  *
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
  */
-public interface IUserModel {
-    
-    public List<User> getAllUsers();
-    public List<User> getAllUsersForOffice(int id);
-    
-    public User authenticate(String username, String password);
+public class JsonTransformer implements ResponseTransformer {
+
+    private Gson gson = new Gson();
+
+    @Override
+    public String render(Object model) {
+        return gson.toJson(model);
+    }
+
 }

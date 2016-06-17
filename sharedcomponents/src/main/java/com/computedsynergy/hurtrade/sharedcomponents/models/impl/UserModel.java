@@ -56,4 +56,24 @@ public class UserModel extends ModelBase implements IUserModel{
         
     }
 
+    @Override
+    public User authenticate(String username, String password) {
+        
+        
+        String query = String.format(("select * from users where username = '{0}' AND password='{1}' LIMIT 1"), username, password);
+        User ret = null;
+        
+        try (Connection conn = sql2o.open()) {
+            List<User> users = conn.createQuery(query)
+                    .executeAndFetch(User.class);
+            
+            if(users.size() > 0){
+                ret = users.get(0);
+            }
+        }
+        
+        return ret;
+        
+    }
+
 }

@@ -29,6 +29,8 @@ import com.rabbitmq.client.Envelope;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -78,12 +80,13 @@ public class CommodityUpdateProcessor extends AmqpBase {
         
         
         QuoteList sourceQuotes = quote.getQuoteList();
-        QuoteList userQuotes = new QuoteList();
+        QuoteList clientQuotes = new QuoteList();
         for(String k:sourceQuotes.keySet()){
             
             Quote sourceQuote = sourceQuotes.get(k);
 
-            Quote q;
+            Quote q = null;
+            //include propagation to client only if they are allowed this symbol
             if(userSpread.containsKey(k)){
                 q = new Quote(
                         sourceQuote.bid,
@@ -92,6 +95,7 @@ public class CommodityUpdateProcessor extends AmqpBase {
                         BigDecimal.ZERO,
                         sourceQuote.name
                 );
+                
             }else{
                 q = new Quote(
                         sourceQuote.bid,
@@ -101,17 +105,33 @@ public class CommodityUpdateProcessor extends AmqpBase {
                         sourceQuote.name
                 );
             }
-            
-            userQuotes.put(k, q);
+            clientQuotes.put(k, q);
         }
+        //process client's positions
+        updateClientPositions(clientQuotes);
         
-        String responseBody = new Gson().toJson(userQuotes);
+        //remove the quotes not allowed for this client
+        for(String k:sourceQuotes.keySet()){
+            if(!userSpread.containsKey(k)){
+                clientQuotes.remove(k);
+            }
+        }
 
+        String responseBody = new Gson().toJson(clientQuotes);
+        //finally send out the quotes and updated positions to the client
         try{
             channel.basicPublish(clientExchangeName, "response", null, responseBody.getBytes());
         }catch(Exception ex){
 
+            Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        //in order to process the client's positions we need access to all 
 
+    }
+    
+    private void updateClientPositions(QuoteList clientQuotes)
+    {
+        
     }
 }

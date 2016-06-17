@@ -9,6 +9,7 @@
         <module>fxyahoo</module>
         <module>sharedcomponents</module>
         <module>hurcpu</module>
+        <module>webauth</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
