@@ -23,26 +23,26 @@ import java.math.BigDecimal;
  */
 public class CommodityUser {
     
-    private String commodity;
+    private String commodityname;
     private BigDecimal spread;
     
     public CommodityUser(String c, BigDecimal s){
-        this.commodity = c;
+        this.commodityname = c;
         this.spread = s;
     }
 
     /**
-     * @return the commodity
+     * @return the commodityname
      */
-    public String getCommodity() {
-        return commodity;
+    public String getCommodityname() {
+        return commodityname;
     }
 
     /**
-     * @param commodity the commodity to set
+     * @param commodityname the commodityname to set
      */
-    public void setCommodity(String commodity) {
-        this.commodity = commodity;
+    public void setCommodityname(String commodityname) {
+        this.commodityname = commodityname;
     }
 
     /**
@@ -58,6 +58,6 @@ public class CommodityUser {
     public void setSpread(BigDecimal spread) {
         this.spread = spread;
     }
-    
+
     
 }

@@ -48,7 +48,7 @@ public class CommandLineOptions {
     public String mqPassword = "guest";
     
     @Parameter(names = {"--redis-server"})
-    public String redisServer = "redis://10.7.1.167";
+    public String redisServer = "10.7.1.167";
 
     @Parameter(names = {"--yahoo-fx-frequency"})
     public Integer yahooFxFrequency = 1000;

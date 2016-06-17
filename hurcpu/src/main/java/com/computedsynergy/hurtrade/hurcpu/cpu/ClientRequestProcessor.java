@@ -26,6 +26,7 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 /**
  *
@@ -34,7 +35,9 @@ import java.util.List;
 public class ClientRequestProcessor extends AmqpBase {
     
     //basic consumes on all of the office request queues
-    public void initialize() throws IOException{
+    public void initialize() throws IOException, TimeoutException{
+        
+        super.setupAMQP();
         
         //fetch all offices
         OfficeModel offices = new OfficeModel();

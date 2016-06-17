@@ -40,6 +40,8 @@ public class Bootstrap extends AmqpBase{
         bootstrapExchanges();
         //setup cached user data
         setupRedisUserSpreads();
+        
+        cleanup();
     }
     
     /**
@@ -86,7 +88,6 @@ public class Bootstrap extends AmqpBase{
             }
         }
         
-        cleanup();
     }
     
     /**

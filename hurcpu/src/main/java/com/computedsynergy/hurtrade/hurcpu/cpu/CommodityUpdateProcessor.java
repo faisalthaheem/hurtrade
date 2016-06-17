@@ -41,6 +41,9 @@ public class CommodityUpdateProcessor extends AmqpBase {
 
     //todo introduce cache layer to reduce hits on db and reduce processing time
     public void init() throws Exception {
+        
+        super.setupAMQP();
+        
         channel.queueDeclare(Constants.RATES_QUEUE_NAME, true, false, false, null);
 
         channel.basicConsume(Constants.RATES_QUEUE_NAME, false, "CommodityPricePump",
@@ -80,13 +83,24 @@ public class CommodityUpdateProcessor extends AmqpBase {
             
             Quote sourceQuote = sourceQuotes.get(k);
 
-            Quote q = new Quote(
-                    sourceQuote.bid,
-                    sourceQuote.bid.add(userSpread.get(k)),
-                    sourceQuote.quoteTime,
-                    BigDecimal.ZERO,
-                    sourceQuote.name
-            );
+            Quote q;
+            if(userSpread.containsKey(k)){
+                q = new Quote(
+                        sourceQuote.bid,
+                        sourceQuote.bid.add(userSpread.get(k)),
+                        sourceQuote.quoteTime,
+                        BigDecimal.ZERO,
+                        sourceQuote.name
+                );
+            }else{
+                q = new Quote(
+                        sourceQuote.bid,
+                        sourceQuote.ask,
+                        sourceQuote.quoteTime,
+                        BigDecimal.ZERO,
+                        sourceQuote.name
+                );
+            }
             
             userQuotes.put(k, q);
         }

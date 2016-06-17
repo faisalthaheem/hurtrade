@@ -87,7 +87,7 @@ public class RedisUtil {
         try {
             Map<String, BigDecimal> userSpreadMap = new HashMap<String, BigDecimal>();
             for(CommodityUser cu: userCommodities){
-                userSpreadMap.put(cu.getCommodity(), cu.getSpread());
+                userSpreadMap.put(cu.getCommodityname(), cu.getSpread());
             }
             
             String serializedMap = gson.toJson(userSpreadMap);
@@ -120,6 +120,8 @@ public class RedisUtil {
                         jedis.get(userMapName),
                         mapType
                 );
+                
+                lock.release();
                 
             }else{
                 Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, null, "Could not get user spread map for " + userMapName);
