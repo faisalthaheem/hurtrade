@@ -19,6 +19,9 @@ import com.computedsynergy.hurtrade.sharedcomponents.amqp.AmqpBase;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.Quote;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.SourceQuote;
+import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.positions.Position;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.SavedPosition;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
 import com.computedsynergy.hurtrade.sharedcomponents.util.HurUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
@@ -29,6 +32,7 @@ import com.rabbitmq.client.Envelope;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,8 +44,9 @@ import java.util.logging.Logger;
  * update after applying client specific spreads
  */
 public class CommodityUpdateProcessor extends AmqpBase {
+    
+    //SavedPositioModel savedPositionModel = new sa
 
-    //todo introduce cache layer to reduce hits on db and reduce processing time
     public void init() throws Exception {
         
         super.setupAMQP();
@@ -108,7 +113,7 @@ public class CommodityUpdateProcessor extends AmqpBase {
             clientQuotes.put(k, q);
         }
         //process client's positions
-        updateClientPositions(clientQuotes);
+        updateClientPositions(quote.getUser(), clientQuotes);
         
         //remove the quotes not allowed for this client
         for(String k:sourceQuotes.keySet()){
@@ -116,7 +121,7 @@ public class CommodityUpdateProcessor extends AmqpBase {
                 clientQuotes.remove(k);
             }
         }
-
+        
         String responseBody = new Gson().toJson(clientQuotes);
         //finally send out the quotes and updated positions to the client
         try{
@@ -125,13 +130,23 @@ public class CommodityUpdateProcessor extends AmqpBase {
 
             Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        //in order to process the client's positions we need access to all 
 
     }
     
-    private void updateClientPositions(QuoteList clientQuotes)
+    private void updateClientPositions(User user, QuoteList clientQuotes)
     {
+        //get client positions
+        Map<UUID, Position> positions = RedisUtil.getInstance().getUserPositions(user);
+        
+        for(Position p:positions.values()){
+            p.processQuote(clientQuotes);
+        }
+        
+        //set client positions
+        String serializedPositions = RedisUtil.getInstance().setUserPositions(user, positions);
+        
+        //dump the client's positions to db
+        SavedPosition p = new SavedPosition(user.getId(), serializedPositions);
         
     }
 }

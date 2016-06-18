@@ -16,7 +16,9 @@
 package com.computedsynergy.hurtrade.sharedcomponents.util;
 
 import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
+import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.positions.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CommodityUser;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.github.jedis.lock.JedisLock;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -40,9 +42,15 @@ import redis.clients.jedis.Jedis;
 public class RedisUtil {
     //public static final String CLIENT_LIST_NAME = 
     public static final String USER_SPREAD_MAP_PREFIX = "spreadmap_";
+    public static final String USER_POSITIONS_KEY_PREFIX = "positions_";
+    
     public static final String LOCK_USER_SPREAD_MAP_PREFIX = "lock_";
     public static final int TIMEOUT_LOCK_SPREAD_MAP = 5000;
     public static final int EXPIRY_LOCK_SPREAD_MAP = 10000;
+    
+    public static final String LOCK_USER_POSITIONS_PREFIX = "lock_";
+    public static final int TIMEOUT_LOCK_USER_POSITIONS = 5000;
+    public static final int EXPIRY_LOCK_USER_POSITIONS = 10000;
     
     
     private static RedisUtil _self = null;
@@ -80,6 +88,26 @@ public class RedisUtil {
     public static String getLockNameForSpreadMap(String spreadMapName)
     {
         return LOCK_USER_SPREAD_MAP_PREFIX + spreadMapName;
+    }
+    
+    /**
+     * Returns a lock name which is used to acquire mutex lock over a use's positions
+     * @param userUuid
+     * @return 
+     */
+    public static String getLockNameForUserPositions(String userPositionKey)
+    {
+        return LOCK_USER_POSITIONS_PREFIX + userPositionKey;
+    }
+    
+    /**
+     * Returns the key under which a particular user's positions are stored
+     * @param userUuid
+     * @return 
+     */
+    public static String getUserPositionsKeyName(UUID userUuid)
+    {
+        return USER_POSITIONS_KEY_PREFIX + userUuid.toString();
     }
     
     public void setUserSpreadMap(String userMapName, List<CommodityUser> userCommodities) 
@@ -132,5 +160,65 @@ public class RedisUtil {
         
         return userSpreadMap;
     }
+    
+    /**
+     * 
+     * @param user
+     * @param userPositions
+     * @return serialized map
+     */
+    public String setUserPositions(User user, Map<UUID, Position> userPositions) 
+    {
+        String serializedPositions = "";
+        
+        try {
+           
+            serializedPositions = gson.toJson(userPositions);
+            String userPositionsKeyName = getUserPositionsKeyName(user.getUseruuid());
+            
+            JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
+            if(lock.acquire()){
+                
+                jedis.set(userPositionsKeyName, serializedPositions);
+                
+            }else{
+                Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, null, "Could not set user positions " + user.getUsername());
+            }
+        } catch (InterruptedException ex) {
+            Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return serializedPositions;
+    }
+    
+    public Map<UUID, Position> getUserPositions(User user)
+    {
+        Type mapType = new TypeToken<Map<UUID, Position>>(){}.getType();
+        Map<UUID, Position> userPositions = new HashMap<UUID,Position>();
+        String userPositionsKeyName = getUserPositionsKeyName(user.getUseruuid());
+            
+        try {
+            
+            JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
+            if(lock.acquire()){
+                
+                userPositions = gson.fromJson(
+                        jedis.get(userPositionsKeyName),
+                        mapType
+                );
+                
+                lock.release();
+                
+            }else{
+                Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, null, "Could not get user positions " + user.getUsername());
+            }
+        } catch (InterruptedException ex) {
+            Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return userPositions;
+    }
+    
+    
     
 }
