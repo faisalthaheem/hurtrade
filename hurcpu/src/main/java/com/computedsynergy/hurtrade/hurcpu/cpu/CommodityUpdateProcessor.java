@@ -20,11 +20,15 @@ import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.Quote;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.SourceQuote;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.positions.Position;
+import com.computedsynergy.hurtrade.sharedcomponents.models.impl.SavedPositionModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.SavedPosition;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
 import com.computedsynergy.hurtrade.sharedcomponents.util.HurUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
+import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.getLockNameForUserPositions;
+import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.getUserPositionsKeyName;
+import com.github.jedis.lock.JedisLock;
 import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.DefaultConsumer;
@@ -45,7 +49,7 @@ import java.util.logging.Logger;
  */
 public class CommodityUpdateProcessor extends AmqpBase {
     
-    //SavedPositioModel savedPositionModel = new sa
+    SavedPositionModel savedPositionModel = new SavedPositionModel();
 
     public void init() throws Exception {
         
@@ -112,8 +116,29 @@ public class CommodityUpdateProcessor extends AmqpBase {
             }
             clientQuotes.put(k, q);
         }
-        //process client's positions
-        updateClientPositions(quote.getUser(), clientQuotes);
+        
+        String userPositionsKeyName = getUserPositionsKeyName(quote.getUser().getUseruuid());
+        JedisLock lock = new JedisLock(
+                    RedisUtil.getInstance().getJedis(), 
+                    getLockNameForUserPositions(userPositionsKeyName), 
+                    RedisUtil.getTIMEOUT_LOCK_USER_POSITIONS(), 
+                    RedisUtil.getEXPIRY_LOCK_USER_POSITIONS()
+                );
+        
+        try {
+            if(lock.acquire()){
+                
+                //process client's positions
+                updateClientPositions(quote.getUser(), clientQuotes);
+                lock.release();
+                
+            }else{
+                Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, "Could not lock user position in redis" + quote.getUser().getUsername());
+            }
+        } catch (InterruptedException ex) {
+            Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         
         //remove the quotes not allowed for this client
         for(String k:sourceQuotes.keySet()){
@@ -145,8 +170,8 @@ public class CommodityUpdateProcessor extends AmqpBase {
         //set client positions
         String serializedPositions = RedisUtil.getInstance().setUserPositions(user, positions);
         
-        //dump the client's positions to db
+        //dump client's positions to db
         SavedPosition p = new SavedPosition(user.getId(), serializedPositions);
-        
+        savedPositionModel.savePosition(p);
     }
 }
