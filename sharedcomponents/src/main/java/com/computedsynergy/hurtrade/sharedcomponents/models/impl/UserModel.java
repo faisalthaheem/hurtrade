@@ -75,5 +75,25 @@ public class UserModel extends ModelBase implements IUserModel{
         return ret;
         
     }
+    
+    @Override
+    public User getByUsername(String username) {
+        
+        
+        String query = String.format(("select * from users where username = '{0}'LIMIT 1"), username);
+        User ret = null;
+        
+        try (Connection conn = sql2o.open()) {
+            List<User> users = conn.createQuery(query)
+                    .executeAndFetch(User.class);
+            
+            if(users.size() > 0){
+                ret = users.get(0);
+            }
+        }
+        
+        return ret;
+        
+    }
 
 }

@@ -26,6 +26,7 @@ public interface IUserModel {
     
     public List<User> getAllUsers();
     public List<User> getAllUsersForOffice(int id);
+    public User getByUsername(String username);
     
     public User authenticate(String username, String password);
 }

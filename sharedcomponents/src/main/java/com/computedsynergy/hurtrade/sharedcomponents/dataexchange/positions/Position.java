@@ -30,6 +30,11 @@ public class Position {
     public static final String ORDER_TYPE_BUY = "b";
     public static final String ORDER_TYPE_SELL = "s";
     
+    public static final String ORDER_STATE_PENDING_OPEN = "pending_dealer_open";
+    public static final String ORDER_STATE_OPEN = "open";
+    public static final String ORDER_STATE_PENDING_CLOSE = "pending_dealer_close";
+    public static final String ORDER_STATE_CLOSED = "closed";
+    
     //is this buy or sell?
     private final String orderType;
     //what commodity are we trading?
@@ -38,15 +43,22 @@ public class Position {
     private BigDecimal amount;
     //p/l of this position
     private BigDecimal currentPl;
-    
     //a unique identifier for this order
-    private UUID orderId = UUID.randomUUID();
+    private final UUID orderId;
+    //the price at which the commodity was requested
+    private final BigDecimal requestedPrice;
+    //what state the order currently is in
+    private String orderState;
     
-    public Position(String orderType, String commodity, BigDecimal amount){
+    public Position(UUID orderId, String orderType, String commodity, BigDecimal amount, BigDecimal requestedPrice){
+        
+        this.orderId = orderId;
         this.orderType = orderType;
         this.commodity = commodity;
         this.amount = amount;
         this.currentPl = BigDecimal.ZERO;
+        this.requestedPrice = requestedPrice;
+        this.orderState = ORDER_STATE_PENDING_OPEN;
     }
     
     public void processQuote(QuoteList clientQuotes){

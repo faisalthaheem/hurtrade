@@ -146,6 +146,10 @@ public class CommodityUpdateProcessor extends AmqpBase {
             }
         }
         
+
+        //set the quotes as they are needed when trading
+        String serializedQuotes = gson.toJson(clientQuotes);
+        RedisUtil.getInstance().setSeriaizedQuotesForClient(serializedQuotes, quote.getUser().getUseruuid());
         
         //remove the quotes not allowed for this client
         for(String k:sourceQuotes.keySet()){
@@ -154,10 +158,10 @@ public class CommodityUpdateProcessor extends AmqpBase {
             }
         }
         
-        String responseBody = new Gson().toJson(clientQuotes);
+        String serializedQuotesForClient = gson.toJson(clientQuotes);
         //finally send out the quotes and updated positions to the client
         try{
-            channel.basicPublish(clientExchangeName, "response", null, responseBody.getBytes());
+            channel.basicPublish(clientExchangeName, "response", null, serializedQuotesForClient.getBytes());
         }catch(Exception ex){
 
             Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, ex);

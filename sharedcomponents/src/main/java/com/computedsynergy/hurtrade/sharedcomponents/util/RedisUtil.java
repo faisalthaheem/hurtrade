@@ -16,9 +16,7 @@
 package com.computedsynergy.hurtrade.sharedcomponents.util;
 
 import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
-import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.positions.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CommodityUser;
-import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.github.jedis.lock.JedisLock;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -45,6 +43,7 @@ public class RedisUtil {
     //public static final String CLIENT_LIST_NAME = 
     public static final String USER_SPREAD_MAP_PREFIX = "spreadmap_";
     public static final String USER_POSITIONS_KEY_PREFIX = "positions_";
+    public static final String USER_QUOTES_KEY_PREFIX = "userquotes";
     
     public static final String LOCK_USER_SPREAD_MAP_PREFIX = "spreadlock_";
     public static final int TIMEOUT_LOCK_SPREAD_MAP = 5000;
@@ -54,9 +53,13 @@ public class RedisUtil {
     public static final int TIMEOUT_LOCK_USER_POSITIONS = 5000;
     public static final int EXPIRY_LOCK_USER_POSITIONS = 10000;
     
-    public static final String LOCK_USER_PROCESSING_PREFIX = "userprocessing_";
+    public static final String LOCK_USER_PROCESSING_PREFIX = "lock_userprocessing_";
     public static final int TIMEOUT_LOCK_USER_PROCESSING = 5000;
     public static final int EXPIRY_LOCK_USER_PROCESSING = 10000;
+    
+    public static final String LOCK_USER_QUOTES_PREFIX = "lock_userquotes_";
+    public static final int TIMEOUT_LOCK_USER_QUOTES = 5000;
+    public static final int EXPIRY_LOCK_USER_QUOTES = 10000;
     
     private static RedisUtil _self = null;
 
@@ -116,6 +119,16 @@ public class RedisUtil {
     public static String getLockNameForUserProcessing(UUID userUuid)
     {
         return LOCK_USER_PROCESSING_PREFIX + userUuid.toString();
+    }
+    
+    public static String getLockNameForUserQuotes(String keyName)
+    {
+        return LOCK_USER_QUOTES_PREFIX + keyName;
+    }
+    
+    public static String getKeyNameForUserQuotes(UUID userUuid)
+    {
+        return USER_QUOTES_KEY_PREFIX + userUuid.toString();
     }
     
     /**
@@ -189,6 +202,56 @@ public class RedisUtil {
         }
         
         return userSpreadMap;
+    }
+    
+    public void setSeriaizedQuotesForClient(String quotes, UUID clientId)
+    {
+        try(Jedis jedis = jedisPool.getResource())
+        {
+            String keyName = getKeyNameForUserQuotes(clientId);
+            
+            JedisLock lock = new JedisLock(jedis, getLockNameForUserQuotes(keyName), TIMEOUT_LOCK_USER_QUOTES, EXPIRY_LOCK_USER_QUOTES);
+            try {
+                if(lock.acquire()){
+                    
+                    jedis.set(keyName, quotes);
+                    
+                    lock.release();
+                    
+                }else{
+                    Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, null, "Could not set user quotes for " + keyName);
+                }
+            } catch (InterruptedException ex) {
+                Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    
+    public String getSeriaizedQuotesForClient(String quotes, UUID clientId)
+    {
+        String response = "";
+        
+        try(Jedis jedis = jedisPool.getResource())
+        {
+            String keyName = getKeyNameForUserQuotes(clientId);
+            
+            JedisLock lock = new JedisLock(jedis, getLockNameForUserQuotes(keyName), TIMEOUT_LOCK_USER_QUOTES, EXPIRY_LOCK_USER_QUOTES);
+            try {
+                if(lock.acquire()){
+                    
+                    response = jedis.get(keyName);
+                    
+                    lock.release();
+                    
+                }else{
+                    Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, null, "Could not set user quotes for " + keyName);
+                }
+            } catch (InterruptedException ex) {
+                Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        return response;
     }
     
     /**
