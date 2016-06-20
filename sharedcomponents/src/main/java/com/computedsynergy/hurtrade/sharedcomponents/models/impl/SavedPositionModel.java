@@ -45,7 +45,7 @@ public class SavedPositionModel extends ModelBase implements ISavedPositionModel
         
         String insertSql = 
 	"INSERT INTO positions(user_id, positiondata, created) " +
-            "values (:user_id, :positiondata, :created)";
+            "values (:user_id, to_json(:positiondata::json), :created)";
 
         try (Connection con = sql2o.open()) {
             con.createQuery(insertSql)
