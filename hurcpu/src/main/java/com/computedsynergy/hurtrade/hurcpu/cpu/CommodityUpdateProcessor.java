@@ -26,19 +26,24 @@ import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
 import com.computedsynergy.hurtrade.sharedcomponents.util.HurUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
+import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.EXPIRY_LOCK_USER_POSITIONS;
+import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.TIMEOUT_LOCK_USER_POSITIONS;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.getLockNameForUserPositions;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.getUserPositionsKeyName;
 import com.github.jedis.lock.JedisLock;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import redis.clients.jedis.Jedis;
 
 /**
  *
@@ -50,6 +55,7 @@ import java.util.logging.Logger;
 public class CommodityUpdateProcessor extends AmqpBase {
     
     SavedPositionModel savedPositionModel = new SavedPositionModel();
+    Gson gson = new Gson();
 
     public void init() throws Exception {
         
@@ -117,26 +123,27 @@ public class CommodityUpdateProcessor extends AmqpBase {
             clientQuotes.put(k, q);
         }
         
-        String userPositionsKeyName = getUserPositionsKeyName(quote.getUser().getUseruuid());
-        JedisLock lock = new JedisLock(
-                    RedisUtil.getInstance().getJedis(), 
-                    getLockNameForUserPositions(userPositionsKeyName), 
-                    RedisUtil.getTIMEOUT_LOCK_USER_POSITIONS(), 
-                    RedisUtil.getEXPIRY_LOCK_USER_POSITIONS()
-                );
-        
-        try {
-            if(lock.acquire()){
-                
-                //process client's positions
-                updateClientPositions(quote.getUser(), clientQuotes);
-                lock.release();
-                
-            }else{
-                Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, "Could not lock user position in redis" + quote.getUser().getUsername());
+        try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
+            JedisLock lock = new JedisLock(
+                        jedis, 
+                        RedisUtil.getLockNameForUserProcessing(quote.getUser().getUseruuid()),
+                        RedisUtil.TIMEOUT_LOCK_USER_PROCESSING, 
+                        RedisUtil.EXPIRY_LOCK_USER_PROCESSING
+                    );
+
+            try {
+                if(lock.acquire()){
+
+                    //process client's positions
+                    updateClientPositions(quote.getUser(), clientQuotes);
+                    lock.release();
+
+                }else{
+                    Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, "Could not lock user position in redis" + quote.getUser().getUsername());
+                }
+            } catch (InterruptedException ex) {
+                Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (InterruptedException ex) {
-            Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         
@@ -160,18 +167,41 @@ public class CommodityUpdateProcessor extends AmqpBase {
     
     private void updateClientPositions(User user, QuoteList clientQuotes)
     {
-        //get client positions
-        Map<UUID, Position> positions = RedisUtil.getInstance().getUserPositions(user);
         
-        for(Position p:positions.values()){
-            p.processQuote(clientQuotes);
+        String userPositionsKeyName = getUserPositionsKeyName(user.getUseruuid());
+        Type mapType = new TypeToken<Map<UUID, Position>>(){}.getType();
+        
+        try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
+            JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
+            try{
+                if(lock.acquire()){
+
+                    //get client positions
+                    Map<UUID, Position> positions = gson.fromJson(jedis.get(userPositionsKeyName),mapType);
+
+                    for(Position p:positions.values()){
+                        p.processQuote(clientQuotes);
+                    }
+                    
+                    //set client positions
+                    String serializedPositions = gson.toJson(positions);
+                    jedis.set(userPositionsKeyName, serializedPositions);
+
+                    //dump client's positions to db only if there are any positions
+                    if(positions.size() > 0){
+                        SavedPosition p = new SavedPosition(user.getId(), serializedPositions);
+                        savedPositionModel.savePosition(p);
+                    }
+
+                    lock.release();
+
+                }else{
+                    Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
+                }
+            }catch(Exception ex){
+                Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
+            }
         }
-        
-        //set client positions
-        String serializedPositions = RedisUtil.getInstance().setUserPositions(user, positions);
-        
-        //dump client's positions to db
-        SavedPosition p = new SavedPosition(user.getId(), serializedPositions);
-        savedPositionModel.savePosition(p);
     }
+    
 }
