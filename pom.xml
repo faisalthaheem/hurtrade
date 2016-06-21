@@ -10,6 +10,7 @@
         <module>sharedcomponents</module>
         <module>hurcpu</module>
         <module>webauth</module>
+        <module>TestClient</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

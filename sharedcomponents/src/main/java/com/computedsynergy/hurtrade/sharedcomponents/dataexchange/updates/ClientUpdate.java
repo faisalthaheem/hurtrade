@@ -33,4 +33,20 @@ public class ClientUpdate {
         this.positions = positions;
         this.clientQuotes = clientQuotes;
     }
+
+    /**
+     * @return the positions
+     */
+    public Map<UUID, Position> getPositions() {
+        return positions;
+    }
+
+    /**
+     * @return the clientQuotes
+     */
+    public QuoteList getClientQuotes() {
+        return clientQuotes;
+    }
+
+    
 }

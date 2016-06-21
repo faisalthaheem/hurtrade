@@ -55,7 +55,7 @@ public class ClientRequestProcessor extends AmqpBase {
     @Test
     public void purchaseValidCommodity() throws IOException{
         
-        TradeRequest request = new TradeRequest(TradeRequest.REQUEST_TYPE_BUY, "USDEUR", BigDecimal.valueOf(0.88), BigDecimal.valueOf(0.1), new Date(), null);
+        TradeRequest request = new TradeRequest(TradeRequest.REQUEST_TYPE_BUY, "USDEUR", BigDecimal.valueOf(0.48), BigDecimal.valueOf(0.01), new Date(), null);
         String serialized = gson.toJson(request);
 
         channel.basicPublish(clientExchangeName, "request", properties, serialized.getBytes());
