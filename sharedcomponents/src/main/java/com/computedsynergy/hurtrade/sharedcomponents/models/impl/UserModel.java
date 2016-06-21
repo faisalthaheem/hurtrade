@@ -16,7 +16,6 @@
 package com.computedsynergy.hurtrade.sharedcomponents.models.impl;
 
 import com.computedsynergy.hurtrade.sharedcomponents.models.interfaces.IUserModel;
-import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Office;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import java.util.List;
 import org.sql2o.Connection;
@@ -60,7 +59,7 @@ public class UserModel extends ModelBase implements IUserModel{
     public User authenticate(String username, String password) {
         
         
-        String query = String.format(("select * from users where username = '{0}' AND password='{1}' LIMIT 1"), username, password);
+        String query = String.format(("select * from users where username = '%s' AND password='%s' LIMIT 1"), username, password);
         User ret = null;
         
         try (Connection conn = sql2o.open()) {
@@ -80,7 +79,7 @@ public class UserModel extends ModelBase implements IUserModel{
     public User getByUsername(String username) {
         
         
-        String query = String.format(("select * from users where username = '{0}'LIMIT 1"), username);
+        String query = String.format("select * from users where username = '%s' LIMIT 1", username);
         User ret = null;
         
         try (Connection conn = sql2o.open()) {

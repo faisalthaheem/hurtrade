@@ -34,11 +34,11 @@ public class Position {
     public static final String ORDER_STATE_OPEN = "open";
     public static final String ORDER_STATE_PENDING_CLOSE = "pending_dealer_close";
     public static final String ORDER_STATE_CLOSED = "closed";
-    
+
     //is this buy or sell?
-    private final String orderType;
+    private String orderType;
     //what commodity are we trading?
-    private final String commodity;
+    private String commodity;
     //how much are we trading, can change in cases of hedge so not final
     private BigDecimal amount;
     //p/l of this position
@@ -46,7 +46,7 @@ public class Position {
     //a unique identifier for this order
     private final UUID orderId;
     //the price at which the commodity was requested
-    private final BigDecimal requestedPrice;
+    private BigDecimal openPrice;
     //what state the order currently is in
     private String orderState;
     
@@ -57,12 +57,129 @@ public class Position {
         this.commodity = commodity;
         this.amount = amount;
         this.currentPl = BigDecimal.ZERO;
-        this.requestedPrice = requestedPrice;
+        this.openPrice = requestedPrice;
         this.orderState = ORDER_STATE_PENDING_OPEN;
     }
     
     public void processQuote(QuoteList clientQuotes){
         
+        
+        if(clientQuotes.containsKey(commodity)){
+            BigDecimal closingPrice = BigDecimal.ZERO;
+            
+            BigDecimal exchangeRate = BigDecimal.ONE;
+            String quoteCurrency = commodity.substring(0,3);
+            
+            
+            if(orderType.equals(ORDER_TYPE_BUY)){
+                closingPrice = clientQuotes.get(commodity).bid;
+                if(!quoteCurrency.equals("USD")){
+                   exchangeRate = clientQuotes.get(quoteCurrency + "USD").bid;
+                }
+            }else{
+                closingPrice = clientQuotes.get(commodity).ask;
+                if(!quoteCurrency.equals("USD")){
+                   exchangeRate = clientQuotes.get(quoteCurrency + "USD").ask;
+                }
+            }
+            
+            currentPl = openPrice.subtract(closingPrice).multiply(exchangeRate).multiply(amount).multiply(clientQuotes.get(commodity).lotSize);
+            
+        }
     }
+
+    /**
+     * @return the orderType
+     */
+    public String getOrderType() {
+        return orderType;
+    }
+
+    /**
+     * @param orderType the orderType to set
+     */
+    public void setOrderType(String orderType) {
+        this.orderType = orderType;
+    }
+
+    /**
+     * @return the commodity
+     */
+    public String getCommodity() {
+        return commodity;
+    }
+
+    /**
+     * @param commodity the commodity to set
+     */
+    public void setCommodity(String commodity) {
+        this.commodity = commodity;
+    }
+
+    /**
+     * @return the amount
+     */
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    /**
+     * @param amount the amount to set
+     */
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    /**
+     * @return the currentPl
+     */
+    public BigDecimal getCurrentPl() {
+        return currentPl;
+    }
+
+    /**
+     * @param currentPl the currentPl to set
+     */
+    public void setCurrentPl(BigDecimal currentPl) {
+        this.currentPl = currentPl;
+    }
+
+    /**
+     * @return the orderId
+     */
+    public UUID getOrderId() {
+        return orderId;
+    }
+
+  
+
+    /**
+     * @return the openPrice
+     */
+    public BigDecimal getRequestedPrice() {
+        return openPrice;
+    }
+
+    /**
+     * @param requestedPrice the openPrice to set
+     */
+    public void setRequestedPrice(BigDecimal requestedPrice) {
+        this.openPrice = requestedPrice;
+    }
+
+    /**
+     * @return the orderState
+     */
+    public String getOrderState() {
+        return orderState;
+    }
+
+    /**
+     * @param orderState the orderState to set
+     */
+    public void setOrderState(String orderState) {
+        this.orderState = orderState;
+    }
+    
     
 }

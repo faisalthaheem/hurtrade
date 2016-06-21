@@ -15,6 +15,7 @@
  */
 package com.computedsynergy.hurtrade.sharedcomponents.models.pojos;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -28,6 +29,7 @@ public class Commodity {
     private String commoditytype;
     private Date created;
     private Date modified;
+    private BigDecimal lotsize;
 
     /**
      * @return the id
@@ -98,6 +100,20 @@ public class Commodity {
      */
     public void setCommoditytype(String commoditytype) {
         this.commoditytype = commoditytype;
+    }
+
+    /**
+     * @return the lotsize
+     */
+    public BigDecimal getLotsize() {
+        return lotsize;
+    }
+
+    /**
+     * @param lotsize the lotsize to set
+     */
+    public void setLotsize(BigDecimal lotsize) {
+        this.lotsize = lotsize;
     }
     
     

@@ -25,6 +25,7 @@ public class TradeResponse {
 
     private static String RES_COMMODITY_NOT_ALLOWED = "The requested commodity is not allowed";
     private static String RES_INVALID_USER = "Authentication failure";
+    private static String RES_SUCCESS = "ok";
 
     private TradeRequest request;
     private String response;
@@ -51,6 +52,10 @@ public class TradeResponse {
     
     public void setResponseInvalidUser(){
         this.response = RES_INVALID_USER;
+    }
+    
+    public void setResposneOk(){
+        this.response = RES_SUCCESS;
     }
 
     /**

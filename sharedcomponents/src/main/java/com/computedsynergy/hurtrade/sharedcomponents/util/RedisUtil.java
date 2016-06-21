@@ -168,7 +168,7 @@ public class RedisUtil {
                     jedis.set(userMapName, serializedMap);
 
                 }else{
-                    Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, null, "Could not set user spread map for " + userMapName);
+                    Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, "Could not set user spread map for {0}", userMapName);
                 }
             }
         } catch (Exception ex) {
@@ -194,7 +194,7 @@ public class RedisUtil {
                     lock.release();
 
                 }else{
-                    Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, null, "Could not get user spread map for " + userMapName);
+                    Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, "Could not get user spread map for {0}",  userMapName);
                 }
             }
         } catch (Exception ex) {
@@ -219,7 +219,7 @@ public class RedisUtil {
                     lock.release();
                     
                 }else{
-                    Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, null, "Could not set user quotes for " + keyName);
+                    Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, "Could not set user quotes for {0}", keyName);
                 }
             } catch (InterruptedException ex) {
                 Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, null, ex);
@@ -227,7 +227,7 @@ public class RedisUtil {
         }
     }
     
-    public String getSeriaizedQuotesForClient(String quotes, UUID clientId)
+    public String getSeriaizedQuotesForClient(UUID clientId)
     {
         String response = "";
         
@@ -244,7 +244,7 @@ public class RedisUtil {
                     lock.release();
                     
                 }else{
-                    Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, null, "Could not set user quotes for " + keyName);
+                    Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, "Could not set user quotes for {0}",  keyName);
                 }
             } catch (InterruptedException ex) {
                 Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, null, ex);

@@ -17,11 +17,11 @@ package com.computedsynergy.hurtrade.hurcpu.cpu.RequestProcessor;
 
 import com.computedsynergy.hurtrade.hurcpu.cpu.ClientRequestProcessor;
 import com.computedsynergy.hurtrade.hurcpu.cpu.CommodityUpdateProcessor;
+import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.positions.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeRequest;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeResponse;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
-import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.SavedPosition;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.computedsynergy.hurtrade.sharedcomponents.util.HurUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
@@ -89,11 +89,33 @@ public class RequestConsumer extends DefaultConsumer {
                 UserModel userModel = new UserModel();
                 user = userModel.getByUsername(userid);
                 if(user == null){
-                    Logger.getLogger(ClientRequestProcessor.class.getName()).log(Level.SEVERE, null, "Could not resolve user for name: " + userid);
+                    Logger.getLogger(ClientRequestProcessor.class.getName()).log(Level.SEVERE, "Could not resolve user for name: ", userid);
                     responseRequired = false;
                 }
                 
-                processTradeRequest(response, user);
+                try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
+                    JedisLock lock = new JedisLock(
+                                jedis, 
+                                RedisUtil.getLockNameForUserProcessing(user.getUseruuid()),
+                                RedisUtil.TIMEOUT_LOCK_USER_PROCESSING, 
+                                RedisUtil.EXPIRY_LOCK_USER_PROCESSING
+                            );
+
+                    try {
+                        if(lock.acquire()){
+
+                            //process client's positions
+                            processTradeRequest(response, user);
+                            lock.release();
+
+                        }else{
+                            Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, "Could not lock user for order processing {0}",  user.getUsername());
+                        }
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }                
+                
 
                 
             }
@@ -125,6 +147,32 @@ public class RequestConsumer extends DefaultConsumer {
     {
         
         //todo, check if this commodity is allowed to this customer
+        Map<String, BigDecimal> userSpread = RedisUtil
+                                                .getInstance()
+                                                .getUserSpreadMap(RedisUtil.getUserSpreadMapName(user.getUseruuid()));
+        
+        if(!userSpread.containsKey(response.getRequest().getCommodity())){
+            
+            response.setResponseCommodityNotAllowed();
+            
+            Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, 
+                    "{0} requested invalid commodity: {1}",new Object[]{ user.getUsername() , response.getRequest().getCommodity()});
+            return;
+        }
+        
+        
+        //get the last quoted prices for commodities for this user
+        String serializedQuotes = RedisUtil.getInstance().getSeriaizedQuotesForClient(user.getUseruuid());
+        QuoteList quotesForClient = gson.fromJson(serializedQuotes, QuoteList.class);
+        
+        if(!quotesForClient.containsKey(response.getRequest().getCommodity()))
+        {
+            response.setResponseCommodityNotAllowed();
+            
+            Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, 
+                    "{0} requested unknown commodity: {1}",new Object[]{ user.getUsername() , response.getRequest().getCommodity()});
+            return;
+        }
         
         String userPositionsKeyName = getUserPositionsKeyName(user.getUseruuid());
         Type mapType = new TypeToken<Map<UUID, Position>>(){}.getType();
@@ -141,13 +189,15 @@ public class RequestConsumer extends DefaultConsumer {
                         case TradeRequest.REQUEST_TYPE_BUY:
                             {
                                 Position position = new Position(
-                                            UUID.randomUUID(), 
-                                            Position.ORDER_TYPE_BUY, 
+                                            UUID.randomUUID(), Position.ORDER_TYPE_BUY,
                                             response.getRequest().getCommodity(), 
                                             response.getRequest().getRequestedLot(),
-                                            //todo get current price of commodity and put here
-                                            BigDecimal.ZERO
+                                            quotesForClient.get(response.getRequest().getCommodity()).ask
                                 );
+                                
+                                positions.put(position.getOrderId(), position);
+                                
+                                response.setResposneOk();
                             }
                             break;
                         case TradeRequest.REQUEST_TYPE_SELL:

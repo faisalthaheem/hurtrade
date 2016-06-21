@@ -33,17 +33,19 @@ public class Quote {
     public final Date quoteTime;
     public final BigDecimal rate;
     public final String name;
+    public final BigDecimal lotSize;
     
     
-    public Quote(BigDecimal bid, BigDecimal ask, Date quoteTime, BigDecimal rate, String name){
+    public Quote(BigDecimal bid, BigDecimal ask, Date quoteTime, BigDecimal rate, String name, BigDecimal lotSize){
         this.bid = bid;
         this.ask = ask;
         this.quoteTime = quoteTime;
         this.rate = rate;
         this.name = name;
+        this.lotSize = lotSize;
     }
     
-    public Quote(String bid, String ask, String date, String time, String rate, String name) throws ParseException{
+    public Quote(String bid, String ask, String date, String time, String rate, String name, BigDecimal lotSize) throws ParseException{
         
         this.bid = new BigDecimal(bid);
         this.ask = new BigDecimal(ask);
@@ -53,5 +55,7 @@ public class Quote {
         this.quoteTime = format.parse(date + " " + time);
         
         this.name = name;
+        
+        this.lotSize = lotSize;
     }
 }

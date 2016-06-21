@@ -33,7 +33,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -46,7 +48,7 @@ import org.jdom2.input.SAXBuilder;
 public class FxYahoo extends AmqpBase implements Runnable {
  
     private Object lockCommodities = new Object();
-    List<Commodity> commodities = null;
+    Map<String, Commodity> commodities;
     
     public static void main(String[] args) throws IOException, TimeoutException{
         
@@ -58,12 +60,17 @@ public class FxYahoo extends AmqpBase implements Runnable {
     }
     
     public void refreshCommodities(){
+        
+        commodities = new HashMap<String, Commodity>();
 
         //fetch all the commodities of type FX and store
         CommodityModel commodityModel = new CommodityModel();
         
         synchronized(lockCommodities){
-            commodities = commodityModel.getCommodities(CommodityModel.COMMODITY_TYPE_FX);
+            List<Commodity> commoditiesList = commodityModel.getCommodities(CommodityModel.COMMODITY_TYPE_FX);
+            for(Commodity c:commoditiesList){
+                commodities.put(c.getCommodityname(), c);
+            }
         }
     }
 
@@ -78,7 +85,7 @@ public class FxYahoo extends AmqpBase implements Runnable {
                 //build a list of quotes to query
                 String symbolsToQuery = "";
                 synchronized(lockCommodities){
-                    for(Commodity commodity : commodities){
+                    for(Commodity commodity : commodities.values()){
                         symbolsToQuery += "\"" + commodity.getCommodityname() + "\",";
                     }
                 }
@@ -105,7 +112,8 @@ public class FxYahoo extends AmqpBase implements Runnable {
                             result.getChildText("Date"),
                             result.getChildText("Time"),
                             result.getChildText("Rate"),
-                            result.getChildText("Name")
+                            result.getChildText("Name"),
+                            commodities.get(commodity).getLotsize()
                     );
                     
                     quotes.put(commodity, quote);
