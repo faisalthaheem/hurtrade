@@ -58,4 +58,8 @@ public class Quote {
         
         this.lotSize = lotSize;
     }
+    
+    public boolean equals(Object o){
+        return o instanceof Quote && ((Quote)o).name.equals(this.name);
+    }
 }

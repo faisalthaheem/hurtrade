@@ -51,5 +51,5 @@ public class CommandLineOptions {
     public String redisServer = "192.168.56.101";
 
     @Parameter(names = {"--yahoo-fx-frequency"})
-    public Integer yahooFxFrequency = 1000;
+    public Integer yahooFxFrequency = 3000;
 }

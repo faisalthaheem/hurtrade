@@ -11,7 +11,7 @@
         <module>hurcpu</module>
         <module>webauth</module>
         <module>TestClient</module>
-    </modules>
+  </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
