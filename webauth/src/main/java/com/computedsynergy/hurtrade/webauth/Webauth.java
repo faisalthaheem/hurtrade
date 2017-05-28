@@ -18,45 +18,118 @@ package com.computedsynergy.hurtrade.webauth;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.computedsynergy.hurtrade.sharedcomponents.transformers.JsonTransformer;
+import com.computedsynergy.hurtrade.sharedcomponents.util.ObjectUtils;
+import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+import redis.clients.jedis.Jedis;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static spark.Spark.port;
 import static spark.Spark.post;
+import java.nio.charset.Charset;
 
 /**
  *
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
  */
 public class Webauth {
-    
+
+    /**
+     * https://github.com/rabbitmq/rabbitmq-auth-backend-http
+     * @param args
+     */
+
+    private static Map<String, String> toMap(List<NameValuePair> pairs){
+        Map<String, String> map = new HashMap<>();
+        for(int i=0; i<pairs.size(); i++){
+            NameValuePair pair = pairs.get(i);
+            map.put(pair.getName(), pair.getValue());
+        }
+        return map;
+    }
+
     public static void main(String[] args){
-        
-        post("/authenticate/", (req, res) -> {
-            
-            Map<String,String> response = new HashMap<String,String>();
-            
+
+        port(80);
+
+        post("/user", (req, res) -> {
+
+            boolean userValid = false;
+            String authtags = "";
+
             try {
-                
-                String username = req.params("username");
-                String password = req.params("password");
-                
+
+                List<NameValuePair> pairs = URLEncodedUtils.parse(req.body(), Charset.defaultCharset());
+
+                Map<String, String> params = toMap(pairs);
+
+                String username = params.get("username");
+                String password = params.get("password");
+
                 //todo get sha checksum for password before querying db
-                
-                UserModel userModel = new UserModel();
-                User user = userModel.authenticate(username, password);
-                if(user != null){
-                    response.put("identifier", user.getUseruuid().toString());
+
+                User user = RedisUtil.getInstance().GetUserInfo(username);
+                if(user == null){
+
+                    UserModel userModel = new UserModel();
+                    User dbUser = userModel.getByUsername(username);
+
+                    if(dbUser != null){
+
+                        RedisUtil.getInstance().SetUserInfo(dbUser);
+
+                        if(dbUser.getPass().equals(password)) {
+                            authtags = dbUser.getAuthtags();
+                            userValid = true;
+                        }
+                    }
+
                 }else{
-                    response.put("error", "invalid username/password");
+                    if(user.getPass().equals(password)){
+                        authtags = user.getAuthtags();
+                        userValid=true;
+                    }
                 }
-            
+
             } catch (Exception ex) {
                 Logger.getLogger(Webauth.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-            return response;
-        }, new JsonTransformer());
+            res.status(200);
+
+            if(userValid){
+                return "allow " + authtags;
+            }
+
+            return "deny";
+        });
+
+        post("/vhost", (req, res) -> {
+
+            res.status(200);
+            return "allow";
+
+        });
+
+        post("/resource", (req, res) -> {
+
+            res.status(200);
+            return "allow";
+
+        });
+
+        post("/topic", (req, res) -> {
+
+            res.status(200);
+            return "allow";
+
+        });
+
     }
-    
 }

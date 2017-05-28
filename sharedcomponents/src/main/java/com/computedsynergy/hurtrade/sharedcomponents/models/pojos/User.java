@@ -34,9 +34,12 @@ public class User {
     private Date created;
     private Date ended;
     private UUID useruuid;
+    private String authtags;
+    private Office userOffice;
     
     public User(int id, String username, String pass, boolean locked, String usertype,
-        String phonenumber, String fullname, String email, Date created, Date ended, UUID useruuid)
+        String phonenumber, String fullname, String email, Date created, Date ended, UUID useruuid,
+                String authtags, Office userOffice)
     {
         this.id = id;
         this.username = username;
@@ -49,6 +52,8 @@ public class User {
         this.created = created;
         this.ended = ended;
         this.useruuid = useruuid;
+        this.setAuthtags(authtags);
+        this.setUserOffice(userOffice);
     }
 
     /**
@@ -204,7 +209,21 @@ public class User {
     public void setUseruuid(UUID useruuid) {
         this.useruuid = useruuid;
     }
-    
-    
-    
+
+
+    public String getAuthtags() {
+        return authtags;
+    }
+
+    public void setAuthtags(String authtags) {
+        this.authtags = authtags;
+    }
+
+    public Office getUserOffice() {
+        return userOffice;
+    }
+
+    public void setUserOffice(Office userOffice) {
+        this.userOffice = userOffice;
+    }
 }

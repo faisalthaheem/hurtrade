@@ -20,6 +20,8 @@ package com.computedsynergy.hurtrade.sharedcomponents.util;
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
  */
 public class Constants {
-    public static final String RATES_QUEUE_NAME = "rates";
-    public static final String RATES_EXCHANGE_NAME = "rates";
+    public static final String QUEUE_NAME_RATES = "rates";
+    public static final String EXCHANGE_NAME_RATES = "rates";
+    public static final String QUEUE_NAME_AUTH = "authReqQ";
+    public static final String EXCHANGE_NAME_AUTH = "authExchange";
 }

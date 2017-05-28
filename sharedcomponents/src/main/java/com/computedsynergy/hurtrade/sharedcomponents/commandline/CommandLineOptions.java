@@ -24,7 +24,7 @@ public class CommandLineOptions {
     public boolean debug = false;
     
     @Parameter(names = {"--database"})
-    public String database = "hurtrade";
+    public String database = "postgres";
     
     @Parameter(names = {"--db-host"})
     public String dbHost = "localhost";
@@ -33,7 +33,7 @@ public class CommandLineOptions {
     public String dbUsername = "postgres";
 
     @Parameter(names = {"--db-password"})
-    public String dbPassword = "";
+    public String dbPassword = "faisal123";
 
     @Parameter(names = {"--db-port"})
     public Integer dbPort = 5432;
@@ -42,13 +42,13 @@ public class CommandLineOptions {
     public String mqHost = "localhost";
     
     @Parameter(names = {"--mq-username"})
-    public String mqUsername = "guest";
+    public String mqUsername = "svc";
     
     @Parameter(names = {"--mq-password"})
-    public String mqPassword = "guest";
+    public String mqPassword = "svc";
     
     @Parameter(names = {"--redis-server"})
-    public String redisServer = "192.168.56.101";
+    public String redisServer = "localhost";
 
     @Parameter(names = {"--yahoo-fx-frequency"})
     public Integer yahooFxFrequency = 3000;

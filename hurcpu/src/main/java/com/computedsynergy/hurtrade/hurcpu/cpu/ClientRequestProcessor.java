@@ -20,7 +20,10 @@ import com.computedsynergy.hurtrade.sharedcomponents.amqp.AmqpBase;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.OfficeModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Office;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.computedsynergy.hurtrade.sharedcomponents.util.HurUtil;
+import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
@@ -39,8 +42,9 @@ public class ClientRequestProcessor extends AmqpBase {
         //fetch all offices
         OfficeModel offices = new OfficeModel();
         List<Office> officeList = offices.getAllOffices();
-        //fetch all users for each office
-        UserModel users = new UserModel();
+        UserModel uModel = new UserModel();
+
+
         for (Office o : officeList) {
 
             String officeExchangeName = HurUtil.getOfficeExchangeName(o.getOfficeuuid());
@@ -48,6 +52,18 @@ public class ClientRequestProcessor extends AmqpBase {
             RequestConsumer consumer = new RequestConsumer(channel, officeExchangeName, officeClientRequestQueueName);
 
             channel.basicConsume(officeClientRequestQueueName, false, officeExchangeName, consumer);
+
+            //update info
+            List<User> users = uModel.getAllUsersForOffice(o.getId());
+            for(User uItem : users){
+                User u = RedisUtil.getInstance().GetUserInfo(uItem.getUsername());
+                if(u == null){
+                    u = uItem;
+                }
+                uItem.setUserOffice(o);
+                RedisUtil.getInstance().SetUserInfo(uItem);
+            }
+
         }
     }
 

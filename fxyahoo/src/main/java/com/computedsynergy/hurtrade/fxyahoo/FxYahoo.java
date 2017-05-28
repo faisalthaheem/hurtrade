@@ -90,6 +90,8 @@ public class FxYahoo extends AmqpBase implements Runnable {
                     }
                 }
                 
+                System.out.println(symbolsToQuery);
+                
                 symbolsToQuery = symbolsToQuery.substring(0, symbolsToQuery.length()-1);
                 
                 String commodityQuery = URLEncoder.encode("select * from yahoo.finance.xchange where pair in (" + symbolsToQuery + ")");
@@ -127,7 +129,7 @@ public class FxYahoo extends AmqpBase implements Runnable {
                     
                     SourceQuote quote = new SourceQuote(quotes, u);
                     String serialized = gson.toJson(quote);
-                    channel.basicPublish(Constants.RATES_EXCHANGE_NAME, "", null, serialized.getBytes());
+                    channel.basicPublish(Constants.EXCHANGE_NAME_RATES, "", null, serialized.getBytes());
                 }
                 
                 Thread.sleep(CommandLineOptions.getInstance().yahooFxFrequency);
@@ -153,8 +155,8 @@ public class FxYahoo extends AmqpBase implements Runnable {
         
         super.setupAMQP();
         
-        channel.exchangeDeclare(Constants.RATES_EXCHANGE_NAME, "direct", true);
-        channel.queueDeclare(Constants.RATES_QUEUE_NAME, true, false, false, null);
-        channel.queueBind(Constants.RATES_QUEUE_NAME, Constants.RATES_EXCHANGE_NAME, "");
+        channel.exchangeDeclare(Constants.EXCHANGE_NAME_RATES, "direct", true);
+        channel.queueDeclare(Constants.QUEUE_NAME_RATES, true, false, false, null);
+        channel.queueBind(Constants.QUEUE_NAME_RATES, Constants.EXCHANGE_NAME_RATES, "");
     }
 }

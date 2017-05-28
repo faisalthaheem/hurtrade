@@ -17,6 +17,7 @@ package com.computedsynergy.hurtrade.hurcpu;
 
 import com.beust.jcommander.JCommander;
 import com.computedsynergy.hurtrade.hurcpu.bootstrap.Bootstrap;
+import com.computedsynergy.hurtrade.hurcpu.cpu.AuthRequestProcessor;
 import com.computedsynergy.hurtrade.hurcpu.cpu.ClientRequestProcessor;
 import com.computedsynergy.hurtrade.hurcpu.cpu.CommodityUpdateProcessor;
 import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
@@ -31,6 +32,9 @@ public class HurCpu {
         new JCommander(CommandLineOptions.getInstance(), args);
         Bootstrap bs = new Bootstrap();
         bs.bootstrap();
+
+        AuthRequestProcessor authProcessor = new AuthRequestProcessor();
+        authProcessor.init();
         
         CommodityUpdateProcessor commodityUpdateProcessor = new CommodityUpdateProcessor();
         commodityUpdateProcessor.init();

@@ -115,9 +115,6 @@ public class RequestConsumer extends DefaultConsumer {
                         Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }                
-                
-
-                
             }
 
         } catch (Exception ex) {

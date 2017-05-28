@@ -63,9 +63,9 @@ public class CommodityUpdateProcessor extends AmqpBase {
         
         super.setupAMQP();
         
-        channel.queueDeclare(Constants.RATES_QUEUE_NAME, true, false, false, null);
+        channel.queueDeclare(Constants.QUEUE_NAME_RATES, true, false, false, null);
 
-        channel.basicConsume(Constants.RATES_QUEUE_NAME, false, "CommodityPricePump",
+        channel.basicConsume(Constants.QUEUE_NAME_RATES, false, "CommodityPricePump",
                 new DefaultConsumer(channel) {
                     @Override
                     public void handleDelivery(String consumerTag,

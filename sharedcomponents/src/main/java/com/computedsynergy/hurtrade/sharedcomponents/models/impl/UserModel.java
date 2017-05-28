@@ -31,7 +31,7 @@ public class UserModel extends ModelBase implements IUserModel{
     @Override
     public List<User> getAllUsers() {
         
-        String query = "select * from users";
+        String query = "select * from users where usertype='trader'";
         
         try (Connection conn = sql2o.open()) {
             List<User> users = conn.createQuery(query)
@@ -44,7 +44,7 @@ public class UserModel extends ModelBase implements IUserModel{
     @Override
     public List<User> getAllUsersForOffice(int id) {
         
-        String query = "select * from users where id IN (select user_id from offices_users where office_id ="+ id + ")";
+        String query = "select * from users where usertype='trader' AND id IN (select user_id from offices_users where office_id ="+ id + ")";
         
         try (Connection conn = sql2o.open()) {
             List<User> users = conn.createQuery(query)
@@ -74,7 +74,12 @@ public class UserModel extends ModelBase implements IUserModel{
         return ret;
         
     }
-    
+
+    /**
+     *
+     * @param username
+     * @return class User if found, null if not found
+     */
     @Override
     public User getByUsername(String username) {
         
