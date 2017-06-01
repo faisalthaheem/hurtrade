@@ -37,6 +37,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
+
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
@@ -46,13 +49,16 @@ import org.jdom2.input.SAXBuilder;
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
  */
 public class FxYahoo extends AmqpBase implements Runnable {
- 
+
+    static final Logger logger = Logger.getLogger(FxYahoo.class);
     private Object lockCommodities = new Object();
     Map<String, Commodity> commodities;
     
     public static void main(String[] args) throws IOException, TimeoutException{
         
         new JCommander(CommandLineOptions.getInstance(), args);
+        BasicConfigurator.configure();
+
         FxYahoo yahoo = new FxYahoo();
         yahoo.refreshCommodities();
         yahoo.setupAMQP();
@@ -90,7 +96,7 @@ public class FxYahoo extends AmqpBase implements Runnable {
                     }
                 }
                 
-                System.out.println(symbolsToQuery);
+                logger.info("symbolsToQuery: " + symbolsToQuery);
                 
                 symbolsToQuery = symbolsToQuery.substring(0, symbolsToQuery.length()-1);
                 
@@ -114,11 +120,13 @@ public class FxYahoo extends AmqpBase implements Runnable {
                             result.getChildText("Date"),
                             result.getChildText("Time"),
                             result.getChildText("Rate"),
-                            result.getChildText("Name"),
+                            result.getChildText("Name").replace("/",""),
                             commodities.get(commodity).getLotsize()
                     );
-                    
+
+                    logger.info("Commodity: " + quote.name + " B: " + quote.bid + " A: " + quote.ask);
                     quotes.put(commodity, quote);
+
                 }
                 
                 Gson gson = new Gson();

@@ -16,6 +16,8 @@
 package com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
@@ -97,7 +99,7 @@ public class TradeRequest {
     
     public static TradeRequest fromJson(String json){
         
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().setDateFormat("MM/dd/yyyy HH:mm").create();;
         return gson.fromJson(json, TradeRequest.class);
     }
 }

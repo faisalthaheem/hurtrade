@@ -21,6 +21,7 @@ import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.positions.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeRequest;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeResponse;
+import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.updates.ClientUpdate;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.computedsynergy.hurtrade.sharedcomponents.util.HurUtil;
@@ -127,10 +128,11 @@ public class RequestConsumer extends DefaultConsumer {
             return;
         }
         
-        String clientExchangeName = HurUtil.getClientExchangeName(user.getUseruuid()); 
+        String clientExchangeName = HurUtil.getClientExchangeName(user.getUseruuid());
 
+        ClientUpdate update = new ClientUpdate(response);
         Gson gson = new Gson();
-        String serializedResponse = gson.toJson(response);
+        String serializedResponse = gson.toJson(update);
 
         try {
             getChannel().basicPublish(clientExchangeName, "response", null, serializedResponse.getBytes());
@@ -198,6 +200,18 @@ public class RequestConsumer extends DefaultConsumer {
                             }
                             break;
                         case TradeRequest.REQUEST_TYPE_SELL:
+                            {
+                                Position position = new Position(
+                                        UUID.randomUUID(), Position.ORDER_TYPE_SELL,
+                                        response.getRequest().getCommodity(),
+                                        response.getRequest().getRequestedLot(),
+                                        quotesForClient.get(response.getRequest().getCommodity()).bid
+                                );
+
+                                positions.put(position.getOrderId(), position);
+
+                                response.setResposneOk();
+                            }
                             break;
                     }
 

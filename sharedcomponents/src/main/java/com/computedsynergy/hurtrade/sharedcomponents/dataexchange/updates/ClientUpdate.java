@@ -17,6 +17,9 @@ package com.computedsynergy.hurtrade.sharedcomponents.dataexchange.updates;
 
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.positions.Position;
+import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeResponse;
+
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -28,10 +31,18 @@ public class ClientUpdate {
 
     private final Map<UUID, Position> positions;
     private final QuoteList clientQuotes;
+    private final TradeResponse tradeResponse;
     
     public ClientUpdate(Map<UUID, Position> positions, QuoteList clientQuotes){
         this.positions = positions;
         this.clientQuotes = clientQuotes;
+        this.tradeResponse = null;
+    }
+
+    public ClientUpdate(TradeResponse tradeResponse){
+        this.positions = new HashMap<>();
+        this.clientQuotes = new QuoteList();
+        this.tradeResponse = tradeResponse;
     }
 
     /**
@@ -48,5 +59,8 @@ public class ClientUpdate {
         return clientQuotes;
     }
 
-    
+
+    public TradeResponse getTradeResponse() {
+        return tradeResponse;
+    }
 }
