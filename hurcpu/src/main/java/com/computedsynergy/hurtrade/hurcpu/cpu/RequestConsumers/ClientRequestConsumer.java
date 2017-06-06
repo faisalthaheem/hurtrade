@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.computedsynergy.hurtrade.hurcpu.cpu.RequestProcessor;
+package com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers;
 
 import com.computedsynergy.hurtrade.hurcpu.cpu.ClientRequestProcessor;
 import com.computedsynergy.hurtrade.hurcpu.cpu.CommodityUpdateProcessor;
@@ -50,17 +50,17 @@ import redis.clients.jedis.Jedis;
  *
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
  */
-public class RequestConsumer extends DefaultConsumer {
+public class ClientRequestConsumer extends DefaultConsumer {
 
     private final String officeExhcangeName;
-    private final String officeClientRqeuestQueueName;
+    private final String officeClientRequestQueueName;
     
     private Gson gson = new Gson();
 
-    public RequestConsumer(Channel channel, String officeExchangeName, String officeClientRequestQueueName) {
+    public ClientRequestConsumer(Channel channel, String officeExchangeName, String officeClientRequestQueueName) {
         super(channel);
         this.officeExhcangeName = officeExchangeName;
-        this.officeClientRqeuestQueueName = officeClientRequestQueueName;
+        this.officeClientRequestQueueName = officeClientRequestQueueName;
     }
 
     @Override
@@ -183,44 +183,47 @@ public class RequestConsumer extends DefaultConsumer {
 
                     //get client positions
                     Map<UUID, Position> positions = gson.fromJson(jedis.get(userPositionsKeyName),mapType);
-                    
-                    switch (response.getRequest().getRequestType()) {
-                        case TradeRequest.REQUEST_TYPE_BUY:
-                            {
-                                Position position = new Position(
-                                            UUID.randomUUID(), Position.ORDER_TYPE_BUY,
-                                            response.getRequest().getCommodity(), 
-                                            response.getRequest().getRequestedLot(),
-                                            quotesForClient.get(response.getRequest().getCommodity()).ask
+                    Position position = null;
+
+                    try {
+
+                        switch (response.getRequest().getRequestType()) {
+                            case TradeRequest.REQUEST_TYPE_BUY: {
+                                position = new Position(
+                                        UUID.randomUUID(), Position.ORDER_TYPE_BUY,
+                                        response.getRequest().getCommodity(),
+                                        response.getRequest().getRequestedLot(),
+                                        quotesForClient.get(response.getRequest().getCommodity()).ask
                                 );
-                                
-                                positions.put(position.getOrderId(), position);
-                                
-                                response.setResposneOk();
                             }
                             break;
-                        case TradeRequest.REQUEST_TYPE_SELL:
-                            {
-                                Position position = new Position(
+                            case TradeRequest.REQUEST_TYPE_SELL: {
+                                position = new Position(
                                         UUID.randomUUID(), Position.ORDER_TYPE_SELL,
                                         response.getRequest().getCommodity(),
                                         response.getRequest().getRequestedLot(),
                                         quotesForClient.get(response.getRequest().getCommodity()).bid
                                 );
-
-                                positions.put(position.getOrderId(), position);
-
-                                response.setResposneOk();
                             }
                             break;
+                        }
+                    }catch(Exception ex){
+                        Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
                     }
 
-                    
-                    //set client positions
-                    String serializedPositions = gson.toJson(positions);
-                    jedis.set(userPositionsKeyName, serializedPositions);
+                    if(null != position){
+                        positions.put(position.getOrderId(), position);
+                        response.setResposneOk();
+
+                        //set client positions
+                        String serializedPositions = gson.toJson(positions);
+                        jedis.set(userPositionsKeyName, serializedPositions);
+                    }
 
                     lock.release();
+
+                    //post the newly opened position for dealer review
+
 
                 }else{
                     Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());

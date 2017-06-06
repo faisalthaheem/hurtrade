@@ -52,4 +52,10 @@ public class CommandLineOptions {
 
     @Parameter(names = {"--yahoo-fx-frequency"})
     public Integer yahooFxFrequency = 3000;
+
+    @Parameter(names = {"--users-keys-update-timer-interval"})
+    public Integer usersKeysUpdateTimerInterval = 60000;
+
+    @Parameter(names = {"--office-positions-update-timer"})
+    public Integer officePositionsUpdateTimer = 1000;
 }

@@ -18,8 +18,10 @@ package com.computedsynergy.hurtrade.hurcpu;
 import com.beust.jcommander.JCommander;
 import com.computedsynergy.hurtrade.hurcpu.bootstrap.Bootstrap;
 import com.computedsynergy.hurtrade.hurcpu.cpu.AuthRequestProcessor;
+import com.computedsynergy.hurtrade.hurcpu.cpu.BackOfficeRequestProcessor;
 import com.computedsynergy.hurtrade.hurcpu.cpu.ClientRequestProcessor;
 import com.computedsynergy.hurtrade.hurcpu.cpu.CommodityUpdateProcessor;
+import com.computedsynergy.hurtrade.hurcpu.cpu.Tasks.OfficePositionsDispatchTask;
 import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
 
 /**
@@ -33,14 +35,17 @@ public class HurCpu {
         Bootstrap bs = new Bootstrap();
         bs.bootstrap();
 
-        AuthRequestProcessor authProcessor = new AuthRequestProcessor();
-        authProcessor.init();
-        
-        CommodityUpdateProcessor commodityUpdateProcessor = new CommodityUpdateProcessor();
-        commodityUpdateProcessor.init();
+        BackOfficeRequestProcessor boRequestProcessor = new BackOfficeRequestProcessor();
+        boRequestProcessor.initialize();
         
         ClientRequestProcessor clientRequestProcessor = new ClientRequestProcessor();
         clientRequestProcessor.initialize();
+
+        CommodityUpdateProcessor commodityUpdateProcessor = new CommodityUpdateProcessor();
+        commodityUpdateProcessor.init();
+
+        AuthRequestProcessor authProcessor = new AuthRequestProcessor();
+        authProcessor.init();
         
         while(true){
             Thread.sleep(100000);

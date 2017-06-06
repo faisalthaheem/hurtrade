@@ -82,9 +82,7 @@ public class Position {
                    exchangeRate = clientQuotes.get(quoteCurrency + "USD").ask;
                 }
             }
-            
-            currentPl = openPrice.subtract(closingPrice).multiply(exchangeRate).multiply(amount).multiply(clientQuotes.get(commodity).lotSize);
-            
+            currentPl = closingPrice.subtract(openPrice).multiply(exchangeRate).multiply(amount).multiply(clientQuotes.get(commodity).lotSize);
         }
     }
 

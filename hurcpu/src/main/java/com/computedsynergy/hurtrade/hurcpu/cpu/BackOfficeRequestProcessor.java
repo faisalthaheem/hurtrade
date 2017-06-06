@@ -15,7 +15,9 @@
  */
 package com.computedsynergy.hurtrade.hurcpu.cpu;
 
+import com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers.BackOfficeRequestConsumer;
 import com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers.ClientRequestConsumer;
+import com.computedsynergy.hurtrade.hurcpu.cpu.Tasks.OfficePositionsDispatchTask;
 import com.computedsynergy.hurtrade.sharedcomponents.amqp.AmqpBase;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.OfficeModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
@@ -25,6 +27,7 @@ import com.computedsynergy.hurtrade.sharedcomponents.util.HurUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
@@ -32,7 +35,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
  */
-public class ClientRequestProcessor extends AmqpBase {
+public class BackOfficeRequestProcessor extends AmqpBase {
 
     //basic consumes on all of the office request queues
     public void initialize() throws IOException, TimeoutException {
@@ -42,29 +45,19 @@ public class ClientRequestProcessor extends AmqpBase {
         //fetch all offices
         OfficeModel offices = new OfficeModel();
         List<Office> officeList = offices.getAllOffices();
-        UserModel uModel = new UserModel();
-
 
         for (Office o : officeList) {
 
             String officeExchangeName = HurUtil.getOfficeExchangeName(o.getOfficeuuid());
-            String officeClientRequestQueueName = HurUtil.getOfficeClientRequestQueueName(o.getOfficeuuid());
-            ClientRequestConsumer consumer = new ClientRequestConsumer(channel, officeExchangeName, officeClientRequestQueueName);
+            String officeDealerInQueueName = HurUtil.getOfficeDealerINQueueName(o.getOfficeuuid());
+            BackOfficeRequestConsumer consumer = new BackOfficeRequestConsumer(channel, officeExchangeName, officeDealerInQueueName,"", o.getId());
 
-            channel.basicConsume(officeClientRequestQueueName, false, officeExchangeName, consumer);
+            //start office position dispatch task
+            OfficePositionsDispatchTask officePositionsDispatchTask = new OfficePositionsDispatchTask(officeExchangeName, o.getId());
+            officePositionsDispatchTask.initialize();
 
-            //update info
-            List<User> users = uModel.getAllUsersForOffice(o.getId());
-            for(User uItem : users){
-                User u = RedisUtil.getInstance().GetUserInfo(uItem.getUsername());
-                if(u == null){
-                    u = uItem;
-                }
-                uItem.setUserOffice(o);
-                RedisUtil.getInstance().SetUserInfo(uItem);
-            }
+            channel.basicConsume(officeDealerInQueueName, false, officeExchangeName, consumer);
 
         }
     }
-
 }

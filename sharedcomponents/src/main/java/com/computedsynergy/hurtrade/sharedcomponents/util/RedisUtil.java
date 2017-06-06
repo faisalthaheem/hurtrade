@@ -16,6 +16,7 @@
 package com.computedsynergy.hurtrade.sharedcomponents.util;
 
 import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
+import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.positions.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CommodityUser;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Office;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
@@ -24,10 +25,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import redis.clients.jedis.Jedis;
@@ -50,12 +48,12 @@ public class RedisUtil {
     public static final String OFFICE_KEY_PREFIX = "office_";
     
     public static final String LOCK_USER_SPREAD_MAP_PREFIX = "spreadlock_";
-    public static final int TIMEOUT_LOCK_SPREAD_MAP = 5000;
-    public static final int EXPIRY_LOCK_SPREAD_MAP = 10000;
+    public static final int TIMEOUT_LOCK_SPREAD_MAP = 200;
+    public static final int EXPIRY_LOCK_SPREAD_MAP = 300;
     
     public static final String LOCK_USER_POSITIONS_PREFIX = "poslock_";
-    public static final int TIMEOUT_LOCK_USER_POSITIONS = 5000;
-    public static final int EXPIRY_LOCK_USER_POSITIONS = 10000;
+    public static final int TIMEOUT_LOCK_USER_POSITIONS = 200;
+    public static final int EXPIRY_LOCK_USER_POSITIONS = 300;
     
     public static final String LOCK_USER_PROCESSING_PREFIX = "lock_userprocessing_";
     public static final int TIMEOUT_LOCK_USER_PROCESSING = 5000;
@@ -69,7 +67,7 @@ public class RedisUtil {
     public static final int TIMEOUT_LOCK_USER_INFO = 5000;
     public static final int EXPIRY_LOCK_USER_INFO = 10000;
 
-    public static final String LOCK_OFFICE_INFO = "lock_userinfo_";
+    public static final String LOCK_OFFICE_INFO = "lock_officeinfo_";
     public static final int TIMEOUT_LOCK_OFFICE_INFO = 5000;
     public static final int EXPIRY_LOCK_OFFICE_INFO = 10000;
     
@@ -352,6 +350,53 @@ public class RedisUtil {
 
         return SetString(keyName, lockName, TIMEOUT_LOCK_USER_INFO, EXPIRY_LOCK_USER_INFO, json);
 
+    }
+
+    public List<Position> GetUserPositions(String username){
+
+        List<Position> retPositions = new ArrayList<>();
+
+        User u = GetUserInfo(username);
+
+        String lockName = getLockNameForUserPositions(username);
+        String keyName = getUserPositionsKeyName(u.getUseruuid());
+        Type mapType = new TypeToken<Map<UUID, Position>>(){}.getType();
+
+        String json="";
+
+
+        if(u != null){
+            try(Jedis jedis = jedisPool.getResource())
+            {
+                JedisLock lock = new JedisLock(jedis, lockName,
+                        TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
+                try {
+                    if(lock.acquire()){
+
+                        json = jedis.get(keyName);
+
+                        lock.release();
+
+
+                        if(json != null && json.length() > 0){
+                            Map<UUID, Position> positions = gson.fromJson(json,mapType);
+                            if(positions!=null){
+                                for(Position p:positions.values()){
+                                    retPositions.add(p);
+                                }
+                            }
+                        }
+
+                    }else{
+                        Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, "Could not set value for key {0}",  keyName);
+                    }
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+
+        return retPositions;
     }
 
 //    public Office GetOfficeInfo(String officeName){

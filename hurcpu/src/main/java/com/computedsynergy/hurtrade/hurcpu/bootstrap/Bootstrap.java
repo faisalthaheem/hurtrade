@@ -22,7 +22,11 @@ import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CommodityUser;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Office;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import com.computedsynergy.hurtrade.sharedcomponents.util.HurUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
 
@@ -49,7 +53,11 @@ public class Bootstrap extends AmqpBase{
      * @throws Exception 
      */
     protected void bootstrapExchanges() throws Exception{
-        
+
+
+        Map<String, Object> args = new HashMap<String, Object>();
+        args.put("x-max-length", 5); //retain only 5 latest messages for clients
+
         //fetch all offices
         OfficeModel offices = new OfficeModel();
         List<Office> officeList = offices.getAllOffices();
@@ -63,13 +71,14 @@ public class Bootstrap extends AmqpBase{
             String officeDealerInQName = HurUtil.getOfficeDealerINQueueName(o.getOfficeuuid());
             
             //declare a queue for this office for incoming messages from the clients
-            channel.exchangeDeclare(officeExchangeName, "direct", true);
-            channel.queueDeclare(officeDealerOutQName, true, false, false, null);
+            channel.exchangeDeclare(officeExchangeName, "fanout", true);
+            channel.queueDeclare(officeDealerOutQName, true, false, false, args);
             channel.queueDeclare(officeDealerInQName, true, false, false, null);
             
             channel.queueBind(officeDealerOutQName, officeExchangeName, "todealer");
             channel.queueBind(officeDealerInQName, officeExchangeName, "fromdealer");
-            
+
+            //requests sent by client on their exchanges are delivered to this queue bound in following code
             channel.queueDeclare(officeClientRequestQueueName, true, false, false, null); //used below with client exchanges
             
             //get all clients of this office
@@ -83,7 +92,7 @@ public class Bootstrap extends AmqpBase{
                 channel.queueBind(officeClientRequestQueueName, clientExchangeName, "request");
                 
                 String clientOutgoingQueueName = HurUtil.getClientOutgoingQueueName(u.getUseruuid());
-                channel.queueDeclare(clientOutgoingQueueName, true, false, false, null);
+                channel.queueDeclare(clientOutgoingQueueName, true, false, false, args);
                 channel.queueBind(clientOutgoingQueueName, clientExchangeName, "response");
             }
         }

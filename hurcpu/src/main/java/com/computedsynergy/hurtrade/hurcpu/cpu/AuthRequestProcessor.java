@@ -15,6 +15,7 @@
  */
 package com.computedsynergy.hurtrade.hurcpu.cpu;
 
+import com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers.BackOfficeRequestConsumer;
 import com.computedsynergy.hurtrade.sharedcomponents.amqp.AmqpBase;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.SourceQuote;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
@@ -31,6 +32,8 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -82,12 +85,22 @@ public class AuthRequestProcessor extends AmqpBase {
 
             User u =RedisUtil.getInstance().GetUserInfo(username);
             if(null != u) {
-                String officeExchangeName = HurUtil.getOfficeExchangeName(u.getUserOffice().getOfficeuuid());
-                res.put("officeExchangeName", officeExchangeName);
+
+
                 String clientExchangeName = HurUtil.getClientExchangeName(u.getUseruuid());
                 res.put("clientExchangeName", clientExchangeName);
                 String responseQueueName = HurUtil.getClientOutgoingQueueName(u.getUseruuid());
                 res.put("responseQueueName", responseQueueName);
+
+
+                if(u.getUsertype().equalsIgnoreCase(User.USERTYPE_DEALER)){
+                    String officeExchangeName = HurUtil.getOfficeExchangeName(u.getUserOffice().getOfficeuuid());
+                    String officeDealerOutQName = HurUtil.getOfficeDealerOutQueueName(u.getUserOffice().getOfficeuuid());
+                    String officeDealerInQName = HurUtil.getOfficeDealerINQueueName(u.getUserOffice().getOfficeuuid());
+                    res.put("officeExchangeName", officeExchangeName);
+                    res.put("officeDealerOutQName", officeDealerOutQName);
+                        res.put("officeDealerInQName", officeDealerInQName);
+                }
 
 
                 String json = new Gson().toJson(res);
@@ -97,8 +110,8 @@ public class AuthRequestProcessor extends AmqpBase {
                             username,
                             null,
                             json.getBytes());
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (IOException ex) {
+                    Logger.getLogger(AuthRequestProcessor.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
                 }
             }
 

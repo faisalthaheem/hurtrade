@@ -104,7 +104,7 @@ public class CommodityUpdateProcessor extends AmqpBase {
 
             Quote q = null;
             //include propagation to client only if they are allowed this symbol
-            if(userSpread.containsKey(k)){
+            if(null != userSpread && userSpread.containsKey(k)){
                 q = new Quote(
                         sourceQuote.bid,
                         sourceQuote.bid.add(userSpread.get(k)),
@@ -204,11 +204,12 @@ public class CommodityUpdateProcessor extends AmqpBase {
                     String serializedPositions = gson.toJson(positions);
                     jedis.set(userPositionsKeyName, serializedPositions);
 
+                    //todo - on a different thread not so often.
                     //dump client's positions to db only if there are any positions
-                    if(positions.size() > 0){
-                        SavedPosition p = new SavedPosition(user.getId(), serializedPositions);
-                        savedPositionModel.savePosition(p);
-                    }
+//                    if(positions.size() > 0){
+//                        SavedPosition p = new SavedPosition(user.getId(), serializedPositions);
+//                        savedPositionModel.savePosition(p);
+//                    }
 
                     lock.release();
                     
