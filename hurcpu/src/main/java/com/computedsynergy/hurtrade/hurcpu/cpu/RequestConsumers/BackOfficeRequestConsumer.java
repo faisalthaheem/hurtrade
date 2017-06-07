@@ -30,10 +30,7 @@ import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
 import com.github.jedis.lock.JedisLock;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
+import com.rabbitmq.client.*;
 import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
@@ -87,109 +84,42 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
         super.handleDelivery(consumerTag, envelope, properties, body); //To change body of generated methods, choose Tools | Templates.
 
         long deliveryTag = envelope.getDeliveryTag();
+        getChannel().basicAck(deliveryTag, false);
 
-        TradeResponse response = null;
-        boolean responseRequired = true;
-        String userid = null;
-        User user = null;
-        
         try {
 
-            TradeRequest request = TradeRequest.fromJson(new String(body));
-            response = new TradeResponse(request);
-            
-            userid = properties.getUserId();
-            if(userid == null){
-                responseRequired = false;
-                
-            }else{
-                
-                UserModel userModel = new UserModel();
-                user = userModel.getByUsername(userid);
-                if(user == null){
-                    Logger.getLogger(ClientRequestProcessor.class.getName()).log(Level.SEVERE, "Could not resolve user for name: ", userid);
-                    responseRequired = false;
-                }
-                
-                try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
-                    JedisLock lock = new JedisLock(
-                                jedis, 
-                                RedisUtil.getLockNameForUserProcessing(user.getUseruuid()),
-                                RedisUtil.TIMEOUT_LOCK_USER_PROCESSING, 
-                                RedisUtil.EXPIRY_LOCK_USER_PROCESSING
-                            );
+            User user = null;
+            Map<String, String> clientUpdate = null;
 
-                    try {
-                        if(lock.acquire()){
+            Type requestMapType = new TypeToken<Map<String, String>>(){}.getType();
+            Map<String, String> request = gson.fromJson(new String(body),requestMapType);
 
-                            //process client's positions
-                            processTradeRequest(response, user);
-                            lock.release();
-
-                        }else{
-                            Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, "Could not lock user for order processing {0}",  user.getUsername());
-                        }
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }                
+            UserModel userModel = new UserModel();
+            user = userModel.getByUsername(request.get("client"));
+            if (user == null) {
+                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Could not resolve user for name: ", properties.getUserId());
+                return;
             }
 
-        } catch (Exception ex) {
-            Logger.getLogger(ClientRequestProcessor.class.getName()).log(Level.SEVERE, null, ex);
-        }
+            clientUpdate = processCommand(user, properties.getType(), UUID.fromString(request.get("orderId")), properties.getUserId());
 
-        getChannel().basicAck(deliveryTag, false);
-        
-        if(!responseRequired || null == userid){
-            return;
-        }
-        
-        String clientExchangeName = HurUtil.getClientExchangeName(user.getUseruuid());
+            String clientExchangeName = HurUtil.getClientExchangeName(user.getUseruuid());
+            String serializedResponse = gson.toJson(clientUpdate);
 
-        ClientUpdate update = new ClientUpdate(response);
-        Gson gson = new Gson();
-        String serializedResponse = gson.toJson(update);
+            AMQP.BasicProperties.Builder builder = new AMQP.BasicProperties.Builder();
+            builder.type("orderUpdate");
+            getChannel().basicPublish(clientExchangeName, "response", builder.build(), serializedResponse.getBytes());
 
-        try {
-            getChannel().basicPublish(clientExchangeName, "response", null, serializedResponse.getBytes());
-        } catch (Exception ex) {
+        }catch (Exception ex) {
 
             Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    private void processTradeRequest(TradeResponse response, User user)
+    private Map<String, String>  processCommand(User user, String commandVerb, UUID orderid, String dealerName)
     {
-        
-        //todo, check if this commodity is allowed to this customer
-        Map<String, BigDecimal> userSpread = RedisUtil
-                                                .getInstance()
-                                                .getUserSpreadMap(RedisUtil.getUserSpreadMapName(user.getUseruuid()));
-        
-        if(!userSpread.containsKey(response.getRequest().getCommodity())){
-            
-            response.setResponseCommodityNotAllowed();
-            
-            Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, 
-                    "{0} requested invalid commodity: {1}",new Object[]{ user.getUsername() , response.getRequest().getCommodity()});
-            return;
-        }
-        
-        
-        //get the last quoted prices for commodities for this user
-        String serializedQuotes = RedisUtil.getInstance().getSeriaizedQuotesForClient(user.getUseruuid());
-        QuoteList quotesForClient = gson.fromJson(serializedQuotes, QuoteList.class);
-        
-        if(!quotesForClient.containsKey(response.getRequest().getCommodity()))
-        {
-            response.setResponseCommodityNotAllowed();
-            
-            Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, 
-                    "{0} requested unknown commodity: {1}",new Object[]{ user.getUsername() , response.getRequest().getCommodity()});
-            return;
-        }
-        
+        Map<String, String> clientUpdate = new HashMap<>();
+
         String userPositionsKeyName = getUserPositionsKeyName(user.getUseruuid());
         Type mapType = new TypeToken<Map<UUID, Position>>(){}.getType();
         
@@ -200,55 +130,71 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
 
                     //get client positions
                     Map<UUID, Position> positions = gson.fromJson(jedis.get(userPositionsKeyName),mapType);
-                    Position position = null;
+                    Position position = positions.get(orderid);
+                    BigDecimal pl = BigDecimal.ZERO;
+
+                    if(null == position){
+                        clientUpdate.put("order_status","Order " + orderid + " not found.");
+                        return clientUpdate;
+                    }
 
                     try {
 
-                        switch (response.getRequest().getRequestType()) {
-                            case TradeRequest.REQUEST_TYPE_BUY: {
-                                position = new Position(
-                                        UUID.randomUUID(), Position.ORDER_TYPE_BUY,
-                                        response.getRequest().getCommodity(),
-                                        response.getRequest().getRequestedLot(),
-                                        quotesForClient.get(response.getRequest().getCommodity()).ask
-                                );
+                        switch (commandVerb) {
+                            case "approve": {
+                                if(position.getOrderState().equalsIgnoreCase(Position.ORDER_STATE_PENDING_OPEN)) {
+                                    position.setOrderState(Position.ORDER_STATE_OPEN);
+                                    clientUpdate.put("order_status", "Order [" + orderid + "] approved open by " + dealerName);
+
+                                }else if(position.getOrderState().equalsIgnoreCase(Position.ORDER_STATE_PENDING_CLOSE)){
+                                    position.setOrderState(Position.ORDER_STATE_CLOSED);
+                                    clientUpdate.put("order_status", "Order [" + orderid + "] approved close by " + dealerName);
+                                    positions.remove(orderid);
+                                }
                             }
                             break;
-                            case TradeRequest.REQUEST_TYPE_SELL: {
-                                position = new Position(
-                                        UUID.randomUUID(), Position.ORDER_TYPE_SELL,
-                                        response.getRequest().getCommodity(),
-                                        response.getRequest().getRequestedLot(),
-                                        quotesForClient.get(response.getRequest().getCommodity()).bid
-                                );
+                            case "reject": {
+                                if(position.getOrderState().equalsIgnoreCase(Position.ORDER_STATE_PENDING_OPEN)) {
+                                    position.setOrderState(Position.ORDER_STATE_REJECTED_OPEN);
+                                    clientUpdate.put("order_status", "Order [" + orderid + "] rejected open by " + dealerName);
+                                    positions.remove(orderid);
+
+                                }else if(position.getOrderState().equalsIgnoreCase(Position.ORDER_STATE_PENDING_CLOSE)){
+                                    position.setOrderState(Position.ORDER_STATE_OPEN);
+                                    clientUpdate.put("order_status", "Order [" + orderid + "] rejected close by " + dealerName);
+                                }
+                            }
+                            break;
+                            case "requote": {
+                                //position.setOrderState(Position.ORDER_STATE_OPEN);
                             }
                             break;
                         }
+                        //post the pl
+                        if(pl != BigDecimal.ZERO) {
+                            //todo post to account
+                        }
+                        //todo update the current order state to db
+
+                        //update client positions
+                        String serializedPositions = gson.toJson(positions);
+                        jedis.set(userPositionsKeyName, serializedPositions);
+
                     }catch(Exception ex){
                         Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
                     }
 
-                    if(null != position){
-                        positions.put(position.getOrderId(), position);
-                        response.setResposneOk();
-
-                        //set client positions
-                        String serializedPositions = gson.toJson(positions);
-                        jedis.set(userPositionsKeyName, serializedPositions);
-                    }
-
                     lock.release();
 
-                    //post the newly opened position for dealer review
-
-
                 }else{
-                    Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
+                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
                 }
             }catch(Exception ex){
-                Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
+                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
             }
         }
+
+        return clientUpdate;
     }
 
 }

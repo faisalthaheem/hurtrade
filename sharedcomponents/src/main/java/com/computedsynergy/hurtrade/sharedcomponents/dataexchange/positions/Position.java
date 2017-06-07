@@ -34,6 +34,7 @@ public class Position {
     public static final String ORDER_STATE_OPEN = "open";
     public static final String ORDER_STATE_PENDING_CLOSE = "pending_dealer_close";
     public static final String ORDER_STATE_CLOSED = "closed";
+    public static final String ORDER_STATE_REJECTED_OPEN = "rejected_open";
 
     //is this buy or sell?
     private String orderType;
@@ -61,8 +62,16 @@ public class Position {
         this.orderState = ORDER_STATE_PENDING_OPEN;
     }
     
-    public void processQuote(QuoteList clientQuotes){
-        
+    public void processQuote(QuoteList clientQuotes) {
+
+        if (
+                orderState.equalsIgnoreCase(ORDER_STATE_PENDING_CLOSE) ||
+                        orderState.equalsIgnoreCase(ORDER_STATE_CLOSED) ||
+                        orderState.equalsIgnoreCase(ORDER_STATE_REJECTED_OPEN)
+                )
+        {
+            return;
+        }
         
         if(clientQuotes.containsKey(commodity)){
             BigDecimal closingPrice = BigDecimal.ZERO;

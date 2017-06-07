@@ -50,12 +50,16 @@ public class BackOfficeRequestProcessor extends AmqpBase {
 
             String officeExchangeName = HurUtil.getOfficeExchangeName(o.getOfficeuuid());
             String officeDealerInQueueName = HurUtil.getOfficeDealerINQueueName(o.getOfficeuuid());
-            BackOfficeRequestConsumer consumer = new BackOfficeRequestConsumer(channel, officeExchangeName, officeDealerInQueueName,"", o.getId());
 
             //start office position dispatch task
             OfficePositionsDispatchTask officePositionsDispatchTask = new OfficePositionsDispatchTask(officeExchangeName, o.getId());
             officePositionsDispatchTask.initialize();
 
+            //declare and bind to queue
+            channel.queueDeclare(officeDealerInQueueName, true, false, false, null);
+            channel.queueBind(officeDealerInQueueName, officeExchangeName, "fromdealer");
+
+            BackOfficeRequestConsumer consumer = new BackOfficeRequestConsumer(channel, officeExchangeName, officeDealerInQueueName,"", o.getId());
             channel.basicConsume(officeDealerInQueueName, false, officeExchangeName, consumer);
 
         }

@@ -71,7 +71,7 @@ public class Bootstrap extends AmqpBase{
             String officeDealerInQName = HurUtil.getOfficeDealerINQueueName(o.getOfficeuuid());
             
             //declare a queue for this office for incoming messages from the clients
-            channel.exchangeDeclare(officeExchangeName, "fanout", true);
+            channel.exchangeDeclare(officeExchangeName, "direct", true);
             channel.queueDeclare(officeDealerOutQName, true, false, false, args);
             channel.queueDeclare(officeDealerInQName, true, false, false, null);
             
