@@ -18,7 +18,8 @@ package com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers;
 import com.computedsynergy.hurtrade.hurcpu.cpu.ClientRequestProcessor;
 import com.computedsynergy.hurtrade.hurcpu.cpu.CommodityUpdateProcessor;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
-import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.positions.Position;
+import com.computedsynergy.hurtrade.sharedcomponents.models.impl.PositionModel;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeRequest;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeResponse;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.updates.ClientUpdate;
@@ -207,6 +208,13 @@ public class ClientRequestConsumer extends DefaultConsumer {
                             }
                             break;
                         }
+
+                        if(position != null){
+                            //update the current order state to db
+                            PositionModel positionModel = new PositionModel();
+                            positionModel.saveUpdatePosition(position);
+                        }
+
                     }catch(Exception ex){
                         Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
                     }
@@ -221,9 +229,6 @@ public class ClientRequestConsumer extends DefaultConsumer {
                     }
 
                     lock.release();
-
-                    //post the newly opened position for dealer review
-
 
                 }else{
                     Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());

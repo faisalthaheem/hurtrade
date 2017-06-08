@@ -30,7 +30,7 @@ public class SavedPositionModel extends ModelBase implements ISavedPositionModel
 
     @Override
     public List<SavedPosition> getAllPositions(int userid) {
-        String query = "select * from positions where user_id = " + userid;
+        String query = "select * from savedpositions where user_id = " + userid;
         
         try (Connection conn = sql2o.open()) {
             List<SavedPosition> positions = conn.createQuery(query)
@@ -44,7 +44,7 @@ public class SavedPositionModel extends ModelBase implements ISavedPositionModel
     public void savePosition(SavedPosition p) {
         
         String insertSql = 
-	"INSERT INTO positions(user_id, positiondata, created) " +
+	"INSERT INTO savedpositions(user_id, positiondata, created) " +
             "values (:user_id, to_json(:positiondata::json), :created)";
 
         try (Connection con = sql2o.open()) {

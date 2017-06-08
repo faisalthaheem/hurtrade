@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.computedsynergy.hurtrade.sharedcomponents.dataexchange.positions;
+package com.computedsynergy.hurtrade.sharedcomponents.models.pojos;
 
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -50,6 +51,14 @@ public class Position {
     private BigDecimal openPrice;
     //what state the order currently is in
     private String orderState;
+    //what price was the order closed at
+    private BigDecimal closePrice;
+    //date and time fields
+    private Date createdat;
+    private Date endedat;
+    private Date closedat;
+    private Date approvedopenat;
+    private Date approvedcloseat;
     
     public Position(UUID orderId, String orderType, String commodity, BigDecimal amount, BigDecimal requestedPrice){
         
@@ -58,8 +67,8 @@ public class Position {
         this.commodity = commodity;
         this.amount = amount;
         this.currentPl = BigDecimal.ZERO;
-        this.openPrice = requestedPrice;
-        this.orderState = ORDER_STATE_PENDING_OPEN;
+        this.setOpenPrice(requestedPrice);
+        this.setOrderState(ORDER_STATE_PENDING_OPEN);
     }
     
     public void processQuote(QuoteList clientQuotes) {
@@ -91,7 +100,7 @@ public class Position {
                    exchangeRate = clientQuotes.get(quoteCurrency + "USD").ask;
                 }
             }
-            currentPl = closingPrice.subtract(openPrice).multiply(exchangeRate).multiply(amount).multiply(clientQuotes.get(commodity).lotSize);
+            currentPl = closingPrice.subtract(getOpenPrice()).multiply(exchangeRate).multiply(amount).multiply(clientQuotes.get(commodity).lotSize);
         }
     }
 
@@ -164,14 +173,14 @@ public class Position {
      * @return the openPrice
      */
     public BigDecimal getRequestedPrice() {
-        return openPrice;
+        return getOpenPrice();
     }
 
     /**
      * @param requestedPrice the openPrice to set
      */
     public void setRequestedPrice(BigDecimal requestedPrice) {
-        this.openPrice = requestedPrice;
+        this.setOpenPrice(requestedPrice);
     }
 
     /**
@@ -186,7 +195,94 @@ public class Position {
      */
     public void setOrderState(String orderState) {
         this.orderState = orderState;
+
+        switch (this.orderState){
+            case ORDER_STATE_PENDING_OPEN:
+            {
+                setCreatedat(new Date());
+            }
+            break;
+
+            case ORDER_STATE_OPEN:
+            {
+                setApprovedopenat(new Date());
+            }
+            break;
+
+            case ORDER_STATE_PENDING_CLOSE:
+            {
+                setClosedat(new Date());
+            }
+            break;
+
+            case ORDER_STATE_CLOSED:
+            {
+                setApprovedcloseat(new Date());
+            }
+            break;
+
+            case ORDER_STATE_REJECTED_OPEN:
+            {
+
+            }
+            break;
+        }
     }
-    
-    
+
+
+    public BigDecimal getOpenPrice() {
+        return openPrice;
+    }
+
+    public void setOpenPrice(BigDecimal openPrice) {
+        this.openPrice = openPrice;
+    }
+
+    public BigDecimal getClosePrice() {
+        return closePrice;
+    }
+
+    public void setClosePrice(BigDecimal closePrice) {
+        this.closePrice = closePrice;
+    }
+
+    public Date getCreatedat() {
+        return createdat;
+    }
+
+    public void setCreatedat(Date createdat) {
+        this.createdat = createdat;
+    }
+
+    public Date getEndedat() {
+        return endedat;
+    }
+
+    public void setEndedat(Date endedat) {
+        this.endedat = endedat;
+    }
+
+    public Date getClosedat() {
+        return closedat;
+    }
+
+    public void setClosedat(Date closedat) {
+        this.closedat = closedat;
+    }
+
+    public Date getApprovedopenat() {
+        return approvedopenat;
+    }
+
+    public void setApprovedopenat(Date approvedopenat) {
+        this.approvedopenat = approvedopenat;
+    }
+
+    public Date getApprovedcloseat() {
+        return approvedcloseat;
+    }
+
+    public void setApprovedcloseat(Date approvedcloseat) {
+        this.approvedcloseat = approvedcloseat;
+    }
 }

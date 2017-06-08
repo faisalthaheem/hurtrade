@@ -16,7 +16,7 @@
 package com.computedsynergy.hurtrade.sharedcomponents.dataexchange.updates;
 
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
-import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.positions.Position;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeResponse;
 
 import java.util.HashMap;

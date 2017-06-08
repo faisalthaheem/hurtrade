@@ -15,37 +15,20 @@
  */
 package com.computedsynergy.hurtrade.hurcpu.cpu.Tasks;
 
-import com.computedsynergy.hurtrade.hurcpu.cpu.ClientRequestProcessor;
-import com.computedsynergy.hurtrade.hurcpu.cpu.CommodityUpdateProcessor;
 import com.computedsynergy.hurtrade.sharedcomponents.amqp.AmqpBase;
 import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
-import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
-import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.positions.Position;
-import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeRequest;
-import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeResponse;
-import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.updates.ClientUpdate;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
-import com.computedsynergy.hurtrade.sharedcomponents.util.HurUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
-import com.github.jedis.lock.JedisLock;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
-import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.*;
 
 /**
  *

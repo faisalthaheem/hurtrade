@@ -16,9 +16,8 @@
 package com.computedsynergy.hurtrade.sharedcomponents.util;
 
 import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
-import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.positions.Position;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CommodityUser;
-import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Office;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.github.jedis.lock.JedisLock;
 import com.google.gson.Gson;

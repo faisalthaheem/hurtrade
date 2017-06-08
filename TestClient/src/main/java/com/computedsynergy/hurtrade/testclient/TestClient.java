@@ -16,7 +16,7 @@
 package com.computedsynergy.hurtrade.testclient;
 
 import com.computedsynergy.hurtrade.sharedcomponents.amqp.AmqpBase;
-import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.positions.Position;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.updates.ClientUpdate;
 import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;

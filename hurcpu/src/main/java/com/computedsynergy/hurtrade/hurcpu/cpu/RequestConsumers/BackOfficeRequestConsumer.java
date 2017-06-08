@@ -15,14 +15,9 @@
  */
 package com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers;
 
-import com.computedsynergy.hurtrade.hurcpu.cpu.ClientRequestProcessor;
 import com.computedsynergy.hurtrade.hurcpu.cpu.CommodityUpdateProcessor;
-import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
-import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
-import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.positions.Position;
-import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeRequest;
-import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeResponse;
-import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.updates.ClientUpdate;
+import com.computedsynergy.hurtrade.sharedcomponents.models.impl.PositionModel;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.computedsynergy.hurtrade.sharedcomponents.util.HurUtil;
@@ -163,6 +158,7 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
                                     position.setOrderState(Position.ORDER_STATE_OPEN);
                                     clientUpdate.put("order_status", "Order [" + orderid + "] rejected close by " + dealerName);
                                 }
+                                //post the pl
                             }
                             break;
                             case "requote": {
@@ -170,11 +166,10 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
                             }
                             break;
                         }
-                        //post the pl
-                        if(pl != BigDecimal.ZERO) {
-                            //todo post to account
-                        }
-                        //todo update the current order state to db
+
+                        //update the current order state to db
+                        PositionModel positionModel = new PositionModel();
+                        positionModel.saveUpdatePosition(position);
 
                         //update client positions
                         String serializedPositions = gson.toJson(positions);
