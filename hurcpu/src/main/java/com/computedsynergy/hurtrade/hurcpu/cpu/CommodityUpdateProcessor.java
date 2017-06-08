@@ -19,6 +19,7 @@ import com.computedsynergy.hurtrade.sharedcomponents.amqp.AmqpBase;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.Quote;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.SourceQuote;
+import com.computedsynergy.hurtrade.sharedcomponents.models.impl.QuoteModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.updates.ClientUpdate;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.SavedPositionModel;
@@ -57,10 +58,13 @@ public class CommodityUpdateProcessor extends AmqpBase {
     
     SavedPositionModel savedPositionModel = new SavedPositionModel();
     Gson gson = new Gson();
+    QuoteModel quoteModel = null;
 
     public void init() throws Exception {
         
         super.setupAMQP();
+
+        quoteModel = new QuoteModel();
         
         channel.queueDeclare(Constants.QUEUE_NAME_RATES, true, false, false, null);
 
@@ -211,7 +215,10 @@ public class CommodityUpdateProcessor extends AmqpBase {
 //                    }
 
                     lock.release();
-                    
+
+                    //insert quotes to db
+                    quoteModel.saveQuote(user.getId(), clientQuotes.values());
+
                     return positions;
 
                 }else{
