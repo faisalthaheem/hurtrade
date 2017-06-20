@@ -20,6 +20,7 @@ import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.Quote;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.SourceQuote;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.QuoteModel;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CommodityUser;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.updates.ClientUpdate;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.SavedPositionModel;
@@ -94,9 +95,9 @@ public class CommodityUpdateProcessor extends AmqpBase {
         String clientExchangeName = HurUtil.getClientExchangeName(quote.getUser().getUseruuid());
         
         //introduce the spread as defined for this client for the symbols in the quote list
-        Map<String, BigDecimal> userSpread = RedisUtil
+        Map<String, CommodityUser> userCommodities = RedisUtil
                                                 .getInstance()
-                                                .getUserSpreadMap(RedisUtil.getUserSpreadMapName(quote.getUser().getUseruuid()));
+                                                .getCachedUserCommodities(quote.getUser().getUseruuid());
         
         
         QuoteList sourceQuotes = quote.getQuoteList();
@@ -107,10 +108,10 @@ public class CommodityUpdateProcessor extends AmqpBase {
 
             Quote q = null;
             //include propagation to client only if they are allowed this symbol
-            if(null != userSpread && userSpread.containsKey(k)){
+            if(null != userCommodities && userCommodities.containsKey(k)){
                 q = new Quote(
                         sourceQuote.bid,
-                        sourceQuote.bid.add(userSpread.get(k)),
+                        sourceQuote.bid.add(userCommodities.get(k).getSpread()),
                         sourceQuote.quoteTime,
                         BigDecimal.ZERO,
                         sourceQuote.name,
@@ -163,7 +164,7 @@ public class CommodityUpdateProcessor extends AmqpBase {
         
         //remove the quotes not allowed for this client
         for(String k:sourceQuotes.keySet()){
-            if(!userSpread.containsKey(k)){
+            if(!userCommodities.containsKey(k)){
                 clientQuotes.remove(k);
             }
         }

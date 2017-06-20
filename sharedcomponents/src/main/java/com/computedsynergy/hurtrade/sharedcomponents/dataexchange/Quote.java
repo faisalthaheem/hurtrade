@@ -46,16 +46,16 @@ public class Quote {
     }
     
     public Quote(String bid, String ask, String date, String time, String rate, String name, BigDecimal lotSize) throws ParseException{
-        
+
         this.bid = new BigDecimal(bid);
         this.ask = new BigDecimal(ask);
         this.rate= new BigDecimal(rate);
-        
+
         DateFormat format = new SimpleDateFormat("M/d/yyyy h:mma", Locale.ENGLISH);
         this.quoteTime = format.parse(date + " " + time);
-        
+
         this.name = name;
-        
+
         this.lotSize = lotSize;
     }
     

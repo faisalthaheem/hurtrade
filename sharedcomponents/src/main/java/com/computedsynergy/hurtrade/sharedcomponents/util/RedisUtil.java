@@ -170,15 +170,18 @@ public class RedisUtil {
         return USER_POSITIONS_KEY_PREFIX + userUuid.toString();
     }
     
-    public void setUserSpreadMap(String userMapName, List<CommodityUser> userCommodities) 
+    public void cacheUserCommodities(UUID userUUID, List<CommodityUser> userCommodities)
     {
         try {
-            Map<String, BigDecimal> userSpreadMap = new HashMap<String, BigDecimal>();
+
+            String userMapName=RedisUtil.getUserSpreadMapName(userUUID);
+
+            Map<String, CommodityUser> commodityMap = new HashMap<>();
             for(CommodityUser cu: userCommodities){
-                userSpreadMap.put(cu.getCommodityname(), cu.getSpread());
+                commodityMap.put(cu.getCommodityname(), cu);
             }
             
-            String serializedMap = getGson().toJson(userSpreadMap);
+            String serializedMap = getGson().toJson(commodityMap);
             
             try(Jedis jedis = jedisPool.getResource()){
                 JedisLock lock = new JedisLock(jedis, getLockNameForSpreadMap(userMapName), TIMEOUT_LOCK_SPREAD_MAP, EXPIRY_LOCK_SPREAD_MAP);
@@ -196,17 +199,18 @@ public class RedisUtil {
         
     }
     
-    public Map<String, BigDecimal> getUserSpreadMap(String userMapName)
+    public Map<String, CommodityUser> getCachedUserCommodities(UUID userUUID)
     {
-        Type mapType = new TypeToken<Map<String, BigDecimal>>(){}.getType();
-        Map<String, BigDecimal> userSpreadMap = new HashMap<>();
+        String userMapName = RedisUtil.getUserSpreadMapName(userUUID);
+        Type mapType = new TypeToken<Map<String, CommodityUser>>(){}.getType();
+        Map<String, CommodityUser> userCommodityMap = new HashMap<>();
             
         try {
             try(Jedis jedis = jedisPool.getResource()){
                 JedisLock lock = new JedisLock(jedis, getLockNameForSpreadMap(userMapName), TIMEOUT_LOCK_SPREAD_MAP, EXPIRY_LOCK_SPREAD_MAP);
                 if(lock.acquire()){
 
-                    userSpreadMap = getGson().fromJson(jedis.get(userMapName),
+                    userCommodityMap = getGson().fromJson(jedis.get(userMapName),
                             mapType
                     );
 
@@ -220,7 +224,7 @@ public class RedisUtil {
             Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        return userSpreadMap;
+        return userCommodityMap;
     }
     
     public void setSeriaizedQuotesForClient(String quotes, UUID clientId)

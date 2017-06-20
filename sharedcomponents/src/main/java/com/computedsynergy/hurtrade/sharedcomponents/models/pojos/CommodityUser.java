@@ -25,10 +25,12 @@ public class CommodityUser {
     
     private String commodityname;
     private BigDecimal spread;
+    private BigDecimal ratio;
     
-    public CommodityUser(String c, BigDecimal s){
+    public CommodityUser(String c, BigDecimal s, BigDecimal r){
         this.commodityname = c;
         this.spread = s;
+        this.ratio = r;
     }
 
     /**
@@ -59,5 +61,12 @@ public class CommodityUser {
         this.spread = spread;
     }
 
-    
+
+    public BigDecimal getRatio() {
+        return ratio;
+    }
+
+    public void setRatio(BigDecimal ratio) {
+        this.ratio = ratio;
+    }
 }

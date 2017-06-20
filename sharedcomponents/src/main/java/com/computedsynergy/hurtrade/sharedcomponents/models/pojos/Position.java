@@ -28,8 +28,8 @@ import java.util.UUID;
  */
 public class Position {
     
-    public static final String ORDER_TYPE_BUY = "b";
-    public static final String ORDER_TYPE_SELL = "s";
+    public static final String ORDER_TYPE_BUY = "buy";
+    public static final String ORDER_TYPE_SELL = "sell";
     
     public static final String ORDER_STATE_PENDING_OPEN = "pending_dealer_open";
     public static final String ORDER_STATE_OPEN = "open";
@@ -59,8 +59,11 @@ public class Position {
     private Date closedat;
     private Date approvedopenat;
     private Date approvedcloseat;
+
+    private BigDecimal usedMargin;
+    private BigDecimal ratio;
     
-    public Position(UUID orderId, String orderType, String commodity, BigDecimal amount, BigDecimal requestedPrice){
+    public Position(UUID orderId, String orderType, String commodity, BigDecimal amount, BigDecimal requestedPrice, BigDecimal ratio){
         
         this.orderId = orderId;
         this.orderType = orderType;
@@ -69,6 +72,7 @@ public class Position {
         this.currentPl = BigDecimal.ZERO;
         this.setOpenPrice(requestedPrice);
         this.setOrderState(ORDER_STATE_PENDING_OPEN);
+        this.ratio = ratio; //ratio of leverage allowed on this instrument
     }
     
     public void processQuote(QuoteList clientQuotes) {
@@ -86,21 +90,28 @@ public class Position {
             BigDecimal closingPrice = BigDecimal.ZERO;
             
             BigDecimal exchangeRate = BigDecimal.ONE;
-            String quoteCurrency = commodity.substring(0,3);
+            String baseCurrency = commodity.substring(0,3);
             
             
             if(orderType.equals(ORDER_TYPE_BUY)){
                 closingPrice = clientQuotes.get(commodity).bid;
-                if(!quoteCurrency.equals("USD")){
-                   exchangeRate = clientQuotes.get(quoteCurrency + "USD").bid;
+                if(!baseCurrency.equals("USD")){
+                   exchangeRate = clientQuotes.get(baseCurrency + "USD").bid;
+                    usedMargin = clientQuotes.get(baseCurrency + "USD").bid.multiply(clientQuotes.get(commodity).lotSize).multiply(amount);
+                }else{
+                    usedMargin = closingPrice.multiply(clientQuotes.get(commodity).lotSize).multiply(amount);
                 }
             }else{
                 closingPrice = clientQuotes.get(commodity).ask;
-                if(!quoteCurrency.equals("USD")){
-                   exchangeRate = clientQuotes.get(quoteCurrency + "USD").ask;
+                if(!baseCurrency.equals("USD")){
+                   exchangeRate = clientQuotes.get(baseCurrency + "USD").ask;
+                    usedMargin = clientQuotes.get(baseCurrency + "USD").ask.multiply(clientQuotes.get(commodity).lotSize).multiply(amount);
+                }else{
+                    usedMargin = closingPrice.multiply(clientQuotes.get(commodity).lotSize).multiply(amount);
                 }
             }
             currentPl = closingPrice.subtract(getOpenPrice()).multiply(exchangeRate).multiply(amount).multiply(clientQuotes.get(commodity).lotSize);
+
         }
     }
 

@@ -15,6 +15,11 @@
  */
 package com.computedsynergy.hurtrade.sharedcomponents.util;
 
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.Map;
+
 /**
  *
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
@@ -24,4 +29,6 @@ public class Constants {
     public static final String EXCHANGE_NAME_RATES = "rates";
     public static final String QUEUE_NAME_AUTH = "authReqQ";
     public static final String EXCHANGE_NAME_AUTH = "authExchange";
+
+    public static Type TYPE_DICTIONARY = new TypeToken<Map<String, String>>(){}.getType();
 }

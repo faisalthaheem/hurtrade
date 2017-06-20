@@ -19,12 +19,14 @@ import com.computedsynergy.hurtrade.hurcpu.cpu.ClientRequestProcessor;
 import com.computedsynergy.hurtrade.hurcpu.cpu.CommodityUpdateProcessor;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.PositionModel;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CommodityUser;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeRequest;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeResponse;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.updates.ClientUpdate;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
+import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
 import com.computedsynergy.hurtrade.sharedcomponents.util.HurUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.EXPIRY_LOCK_USER_POSITIONS;
@@ -69,9 +71,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
         super.handleDelivery(consumerTag, envelope, properties, body); //To change body of generated methods, choose Tools | Templates.
 
         long deliveryTag = envelope.getDeliveryTag();
-        
-        
-        
+
         TradeResponse response = null;
         boolean responseRequired = true;
         String userid = null;
@@ -79,8 +79,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
         
         try {
 
-            TradeRequest request = TradeRequest.fromJson(new String(body));
-            response = new TradeResponse(request);
+
             
             userid = properties.getUserId();
             if(userid == null){
@@ -106,8 +105,21 @@ public class ClientRequestConsumer extends DefaultConsumer {
                     try {
                         if(lock.acquire()){
 
-                            //process client's positions
-                            processTradeRequest(response, user);
+                            String commandVerb = properties.getType();
+
+                            if(commandVerb.equals("trade")) {
+
+                                TradeRequest request = TradeRequest.fromJson(new String(body));
+                                response = new TradeResponse(request);
+
+                                processTradeRequest(response, user);
+                            }else if(commandVerb.equals("tradeClosure")) {
+
+                                Map<String,String> cmdParams =  new Gson().fromJson(new String(body), Constants.TYPE_DICTIONARY);
+                                closePosition(user, UUID.fromString(cmdParams.get("orderid")));
+                            }
+
+
                             lock.release();
 
                         }else{
@@ -142,16 +154,82 @@ public class ClientRequestConsumer extends DefaultConsumer {
             Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+    private void closePosition(User user, UUID orderId)
+    {
+
+        //get the last quoted prices for commodities for this user
+        String serializedQuotes = RedisUtil.getInstance().getSeriaizedQuotesForClient(user.getUseruuid());
+        QuoteList quotesForClient = gson.fromJson(serializedQuotes, QuoteList.class);
+
+
+        String userPositionsKeyName = getUserPositionsKeyName(user.getUseruuid());
+        Type mapType = new TypeToken<Map<UUID, Position>>(){}.getType();
+
+        try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
+            JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
+            try{
+                if(lock.acquire()){
+
+                    //get client positions
+                    Map<UUID, Position> positions = gson.fromJson(jedis.get(userPositionsKeyName),mapType);
+                    if(positions.containsKey(orderId)) {
+
+
+                        Position position = positions.get(orderId);
+                        //process close request only if order is open
+                        if(position.getOrderState().equalsIgnoreCase(Position.ORDER_STATE_OPEN)) {
+
+                            try {
+
+                                position.setOrderState(Position.ORDER_STATE_PENDING_CLOSE);
+
+                                switch (position.getOrderType()) {
+                                    case TradeRequest.REQUEST_TYPE_BUY: {
+                                        position.setClosePrice(quotesForClient.get(position.getCommodity()).bid);
+                                    }
+                                    break;
+                                    case TradeRequest.REQUEST_TYPE_SELL: {
+                                        position.setClosePrice(quotesForClient.get(position.getCommodity()).ask);
+                                    }
+                                    break;
+                                }
+
+                                //update the current order state to db
+                                PositionModel positionModel = new PositionModel();
+                                positionModel.saveUpdatePosition(position);
+
+                                //set client positions
+                                String serializedPositions = gson.toJson(positions);
+                                jedis.set(userPositionsKeyName, serializedPositions);
+
+
+                            } catch (Exception ex) {
+                                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                            }
+                        }
+                    }
+
+                    lock.release();
+
+                }else{
+                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
+                }
+            }catch(Exception ex){
+                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
+            }
+        }
+    }
     
     private void processTradeRequest(TradeResponse response, User user)
     {
         
         //todo, check if this commodity is allowed to this customer
-        Map<String, BigDecimal> userSpread = RedisUtil
+        Map<String, CommodityUser> userCommodities = RedisUtil
                                                 .getInstance()
-                                                .getUserSpreadMap(RedisUtil.getUserSpreadMapName(user.getUseruuid()));
+                                                .getCachedUserCommodities(user.getUseruuid());
         
-        if(!userSpread.containsKey(response.getRequest().getCommodity())){
+        if(!userCommodities.containsKey(response.getRequest().getCommodity())){
             
             response.setResponseCommodityNotAllowed();
             
@@ -194,7 +272,8 @@ public class ClientRequestConsumer extends DefaultConsumer {
                                         UUID.randomUUID(), Position.ORDER_TYPE_BUY,
                                         response.getRequest().getCommodity(),
                                         response.getRequest().getRequestedLot(),
-                                        quotesForClient.get(response.getRequest().getCommodity()).ask
+                                        quotesForClient.get(response.getRequest().getCommodity()).ask,
+                                        userCommodities.get(response.getRequest().getCommodity()).getRatio()
                                 );
                             }
                             break;
@@ -203,16 +282,16 @@ public class ClientRequestConsumer extends DefaultConsumer {
                                         UUID.randomUUID(), Position.ORDER_TYPE_SELL,
                                         response.getRequest().getCommodity(),
                                         response.getRequest().getRequestedLot(),
-                                        quotesForClient.get(response.getRequest().getCommodity()).bid
+                                        quotesForClient.get(response.getRequest().getCommodity()).bid,
+                                        userCommodities.get(response.getRequest().getCommodity()).getRatio()
                                 );
                             }
                             break;
                         }
 
                         if(position != null){
-                            //update the current order state to db
-                            PositionModel positionModel = new PositionModel();
-                            positionModel.saveUpdatePosition(position);
+                            positions.put(position.getOrderId(), position);
+                            response.setResposneOk();
                         }
 
                     }catch(Exception ex){
@@ -220,8 +299,10 @@ public class ClientRequestConsumer extends DefaultConsumer {
                     }
 
                     if(null != position){
-                        positions.put(position.getOrderId(), position);
-                        response.setResposneOk();
+
+                        //update the current order state to db
+                        PositionModel positionModel = new PositionModel();
+                        positionModel.saveUpdatePosition(position);
 
                         //set client positions
                         String serializedPositions = gson.toJson(positions);

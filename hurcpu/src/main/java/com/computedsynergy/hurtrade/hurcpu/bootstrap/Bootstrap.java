@@ -113,7 +113,7 @@ public class Bootstrap extends AmqpBase{
         for(User u:users){
             
             List<CommodityUser> userCommodities = cuModel.getCommoditiesForUser(u.getId());
-            RedisUtil.getInstance().setUserSpreadMap(RedisUtil.getUserSpreadMapName(u.getUseruuid()), userCommodities);
+            RedisUtil.getInstance().cacheUserCommodities(u.getUseruuid(), userCommodities);
 
         }
                 
