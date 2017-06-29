@@ -27,11 +27,10 @@ import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
  */
 public class SourceQuote {
     private QuoteList quoteList;
-    private User user;
+
     
-    public SourceQuote(QuoteList q, User u){
+    public SourceQuote(QuoteList q){
         this.quoteList = q;
-        this.user = u;
     }
 
     /**
@@ -48,20 +47,4 @@ public class SourceQuote {
         this.quoteList = quoteList;
     }
 
-    /**
-     * @return the user
-     */
-    public User getUser() {
-        return user;
-    }
-
-    /**
-     * @param user the user to set
-     */
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    
-    
 }

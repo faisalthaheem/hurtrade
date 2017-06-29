@@ -15,6 +15,7 @@
  */
 package com.computedsynergy.hurtrade.hurcpu.bootstrap;
 
+import com.computedsynergy.hurtrade.hurcpu.cpu.Tasks.ClientAccountStatusTask;
 import com.computedsynergy.hurtrade.sharedcomponents.amqp.AmqpBase;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.CommodityUserModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.OfficeModel;
@@ -23,6 +24,7 @@ import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CommodityUser;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Office;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +37,9 @@ import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
  */
 public class Bootstrap extends AmqpBase{
-    
+
+    private ArrayList<ClientAccountStatusTask> clientTasks = new ArrayList<>();
+
     public void bootstrap() throws Exception{
         
         //setup amqp
@@ -43,7 +47,7 @@ public class Bootstrap extends AmqpBase{
         //setup queues and exchanges
         bootstrapExchanges();
         //setup cached user data
-        setupRedisUserSpreads();
+        setupUserSpecific();
         
         cleanup();
     }
@@ -102,7 +106,7 @@ public class Bootstrap extends AmqpBase{
     /**
      * Loads the users 
      */
-    protected void setupRedisUserSpreads(){
+    protected void setupUserSpecific(){
         
         
         UserModel userModel = new UserModel();
@@ -115,6 +119,7 @@ public class Bootstrap extends AmqpBase{
             List<CommodityUser> userCommodities = cuModel.getCommoditiesForUser(u.getId());
             RedisUtil.getInstance().cacheUserCommodities(u.getUseruuid(), userCommodities);
 
+            clientTasks.add(new ClientAccountStatusTask(u));
         }
                 
     }

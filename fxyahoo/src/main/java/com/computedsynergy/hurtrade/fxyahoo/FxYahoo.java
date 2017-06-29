@@ -33,6 +33,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -128,17 +129,20 @@ public class FxYahoo extends AmqpBase implements Runnable {
                     quotes.put(commodity, quote);
 
                 }
-                
+
+                Date startTime = new Date();
                 Gson gson = new Gson();
+                SourceQuote quote = new SourceQuote(quotes);
                 
                 UserModel userModel = new UserModel();
                 List<User> users = userModel.getAllUsers();
                 for(User u: users){
-                    
-                    SourceQuote quote = new SourceQuote(quotes, u);
+
                     String serialized = gson.toJson(quote);
-                    channel.basicPublish(Constants.EXCHANGE_NAME_RATES, "", null, serialized.getBytes());
+                    channel.basicPublish(Constants.EXCHANGE_NAME_RATES, u.getUseruuid().toString(), null, serialized.getBytes());
                 }
+                Date endTime = new Date();
+                logger.info("Publishing took [" + (endTime.getTime() - startTime.getTime()) + "] ms.");
                 
                 Thread.sleep(CommandLineOptions.getInstance().yahooFxFrequency);
             }catch(Exception ex){

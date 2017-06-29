@@ -15,7 +15,6 @@
  */
 package com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers;
 
-import com.computedsynergy.hurtrade.hurcpu.cpu.CommodityUpdateProcessor;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.PositionModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
@@ -107,7 +106,7 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
 
         }catch (Exception ex) {
 
-            Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -176,7 +175,7 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
                         jedis.set(userPositionsKeyName, serializedPositions);
 
                     }catch(Exception ex){
-                        Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                        Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
                     }
 
                     lock.release();

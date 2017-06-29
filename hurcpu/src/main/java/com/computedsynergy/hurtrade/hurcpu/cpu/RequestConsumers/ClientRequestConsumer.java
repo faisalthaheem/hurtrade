@@ -16,7 +16,6 @@
 package com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers;
 
 import com.computedsynergy.hurtrade.hurcpu.cpu.ClientRequestProcessor;
-import com.computedsynergy.hurtrade.hurcpu.cpu.CommodityUpdateProcessor;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.PositionModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CommodityUser;
@@ -42,7 +41,6 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.math.BigDecimal;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -123,10 +121,10 @@ public class ClientRequestConsumer extends DefaultConsumer {
                             lock.release();
 
                         }else{
-                            Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, "Could not lock user for order processing {0}",  user.getUsername());
+                            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Could not lock user for order processing {0}",  user.getUsername());
                         }
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
                     }
                 }                
             }
@@ -151,7 +149,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
             getChannel().basicPublish(clientExchangeName, "response", null, serializedResponse.getBytes());
         } catch (Exception ex) {
 
-            Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -233,7 +231,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
             
             response.setResponseCommodityNotAllowed();
             
-            Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, 
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE,
                     "{0} requested invalid commodity: {1}",new Object[]{ user.getUsername() , response.getRequest().getCommodity()});
             return;
         }
@@ -247,7 +245,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
         {
             response.setResponseCommodityNotAllowed();
             
-            Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, 
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE,
                     "{0} requested unknown commodity: {1}",new Object[]{ user.getUsername() , response.getRequest().getCommodity()});
             return;
         }
@@ -295,7 +293,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
                         }
 
                     }catch(Exception ex){
-                        Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                        Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
                     }
 
                     if(null != position){
@@ -312,10 +310,10 @@ public class ClientRequestConsumer extends DefaultConsumer {
                     lock.release();
 
                 }else{
-                    Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
+                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
                 }
             }catch(Exception ex){
-                Logger.getLogger(CommodityUpdateProcessor.class.getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
+                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
             }
         }
     }

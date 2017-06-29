@@ -20,8 +20,6 @@ import com.computedsynergy.hurtrade.hurcpu.bootstrap.Bootstrap;
 import com.computedsynergy.hurtrade.hurcpu.cpu.AuthRequestProcessor;
 import com.computedsynergy.hurtrade.hurcpu.cpu.BackOfficeRequestProcessor;
 import com.computedsynergy.hurtrade.hurcpu.cpu.ClientRequestProcessor;
-import com.computedsynergy.hurtrade.hurcpu.cpu.CommodityUpdateProcessor;
-import com.computedsynergy.hurtrade.hurcpu.cpu.Tasks.OfficePositionsDispatchTask;
 import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
 
 /**
@@ -41,8 +39,8 @@ public class HurCpu {
         ClientRequestProcessor clientRequestProcessor = new ClientRequestProcessor();
         clientRequestProcessor.initialize();
 
-        CommodityUpdateProcessor commodityUpdateProcessor = new CommodityUpdateProcessor();
-        commodityUpdateProcessor.init();
+//        CommodityUpdateProcessor commodityUpdateProcessor = new CommodityUpdateProcessor();
+//        commodityUpdateProcessor.init();
 
         AuthRequestProcessor authProcessor = new AuthRequestProcessor();
         authProcessor.init();

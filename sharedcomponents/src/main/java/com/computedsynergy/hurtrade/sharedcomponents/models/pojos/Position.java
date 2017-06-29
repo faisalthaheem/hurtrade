@@ -97,17 +97,17 @@ public class Position {
                 closingPrice = clientQuotes.get(commodity).bid;
                 if(!baseCurrency.equals("USD")){
                    exchangeRate = clientQuotes.get(baseCurrency + "USD").bid;
-                    usedMargin = clientQuotes.get(baseCurrency + "USD").bid.multiply(clientQuotes.get(commodity).lotSize).multiply(amount);
+                    setUsedMargin(clientQuotes.get(baseCurrency + "USD").bid.multiply(clientQuotes.get(commodity).lotSize).multiply(amount));
                 }else{
-                    usedMargin = closingPrice.multiply(clientQuotes.get(commodity).lotSize).multiply(amount);
+                    setUsedMargin(closingPrice.multiply(clientQuotes.get(commodity).lotSize).multiply(amount));
                 }
             }else{
                 closingPrice = clientQuotes.get(commodity).ask;
                 if(!baseCurrency.equals("USD")){
                    exchangeRate = clientQuotes.get(baseCurrency + "USD").ask;
-                    usedMargin = clientQuotes.get(baseCurrency + "USD").ask.multiply(clientQuotes.get(commodity).lotSize).multiply(amount);
+                    setUsedMargin(clientQuotes.get(baseCurrency + "USD").ask.multiply(clientQuotes.get(commodity).lotSize).multiply(amount));
                 }else{
-                    usedMargin = closingPrice.multiply(clientQuotes.get(commodity).lotSize).multiply(amount);
+                    setUsedMargin(closingPrice.multiply(clientQuotes.get(commodity).lotSize).multiply(amount));
                 }
             }
             currentPl = closingPrice.subtract(getOpenPrice()).multiply(exchangeRate).multiply(amount).multiply(clientQuotes.get(commodity).lotSize);
@@ -295,5 +295,13 @@ public class Position {
 
     public void setApprovedcloseat(Date approvedcloseat) {
         this.approvedcloseat = approvedcloseat;
+    }
+
+    public BigDecimal getUsedMargin() {
+        return usedMargin;
+    }
+
+    public void setUsedMargin(BigDecimal usedMargin) {
+        this.usedMargin = usedMargin;
     }
 }
