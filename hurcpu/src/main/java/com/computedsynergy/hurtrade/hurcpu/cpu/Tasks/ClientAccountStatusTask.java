@@ -19,6 +19,7 @@ import com.computedsynergy.hurtrade.sharedcomponents.amqp.AmqpBase;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.Quote;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.SourceQuote;
+import com.computedsynergy.hurtrade.sharedcomponents.models.impl.LedgerModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.QuoteModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CommodityUser;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
@@ -280,15 +281,17 @@ public class ClientAccountStatusTask extends AmqpBase {
                 Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Error processing user positions for {0}", user.getUsername());
                 Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
             }
-            //or return null if problemms
+            //or return null if problems
             return null;
         }
     }
 
     private void publishAccountStatus()
     {
+        BigDecimal availableCash = new LedgerModel().GetAvailableCashForUser(_self.getId());
+
         BigDecimal usedMargin = (_usedMarginBuy.subtract(_usedMarginSell)).abs();
-        BigDecimal equity = BigDecimal.valueOf(500000).add(_floating);
+        BigDecimal equity = availableCash.add(_floating);
         BigDecimal usable = equity.subtract(usedMargin);
 
         HashMap<String, BigDecimal> accountStatus = new HashMap<>();
@@ -296,6 +299,7 @@ public class ClientAccountStatusTask extends AmqpBase {
         accountStatus.put("usedMargin", usedMargin);
         accountStatus.put("equity", equity);
         accountStatus.put("usable", usable);
+        accountStatus.put("availableCash", availableCash);
 
         String serializedAccountStatus = gson.toJson(accountStatus);
 

@@ -16,12 +16,14 @@
 package com.computedsynergy.hurtrade.sharedcomponents.models.impl;
 
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.Quote;
+import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.charting.CandleStick;
 import com.computedsynergy.hurtrade.sharedcomponents.models.interfaces.IQuoteModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import org.sql2o.Connection;
 import org.sql2o.Query;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,6 +63,8 @@ public class QuoteModel extends ModelBase implements IQuoteModel{
         }
     }
 
+
+
     @Override
     public void saveQuote(int userId, Quote q) {
 
@@ -82,4 +86,47 @@ public class QuoteModel extends ModelBase implements IQuoteModel{
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
+
+    @Override
+    public CandleStick GetCandleStickForPeriod(String commodity, int user_id, Date start, Date end) {
+
+        CandleStick cstick = new CandleStick();
+
+        try{
+
+            //find the max price in the period
+            String queryHighest = String.format(
+                    "select max(bid) maxprice from quotes where commodityname='%1$s' and user_id=%2$d and created > '%3$s' and created <= '%4$s'",
+                    commodity, user_id, start.toString(), end.toString()
+            );
+            //find the min price in the period
+            String queryLowest = String.format(
+                    "select min(bid) minprice from quotes where commodityname='%1$s' and user_id=%2$d and created > '%3$s' and created <= '%4$s'",
+                    commodity, user_id, start.toString(), end.toString()
+            );
+            //find the nearest to 'start' open price
+            String queryOpen = String.format(
+                    "select bid from quotes where commodityname='%1$s' and user_id=%2$d and created > '%3$s' and created <= '%4$s' order by id desc limit 1",
+                    commodity, user_id, start.toString(), end.toString()
+            );
+            //find the nearest to 'end' close price
+            String queryClose = String.format(
+                    "select bid from quotes where commodityname='%1$s' and user_id=%2$d and created > '%3$s' and created <= '%4$s' order by id asc limit 1",
+                    commodity, user_id, start.toString(), end.toString()
+            );
+
+            try (Connection con = sql2o.open()) {
+                cstick.setHighest((double)con.createQuery(queryHighest).executeScalar());
+                cstick.setLowest((double)con.createQuery(queryLowest).executeScalar());
+                cstick.setOpen((double)con.createQuery(queryOpen).executeScalar());
+                cstick.setClose((double)con.createQuery(queryClose).executeScalar());
+            }
+
+        }catch (Exception ex){
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+        }
+
+        return cstick;
+    }
+
 }

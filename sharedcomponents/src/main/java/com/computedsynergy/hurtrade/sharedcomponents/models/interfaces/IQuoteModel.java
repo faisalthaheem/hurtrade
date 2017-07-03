@@ -16,8 +16,10 @@
 package com.computedsynergy.hurtrade.sharedcomponents.models.interfaces;
 
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.Quote;
+import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.charting.CandleStick;
 
 import java.util.Collection;
+import java.util.Date;
 
 /**
  *
@@ -25,6 +27,7 @@ import java.util.Collection;
  */
 public interface IQuoteModel {
 
-    public void saveQuote(int userId, Quote p);
-    public void saveQuote(int userId, Collection<Quote> quotes);
+    void saveQuote(int userId, Quote p);
+    void saveQuote(int userId, Collection<Quote> quotes);
+    CandleStick GetCandleStickForPeriod(String commodity, int user_id, Date start, Date end);
 }

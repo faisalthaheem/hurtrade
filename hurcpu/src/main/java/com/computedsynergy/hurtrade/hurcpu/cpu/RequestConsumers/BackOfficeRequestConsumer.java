@@ -15,6 +15,7 @@
  */
 package com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers;
 
+import com.computedsynergy.hurtrade.sharedcomponents.models.impl.LedgerModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.PositionModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
@@ -144,6 +145,10 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
                                     position.setOrderState(Position.ORDER_STATE_CLOSED);
                                     clientUpdate.put("order_status", "Order [" + orderid + "] approved close by " + dealerName);
                                     positions.remove(orderid);
+
+                                    //realize position P/L
+                                    new LedgerModel().SaveRealizedPositionPL(user.getId(), position.getOrderId(), position.getCurrentPl());
+
                                 }
                             }
                             break;
