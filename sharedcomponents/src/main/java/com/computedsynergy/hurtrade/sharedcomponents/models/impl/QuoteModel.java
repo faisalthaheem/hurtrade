@@ -21,6 +21,7 @@ import com.computedsynergy.hurtrade.sharedcomponents.models.interfaces.IQuoteMod
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import org.sql2o.Connection;
 import org.sql2o.Query;
+import org.sql2o.converters.BigDecimalConverter;
 
 import java.util.Collection;
 import java.util.Date;
@@ -115,11 +116,14 @@ public class QuoteModel extends ModelBase implements IQuoteModel{
                     commodity, user_id, start.toString(), end.toString()
             );
 
+            BigDecimalConverter converter = new BigDecimalConverter();
+
             try (Connection con = sql2o.open()) {
-                cstick.setHighest((double)con.createQuery(queryHighest).executeScalar());
-                cstick.setLowest((double)con.createQuery(queryLowest).executeScalar());
-                cstick.setOpen((double)con.createQuery(queryOpen).executeScalar());
-                cstick.setClose((double)con.createQuery(queryClose).executeScalar());
+                cstick.setHighest(converter.convert(con.createQuery(queryHighest).executeScalar()));
+                cstick.setLowest(converter.convert(con.createQuery(queryLowest).executeScalar()));
+                cstick.setOpen(converter.convert(con.createQuery(queryOpen).executeScalar()));
+                cstick.setClose(converter.convert(con.createQuery(queryClose).executeScalar()));
+                cstick.setSampleFor(start);
             }
 
         }catch (Exception ex){

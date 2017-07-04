@@ -1,13 +1,17 @@
 package com.computedsynergy.hurtrade.sharedcomponents.dataexchange.charting;
 
+import java.math.BigDecimal;
+import java.util.Date;
+
 /**
  * Created by faisal.t on 7/3/2017.
  */
 public class CandleStick {
-    private double highest;
-    private double open;
-    private double close;
-    private double lowest;
+    private BigDecimal highest;
+    private BigDecimal open;
+    private BigDecimal close;
+    private BigDecimal lowest;
+    private Date sampleFor;
 
     //where does this fall on selected period
     private int segmentNumber;
@@ -17,42 +21,42 @@ public class CandleStick {
 
     }
 
-    public CandleStick(double h, double o, double c, double l){
+    public CandleStick(BigDecimal h, BigDecimal o, BigDecimal c, BigDecimal l){
         this.highest = h;
         this.open = o;
         this.close = c;
         this.lowest = l;
     }
 
-    public double getHighest() {
+    public BigDecimal getHighest() {
         return highest;
     }
 
-    public void setHighest(double highest) {
+    public void setHighest(BigDecimal highest) {
         this.highest = highest;
     }
 
-    public double getOpen() {
+    public BigDecimal getOpen() {
         return open;
     }
 
-    public void setOpen(double open) {
+    public void setOpen(BigDecimal open) {
         this.open = open;
     }
 
-    public double getClose() {
+    public BigDecimal getClose() {
         return close;
     }
 
-    public void setClose(double close) {
+    public void setClose(BigDecimal close) {
         this.close = close;
     }
 
-    public double getLowest() {
+    public BigDecimal getLowest() {
         return lowest;
     }
 
-    public void setLowest(double lowest) {
+    public void setLowest(BigDecimal lowest) {
         this.lowest = lowest;
     }
 
@@ -62,5 +66,13 @@ public class CandleStick {
 
     public void setSegmentNumber(int segmentNumber) {
         this.segmentNumber = segmentNumber;
+    }
+
+    public Date getSampleFor() {
+        return sampleFor;
+    }
+
+    public void setSampleFor(Date sampleFor) {
+        this.sampleFor = sampleFor;
     }
 }

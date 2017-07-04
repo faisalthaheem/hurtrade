@@ -16,7 +16,9 @@
 package com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers;
 
 import com.computedsynergy.hurtrade.hurcpu.cpu.ClientRequestProcessor;
+import com.computedsynergy.hurtrade.sharedcomponents.charting.CandleStickChartingDataProvider;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
+import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.charting.CandleStick;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.PositionModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CommodityUser;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
@@ -41,6 +43,7 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -48,6 +51,8 @@ import java.util.logging.Logger;
 import redis.clients.jedis.Jedis;
 
 /**
+ * todo
+ * Note to self: refactor this code, don't like how it is..
  *
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
  */
@@ -115,8 +120,34 @@ public class ClientRequestConsumer extends DefaultConsumer {
 
                                 Map<String,String> cmdParams =  new Gson().fromJson(new String(body), Constants.TYPE_DICTIONARY);
                                 closePosition(user, UUID.fromString(cmdParams.get("orderid")));
-                            }
+                            }else if(commandVerb.equalsIgnoreCase("candlestick")){
 
+                                Map<String,String> cmdParams =  new Gson().fromJson(new String(body), Constants.TYPE_DICTIONARY);
+                                CandleStickChartingDataProvider cstickProvider = new CandleStickChartingDataProvider();
+
+                                List<CandleStick> lstRet =  cstickProvider.GetChartData(
+                                        cmdParams.get("commodity"),
+                                        user.getId(),
+                                        cmdParams.get("resolution"),
+                                        Integer.parseInt(cmdParams.get("samples"))
+                                );
+
+                                Gson gson = new Gson();
+                                String serializedResponse = gson.toJson(lstRet);
+
+                                AMQP.BasicProperties.Builder propsBuilder = new AMQP.BasicProperties.Builder();
+                                propsBuilder.type("candlestick");
+                                AMQP.BasicProperties props = propsBuilder.build();
+
+                                try {
+                                    String clientExchangeName = HurUtil.getClientExchangeName(user.getUseruuid());
+                                    getChannel().basicPublish(clientExchangeName, "response", props, serializedResponse.getBytes());
+                                } catch (Exception ex) {
+
+                                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+                                }
+
+                            }
 
                             lock.release();
 

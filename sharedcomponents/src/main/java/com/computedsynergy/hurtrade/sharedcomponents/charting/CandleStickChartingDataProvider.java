@@ -29,25 +29,31 @@ public class CandleStickChartingDataProvider {
         return lst;
     }
 
-    public List<CandleStick> GetHourly(String commodity, int user_id, int samples){
+    private List<CandleStick> GetHourly(String commodity, int user_id, int samples){
 
         List<CandleStick> lst = new ArrayList<>();
 
         QuoteModel quotes = new QuoteModel();
 
-        DateTime end = DateTime.now();
-        DateTime start = end.getMinuteOfHour() > 0 ? end.minus(end.getMinuteOfHour()) : end.minusHours(1);
+        DateTime end = DateTime.now(); end = end.minusSeconds(end.getSecondOfMinute());
+        DateTime start = end.minusMinutes(end.getMinuteOfHour()).minusHours(1);
 
         do{
-            lst.add(
-                    quotes.GetCandleStickForPeriod(
-                            commodity,
-                            user_id,
-                            start.toDate(),
-                            end.toDate()
-                    )
-            );
+            CandleStick stick = quotes.GetCandleStickForPeriod(
+                    commodity,
+                    user_id,
+                    start.toDate(),
+                    end.toDate()
+                );
 
+            if(stick.getClose() == null) {
+                break;
+            }
+            lst.add(stick);
+
+            if(end.getMinuteOfHour() > 0){
+                end = end.minusMinutes(end.getMinuteOfHour());
+            }
             end = end.minusHours(1);
             start = end.minusHours(1);
         }while( --samples > 0);
