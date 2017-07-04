@@ -15,6 +15,7 @@
  */
 package com.computedsynergy.hurtrade.hurcpu.cpu.Tasks;
 
+import com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers.ClientRequestConsumer;
 import com.computedsynergy.hurtrade.sharedcomponents.amqp.AmqpBase;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.Quote;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
@@ -55,19 +56,28 @@ import redis.clients.jedis.Jedis;
  *
  * Subscribes to the rate queue and notifies the clients in case there is an
  * update after applying client specific spreads
+ *
+ * Also processes client's positions effectively calculating P/L
+ *
+ * Listens to the client's requests
  */
-public class ClientAccountStatusTask extends AmqpBase {
+public class ClientAccountTask extends AmqpBase {
     
     SavedPositionModel savedPositionModel = new SavedPositionModel();
+
     Gson gson = new Gson();
     QuoteModel quoteModel = null;
 
     private User _self = null;
-    private String _myRateQueueName = "";
 
-    String _userPositionsKeyName = "";
-    String _clientExchangeName = "";
-    Type _positionsMapType = new TypeToken<Map<UUID, Position>>(){}.getType();
+    //mq related
+    private String _clientExchangeName = "";
+    private String _myRateQueueName = "";
+    private String _incomingQueueName = "";
+    private String _outgoingQueueName = "";
+
+    //redis related
+    private String _userPositionsKeyName = "";
 
     //finances related variables
     private BigDecimal _floating = BigDecimal.ZERO;
@@ -75,12 +85,15 @@ public class ClientAccountStatusTask extends AmqpBase {
     private BigDecimal _usedMarginSell = BigDecimal.ZERO;
 
 
-    public ClientAccountStatusTask(User u){
+    public ClientAccountTask(User u){
         _self = u;
-        _myRateQueueName = Constants.QUEUE_NAME_RATES + _self.getUseruuid().toString();
 
         _userPositionsKeyName = getUserPositionsKeyName(_self.getUseruuid());
+
         _clientExchangeName = HurUtil.getClientExchangeName(_self.getUseruuid());
+        _incomingQueueName = HurUtil.getClientIncomingQueueName(u.getUseruuid());
+        _outgoingQueueName = HurUtil.getClientOutgoingQueueName(u.getUseruuid());
+        _myRateQueueName = Constants.QUEUE_NAME_RATES + _self.getUseruuid().toString();
 
         this.init();
     }
@@ -92,10 +105,27 @@ public class ClientAccountStatusTask extends AmqpBase {
 
             quoteModel = new QuoteModel();
 
+            Map<String, Object> args = new HashMap<String, Object>();
+            args.put("x-max-length", 5); //retain only 5 latest messages for clients
+
+            channel.exchangeDeclare(_clientExchangeName, "direct", true);
+
+            channel.queueDeclare(_incomingQueueName, true, false, false, args);
+            channel.queueBind(_incomingQueueName, _clientExchangeName, "request");
+
+            channel.queueDeclare(_outgoingQueueName, true, false, false, args);
+            channel.queueBind(_outgoingQueueName, _clientExchangeName, "response");
+
             channel.queueDeclare(_myRateQueueName, true, false, false, null);
             channel.queueBind(_myRateQueueName, Constants.EXCHANGE_NAME_RATES, _self.getUseruuid().toString());
 
-            channel.basicConsume(_myRateQueueName, false, "CommodityPricePump",
+            //consume command related messages from user
+            ClientRequestConsumer consumer = new ClientRequestConsumer(_self, channel, _clientExchangeName);
+
+            channel.basicConsume(_incomingQueueName, false, "command" + _self.getUseruuid().toString(), consumer);
+
+            //consume the rates specific messages and send updates to the user as a result
+            channel.basicConsume(_myRateQueueName, false, "rates-"+ _self.getUseruuid().toString(),
                     new DefaultConsumer(channel) {
                         @Override
                         public void handleDelivery(String consumerTag,
@@ -238,7 +268,7 @@ public class ClientAccountStatusTask extends AmqpBase {
 
                     //get client positions
                     Map<UUID, Position> positions =
-                            gson.fromJson(jedis.get(_userPositionsKeyName),_positionsMapType);
+                            gson.fromJson(jedis.get(_userPositionsKeyName), Constants.POSITIONS_MAP_TYPE);
 
                     if(positions == null){
                         positions = new HashMap<>();

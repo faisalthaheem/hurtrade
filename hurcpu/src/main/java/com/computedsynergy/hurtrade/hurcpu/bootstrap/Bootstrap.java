@@ -15,7 +15,7 @@
  */
 package com.computedsynergy.hurtrade.hurcpu.bootstrap;
 
-import com.computedsynergy.hurtrade.hurcpu.cpu.Tasks.ClientAccountStatusTask;
+import com.computedsynergy.hurtrade.hurcpu.cpu.Tasks.ClientAccountTask;
 import com.computedsynergy.hurtrade.sharedcomponents.amqp.AmqpBase;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.CommodityUserModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.OfficeModel;
@@ -38,7 +38,7 @@ import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
  */
 public class Bootstrap extends AmqpBase{
 
-    private ArrayList<ClientAccountStatusTask> clientTasks = new ArrayList<>();
+    private ArrayList<ClientAccountTask> clientTasks = new ArrayList<>();
 
     public void bootstrap() throws Exception{
         
@@ -46,8 +46,6 @@ public class Bootstrap extends AmqpBase{
         setupAMQP();
         //setup queues and exchanges
         bootstrapExchanges();
-        //setup cached user data
-        setupUserSpecific();
         
         cleanup();
     }
@@ -67,10 +65,13 @@ public class Bootstrap extends AmqpBase{
         List<Office> officeList = offices.getAllOffices();
         //fetch all users for each office
         UserModel users = new UserModel();
+
+        CommodityUserModel cuModel = new CommodityUserModel();
+
         for(Office o:officeList){
             
             String officeExchangeName = HurUtil.getOfficeExchangeName(o.getOfficeuuid());
-            String officeClientRequestQueueName = HurUtil.getOfficeClientRequestQueueName(o.getOfficeuuid());
+            //String officeClientRequestQueueName = HurUtil.getOfficeClientRequestQueueName(o.getOfficeuuid());
             String officeDealerOutQName = HurUtil.getOfficeDealerOutQueueName(o.getOfficeuuid());
             String officeDealerInQName = HurUtil.getOfficeDealerINQueueName(o.getOfficeuuid());
             
@@ -83,44 +84,21 @@ public class Bootstrap extends AmqpBase{
             channel.queueBind(officeDealerInQName, officeExchangeName, "fromdealer");
 
             //requests sent by client on their exchanges are delivered to this queue bound in following code
-            channel.queueDeclare(officeClientRequestQueueName, true, false, false, null); //used below with client exchanges
+            //channel.queueDeclare(officeClientRequestQueueName, true, false, false, null); //used below with client exchanges
             
             //get all clients of this office
             List<User> userList = users.getAllUsersForOffice(o.getId());
-            //foreach user declare an exchange where user publishes
-            //bind the exchange to the office queue this user belongs to on routing key "request" and create an additional "out" queue for the messages
-            //sent to the user bound by "response"
+
             for(User u : userList){
-                String clientExchangeName = HurUtil.getClientExchangeName(u.getUseruuid());
-                channel.exchangeDeclare(clientExchangeName, "direct", true);
-                channel.queueBind(officeClientRequestQueueName, clientExchangeName, "request");
-                
-                String clientOutgoingQueueName = HurUtil.getClientOutgoingQueueName(u.getUseruuid());
-                channel.queueDeclare(clientOutgoingQueueName, true, false, false, args);
-                channel.queueBind(clientOutgoingQueueName, clientExchangeName, "response");
+
+                List<CommodityUser> userCommodities = cuModel.getCommoditiesForUser(u.getId());
+                RedisUtil.getInstance().cacheUserCommodities(u.getUseruuid(), userCommodities);
+
+                u.setUserOffice(o);
+                RedisUtil.getInstance().SetUserInfo(u);
+
+                clientTasks.add(new ClientAccountTask(u));
             }
         }
-        
-    }
-    
-    /**
-     * Loads the users 
-     */
-    protected void setupUserSpecific(){
-        
-        
-        UserModel userModel = new UserModel();
-        List<User> users = userModel.getAllUsers();
-        
-        CommodityUserModel cuModel = new CommodityUserModel();
-                
-        for(User u:users){
-            
-            List<CommodityUser> userCommodities = cuModel.getCommoditiesForUser(u.getId());
-            RedisUtil.getInstance().cacheUserCommodities(u.getUseruuid(), userCommodities);
-
-            clientTasks.add(new ClientAccountStatusTask(u));
-        }
-                
     }
 }

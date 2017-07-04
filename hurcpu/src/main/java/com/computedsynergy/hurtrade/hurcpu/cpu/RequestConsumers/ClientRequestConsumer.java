@@ -15,7 +15,6 @@
  */
 package com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers;
 
-import com.computedsynergy.hurtrade.hurcpu.cpu.ClientRequestProcessor;
 import com.computedsynergy.hurtrade.sharedcomponents.charting.CandleStickChartingDataProvider;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.charting.CandleStick;
@@ -51,22 +50,23 @@ import java.util.logging.Logger;
 import redis.clients.jedis.Jedis;
 
 /**
- * todo
- * Note to self: refactor this code, don't like how it is..
  *
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
  */
 public class ClientRequestConsumer extends DefaultConsumer {
 
-    private final String officeExhcangeName;
-    private final String officeClientRequestQueueName;
-    
-    private Gson gson = new Gson();
+    private final User _user;
+    private final String _exchangeName;
 
-    public ClientRequestConsumer(Channel channel, String officeExchangeName, String officeClientRequestQueueName) {
+    private Gson gson = new Gson();
+    AMQP.BasicProperties.Builder propsBuilder = new AMQP.BasicProperties.Builder();
+
+    public ClientRequestConsumer(User user, Channel channel, String exchangeName) {
         super(channel);
-        this.officeExhcangeName = officeExchangeName;
-        this.officeClientRequestQueueName = officeClientRequestQueueName;
+
+        _user = user;
+        this._exchangeName= exchangeName;
+
     }
 
     @Override
@@ -75,112 +75,58 @@ public class ClientRequestConsumer extends DefaultConsumer {
 
         long deliveryTag = envelope.getDeliveryTag();
 
-        TradeResponse response = null;
-        boolean responseRequired = true;
-        String userid = null;
-        User user = null;
-        
+        AMQP.BasicProperties props = null;
+        String serializedResponse = null;
+
         try {
 
+            String commandVerb = properties.getType();
 
-            
-            userid = properties.getUserId();
-            if(userid == null){
-                responseRequired = false;
-                
-            }else{
-                
-                UserModel userModel = new UserModel();
-                user = userModel.getByUsername(userid);
-                if(user == null){
-                    Logger.getLogger(ClientRequestProcessor.class.getName()).log(Level.SEVERE, "Could not resolve user for name: ", userid);
-                    responseRequired = false;
-                }
-                
-                try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
-                    JedisLock lock = new JedisLock(
-                                jedis, 
-                                RedisUtil.getLockNameForUserProcessing(user.getUseruuid()),
-                                RedisUtil.TIMEOUT_LOCK_USER_PROCESSING, 
-                                RedisUtil.EXPIRY_LOCK_USER_PROCESSING
-                            );
+            if(commandVerb.equals("trade")) {
 
-                    try {
-                        if(lock.acquire()){
+                TradeRequest request = TradeRequest.fromJson(new String(body));
+                TradeResponse response = new TradeResponse(request);
 
-                            String commandVerb = properties.getType();
+                processTradeRequest(response, _user);
 
-                            if(commandVerb.equals("trade")) {
+                ClientUpdate update = new ClientUpdate(response);
+                serializedResponse = gson.toJson(update);
 
-                                TradeRequest request = TradeRequest.fromJson(new String(body));
-                                response = new TradeResponse(request);
+            }else if(commandVerb.equals("tradeClosure")) {
 
-                                processTradeRequest(response, user);
-                            }else if(commandVerb.equals("tradeClosure")) {
+                Map<String,String> cmdParams =  new Gson().fromJson(new String(body), Constants.TYPE_DICTIONARY);
+                closePosition(_user, UUID.fromString(cmdParams.get("orderid")));
 
-                                Map<String,String> cmdParams =  new Gson().fromJson(new String(body), Constants.TYPE_DICTIONARY);
-                                closePosition(user, UUID.fromString(cmdParams.get("orderid")));
-                            }else if(commandVerb.equalsIgnoreCase("candlestick")){
+            }else if(commandVerb.equalsIgnoreCase("candlestick")){
 
-                                Map<String,String> cmdParams =  new Gson().fromJson(new String(body), Constants.TYPE_DICTIONARY);
-                                CandleStickChartingDataProvider cstickProvider = new CandleStickChartingDataProvider();
+                Map<String,String> cmdParams =  gson.fromJson(new String(body), Constants.TYPE_DICTIONARY);
+                CandleStickChartingDataProvider cstickProvider = new CandleStickChartingDataProvider();
 
-                                List<CandleStick> lstRet =  cstickProvider.GetChartData(
-                                        cmdParams.get("commodity"),
-                                        user.getId(),
-                                        cmdParams.get("resolution"),
-                                        Integer.parseInt(cmdParams.get("samples"))
-                                );
+                List<CandleStick> lstRet =  cstickProvider.GetChartData(
+                        cmdParams.get("commodity"),
+                        _user.getId(),
+                        cmdParams.get("resolution"),
+                        Integer.parseInt(cmdParams.get("samples"))
+                );
+                serializedResponse = gson.toJson(lstRet);
+                propsBuilder.type("candlestick");
+                props = propsBuilder.build();
 
-                                Gson gson = new Gson();
-                                String serializedResponse = gson.toJson(lstRet);
-
-                                AMQP.BasicProperties.Builder propsBuilder = new AMQP.BasicProperties.Builder();
-                                propsBuilder.type("candlestick");
-                                AMQP.BasicProperties props = propsBuilder.build();
-
-                                try {
-                                    String clientExchangeName = HurUtil.getClientExchangeName(user.getUseruuid());
-                                    getChannel().basicPublish(clientExchangeName, "response", props, serializedResponse.getBytes());
-                                } catch (Exception ex) {
-
-                                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
-                                }
-
-                            }
-
-                            lock.release();
-
-                        }else{
-                            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Could not lock user for order processing {0}",  user.getUsername());
-                        }
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
-                    }
-                }                
             }
 
         } catch (Exception ex) {
-            Logger.getLogger(ClientRequestProcessor.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
         getChannel().basicAck(deliveryTag, false);
-        
-        if(!responseRequired || null == userid){
-            return;
-        }
-        
-        String clientExchangeName = HurUtil.getClientExchangeName(user.getUseruuid());
 
-        ClientUpdate update = new ClientUpdate(response);
-        Gson gson = new Gson();
-        String serializedResponse = gson.toJson(update);
+        if(null != serializedResponse) {
+            try {
+                getChannel().basicPublish(_exchangeName, "response", props, serializedResponse.getBytes());
+            } catch (Exception ex) {
 
-        try {
-            getChannel().basicPublish(clientExchangeName, "response", null, serializedResponse.getBytes());
-        } catch (Exception ex) {
-
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 

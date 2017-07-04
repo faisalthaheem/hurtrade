@@ -15,10 +15,12 @@
  */
 package com.computedsynergy.hurtrade.sharedcomponents.util;
 
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  *
@@ -31,4 +33,5 @@ public class Constants {
     public static final String EXCHANGE_NAME_AUTH = "authExchange";
 
     public static Type TYPE_DICTIONARY = new TypeToken<Map<String, String>>(){}.getType();
+    public static Type POSITIONS_MAP_TYPE = new TypeToken<Map<UUID, Position>>(){}.getType();
 }

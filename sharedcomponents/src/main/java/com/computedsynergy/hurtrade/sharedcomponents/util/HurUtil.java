@@ -27,8 +27,9 @@ public class HurUtil {
     private static final String Q_OFFICE_REQUEST_NAME_SUFFIX = "_off_requests";
     private static final String Q_OFFICE_DEALER_OUT_NAME_SUFFIX = "_off_dealer_out";
     private static final String Q_OFFICE_DEALER_IN_NAME_SUFFIX = "_off_dealer_in";
-    private static final String E_CLIENT_NAME_SUFFIX = "_client_incoming";
+    private static final String E_CLIENT_NAME_SUFFIX = "_client";
     private static final String Q_CLIENT_OUTGOING_NAME_SUFFIX = "_client_outgoing";
+    private static final String Q_CLIENT_INCOMING_NAME_SUFFIX = "_client_incoming";
     
     public static String getOfficeExchangeName(UUID uuid){
         return uuid.toString() + E_OFFICE_NAME_SUFFIX;
@@ -52,5 +53,9 @@ public class HurUtil {
     
     public static String getClientOutgoingQueueName(UUID uuid){
         return uuid.toString() + Q_CLIENT_OUTGOING_NAME_SUFFIX;
+    }
+
+    public static String getClientIncomingQueueName(UUID uuid){
+        return uuid.toString() + Q_CLIENT_INCOMING_NAME_SUFFIX;
     }
 }
