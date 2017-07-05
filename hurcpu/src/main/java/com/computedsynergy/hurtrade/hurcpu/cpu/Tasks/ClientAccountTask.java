@@ -75,6 +75,7 @@ public class ClientAccountTask extends AmqpBase {
     private String _myRateQueueName = "";
     private String _incomingQueueName = "";
     private String _outgoingQueueName = "";
+    private AMQP.BasicProperties.Builder propsBuilder = new AMQP.BasicProperties.Builder();
 
     //redis related
     private String _userPositionsKeyName = "";
@@ -230,7 +231,7 @@ public class ClientAccountTask extends AmqpBase {
         }
 
 
-        AMQP.BasicProperties.Builder propsBuilder = new AMQP.BasicProperties.Builder();
+
         propsBuilder.type("update");
         AMQP.BasicProperties props = propsBuilder.build();
 
@@ -333,7 +334,6 @@ public class ClientAccountTask extends AmqpBase {
 
         String serializedAccountStatus = gson.toJson(accountStatus);
 
-        AMQP.BasicProperties.Builder propsBuilder = new AMQP.BasicProperties.Builder();
         propsBuilder.type("accountStatus");
         AMQP.BasicProperties props = propsBuilder.build();
 
