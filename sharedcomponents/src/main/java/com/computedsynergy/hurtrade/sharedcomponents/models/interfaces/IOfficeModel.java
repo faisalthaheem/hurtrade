@@ -25,4 +25,5 @@ import java.util.List;
 public interface IOfficeModel {
     
     public List<Office> getAllOffices();
+    public Office getOffice(int id);
 }

@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -136,18 +137,21 @@ public class FxYahoo extends AmqpBase implements Runnable {
                 
                 UserModel userModel = new UserModel();
                 List<User> users = userModel.getAllUsers();
-                for(User u: users){
+                String serialized = gson.toJson(quote);
 
-                    String serialized = gson.toJson(quote);
+                for(User u: users){
                     channel.basicPublish(Constants.EXCHANGE_NAME_RATES, u.getUseruuid().toString(), null, serialized.getBytes());
                 }
+                channel.basicPublish(Constants.EXCHANGE_NAME_RATES, Constants.QUEUE_NAME_RATES, null, serialized.getBytes());
+
+
                 Date endTime = new Date();
                 logger.info("Publishing took [" + (endTime.getTime() - startTime.getTime()) + "] ms.");
                 
                 Thread.sleep(CommandLineOptions.getInstance().yahooFxFrequency);
             }catch(Exception ex){
-                //todo log here
-                ex.printStackTrace();
+
+                java.util.logging.Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -163,12 +167,16 @@ public class FxYahoo extends AmqpBase implements Runnable {
     
     
     @Override
-    public void setupAMQP() throws IOException, TimeoutException {
-        
-        super.setupAMQP();
-        
-        channel.exchangeDeclare(Constants.EXCHANGE_NAME_RATES, "direct", true);
-        channel.queueDeclare(Constants.QUEUE_NAME_RATES, true, false, false, null);
-        channel.queueBind(Constants.QUEUE_NAME_RATES, Constants.EXCHANGE_NAME_RATES, "");
+    public void setupAMQP() {
+
+        try {
+            super.setupAMQP();
+
+            channel.exchangeDeclare(Constants.EXCHANGE_NAME_RATES, "direct", true);
+            channel.queueDeclare(Constants.QUEUE_NAME_RATES, true, false, false, null);
+            channel.queueBind(Constants.QUEUE_NAME_RATES, Constants.EXCHANGE_NAME_RATES, Constants.QUEUE_NAME_RATES);
+        }catch (Exception ex){
+            java.util.logging.Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

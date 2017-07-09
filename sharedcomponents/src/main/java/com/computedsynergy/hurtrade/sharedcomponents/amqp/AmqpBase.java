@@ -30,9 +30,7 @@ import java.util.concurrent.TimeoutException;
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
  */
 public class AmqpBase {
-    
-    protected ConnectionFactory factory = null;
-    protected Connection connection = null;
+
     protected Channel channel = null;
     
     /**
@@ -40,40 +38,13 @@ public class AmqpBase {
      * @throws java.io.IOException
      * @throws java.util.concurrent.TimeoutException
      */
-    protected void setupAMQP() throws IOException, TimeoutException {
-        
-        if(connection != null && connection.isOpen()){
-            connection.close();
-        }
+    protected void setupAMQP() {
 
-        factory = new ConnectionFactory();
-        factory.setHost(CommandLineOptions.getInstance().mqHost);
-        factory.setAutomaticRecoveryEnabled(true);
-        factory.setUsername(CommandLineOptions.getInstance().mqUsername);
-        factory.setPassword(CommandLineOptions.getInstance().mqPassword);
-        //are we targeting a cluster?
-        if(CommandLineOptions.getInstance().mqHost.contains(",")){
-
-            //conver the string into "Address" objects
-            List<Address> nodeAddresses = new ArrayList<>();
-
-            String[] addresses = CommandLineOptions.getInstance().mqHost.split(",");
-            for(String address : addresses){
-                nodeAddresses.add(new Address(address));
-            }
-            //try to connect
-            connection = factory.newConnection(nodeAddresses.toArray(new Address[0]));
-        }else{
-            connection = factory.newConnection();
-        }
-        
-        channel = connection.createChannel();
-        
+        channel = AmqpConnectionFactory.GetInstance().CreateChannel();
     }
     
-    protected void cleanup() throws Exception
+    protected void cleanup()
     {
-        channel.close();
-        connection.close();
+
     }
 }

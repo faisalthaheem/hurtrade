@@ -40,4 +40,20 @@ public class OfficeModel extends ModelBase implements IOfficeModel{
             return offices;
         }
     }
+
+    @Override
+    public Office getOffice(int id) {
+
+        Office ret;
+
+        String query = "Select * from offices where id = :officeid";
+
+        try (Connection conn = sql2o.open()) {
+            ret = conn.createQuery(query)
+                    .addParameter("officeid", id)
+                    .executeAndFetchFirst(Office.class);
+        }
+
+        return ret;
+    }
 }
