@@ -5,3 +5,5 @@
 
 # hur (حر) trade
 An Open Source Forex Trading Platform
+
+Notes on development, deployment coming soon.
