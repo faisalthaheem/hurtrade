@@ -169,11 +169,11 @@ public class ClientRequestConsumer extends DefaultConsumer {
 
                         Position position = positions.get(orderId);
                         //process close request only if order is open
-                        if(position.getOrderState().equalsIgnoreCase(Position.ORDER_STATE_OPEN)) {
+                        if(position.getOrderState().equalsIgnoreCase(Constants.ORDER_STATE_OPEN)) {
 
                             try {
 
-                                position.setOrderState(Position.ORDER_STATE_PENDING_CLOSE);
+                                position.setOrderState(Constants.ORDER_STATE_PENDING_CLOSE);
 
                                 switch (position.getOrderType()) {
                                     case TradeRequest.REQUEST_TYPE_BUY: {
@@ -260,7 +260,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
                         switch (response.getRequest().getRequestType()) {
                             case TradeRequest.REQUEST_TYPE_BUY: {
                                 position = new Position(
-                                        UUID.randomUUID(), Position.ORDER_TYPE_BUY,
+                                        UUID.randomUUID(), Constants.ORDER_TYPE_BUY,
                                         response.getRequest().getCommodity(),
                                         response.getRequest().getRequestedLot(),
                                         quotesForClient.get(response.getRequest().getCommodity()).ask,
@@ -270,7 +270,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
                             break;
                             case TradeRequest.REQUEST_TYPE_SELL: {
                                 position = new Position(
-                                        UUID.randomUUID(), Position.ORDER_TYPE_SELL,
+                                        UUID.randomUUID(), Constants.ORDER_TYPE_SELL,
                                         response.getRequest().getCommodity(),
                                         response.getRequest().getRequestedLot(),
                                         quotesForClient.get(response.getRequest().getCommodity()).bid,

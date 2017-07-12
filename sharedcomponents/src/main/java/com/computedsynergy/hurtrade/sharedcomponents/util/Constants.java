@@ -15,6 +15,7 @@
  */
 package com.computedsynergy.hurtrade.sharedcomponents.util;
 
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CoverPosition;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import com.google.gson.reflect.TypeToken;
 
@@ -34,4 +35,16 @@ public class Constants {
 
     public static Type TYPE_DICTIONARY = new TypeToken<Map<String, String>>(){}.getType();
     public static Type TYPE_POSITIONS_MAP = new TypeToken<Map<UUID, Position>>(){}.getType();
+    public static Type TYPE_COV_POSITIONS_MAP = new TypeToken<Map<UUID, CoverPosition>>(){}.getType();
+
+
+    public static final String ORDER_TYPE_BUY = "buy";
+    public static final String ORDER_TYPE_SELL = "sell";
+
+    public static final String ORDER_STATE_PENDING_OPEN = "pending_dealer_open";
+    public static final String ORDER_STATE_OPEN = "open";
+    public static final String ORDER_STATE_PENDING_CLOSE = "pending_dealer_close";
+    public static final String ORDER_STATE_CLOSED = "closed";
+    public static final String ORDER_STATE_REJECTED_OPEN = "rejected_open";
+
 }

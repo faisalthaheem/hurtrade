@@ -47,6 +47,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import redis.clients.jedis.Jedis;
 
 /**
@@ -284,7 +286,7 @@ public class ClientAccountTask extends AmqpBase {
 
                         _floating = _floating.add(p.getCurrentPl());
 
-                        if(p.getOrderType().equals(Position.ORDER_TYPE_BUY)){
+                        if(p.getOrderType().equals(Constants.ORDER_TYPE_BUY)){
                             _usedMarginBuy = _usedMarginBuy.add(p.getUsedMargin());
                         }else{
                             _usedMarginSell = _usedMarginSell.add(p.getUsedMargin());

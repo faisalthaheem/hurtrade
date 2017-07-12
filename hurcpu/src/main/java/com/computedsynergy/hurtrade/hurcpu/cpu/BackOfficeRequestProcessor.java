@@ -60,7 +60,7 @@ public class BackOfficeRequestProcessor extends AmqpBase {
                     consumerChannel,
                     officeExchangeName,
                     officeDealerInQueueName,"",
-                    o.getId()
+                    o
             );
             consumerChannel.basicConsume(officeDealerInQueueName, false, officeExchangeName, consumer);
 

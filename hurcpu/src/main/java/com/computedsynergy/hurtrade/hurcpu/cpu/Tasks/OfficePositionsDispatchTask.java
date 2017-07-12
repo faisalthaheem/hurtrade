@@ -20,11 +20,10 @@ import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOpti
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.SourceQuote;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.updates.BackofficeUpdate;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.updates.ClientUpdate;
+import com.computedsynergy.hurtrade.sharedcomponents.models.impl.CoverAccountModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.OfficeModel;
-import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Office;
-import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.*;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
-import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
 import com.google.gson.Gson;
@@ -47,8 +46,10 @@ public class OfficePositionsDispatchTask extends AmqpBase {
     private final String officeExhcangeName;
     private final int officeId;
     private List<String> officeUsers  = new ArrayList<>();
+    private List<CoverAccount> coverAccounts = new ArrayList<>();
     private Office _self = null;
 
+    private Object lockCoverAccounts = new Object();
     private Object lockOfficeUsers = new Object(); //governs access to officeUsers
     private Object lockChannelWrite = new Object(); //governs access to write access on mq channel
 
@@ -87,6 +88,12 @@ public class OfficePositionsDispatchTask extends AmqpBase {
 
         OfficeModel model = new OfficeModel();
         _self = model.getOffice(officeId);
+
+        CoverAccountModel covModel = new CoverAccountModel();
+        synchronized (lockCoverAccounts) {
+            coverAccounts = covModel.listCoverAccountsForOffice(_self.getId());
+        }
+
     }
 
     private void Setup(){
@@ -159,12 +166,28 @@ public class OfficePositionsDispatchTask extends AmqpBase {
                 }
             }
 
+            //get cover accounts
+            List<CoverAccount> covAccs = new ArrayList<>();
+            synchronized (lockCoverAccounts)
+            {
+                for(CoverAccount ca : coverAccounts){
+                    covAccs.add(ca.Clone());
+                }
+            }
+
+            //get cover positions
+            List<CoverPosition> coverPositionlist = RedisUtil.getInstance().GetOfficeCoverPositions(_self.getOfficeuuid());
+
+            //leave the cover account and positions mapping to the clients... offload work
+
             AMQP.BasicProperties.Builder builder = new AMQP.BasicProperties.Builder();
             builder.type("officePositions");
             AMQP.BasicProperties props = builder.build();
 
             update.setQuotes(quote.getQuoteList());
             update.setUserPositions(userPositions);
+            update.setCoverAccounts(covAccs);
+            update.setCoverPositions(coverPositionlist);
 
 
             String json = gson.toJson(update);

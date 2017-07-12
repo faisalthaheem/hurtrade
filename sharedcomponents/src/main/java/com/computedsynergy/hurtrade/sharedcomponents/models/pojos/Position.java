@@ -20,6 +20,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
 
+import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.*;
+
 /**
  *
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
@@ -28,14 +30,6 @@ import java.util.UUID;
  */
 public class Position {
     
-    public static final String ORDER_TYPE_BUY = "buy";
-    public static final String ORDER_TYPE_SELL = "sell";
-    
-    public static final String ORDER_STATE_PENDING_OPEN = "pending_dealer_open";
-    public static final String ORDER_STATE_OPEN = "open";
-    public static final String ORDER_STATE_PENDING_CLOSE = "pending_dealer_close";
-    public static final String ORDER_STATE_CLOSED = "closed";
-    public static final String ORDER_STATE_REJECTED_OPEN = "rejected_open";
 
     //is this buy or sell?
     private String orderType;

@@ -12,8 +12,20 @@ public class CoverAccount {
     private String title;
     private boolean active;
     private Date created;
-    private int officeId;
+    private int office_id;
     private List<CoverPosition> coverPositions;
+
+    public CoverAccount Clone(){
+
+        CoverAccount clone = new CoverAccount();
+        clone.setActive(active);
+        clone.setCreated(created);
+        clone.setId(id);
+        clone.setOffice_id(office_id);
+        clone.setTitle(title);
+
+        return clone;
+    }
 
     public int getId() {
         return id;
@@ -47,12 +59,12 @@ public class CoverAccount {
         this.created = created;
     }
 
-    public int getOfficeId() {
-        return officeId;
+    public int getOffice_id() {
+        return office_id;
     }
 
-    public void setOfficeId(int officeId) {
-        this.officeId = officeId;
+    public void setOffice_id(int office_id) {
+        this.office_id = office_id;
     }
 
     public List<CoverPosition> getCoverPositions() {

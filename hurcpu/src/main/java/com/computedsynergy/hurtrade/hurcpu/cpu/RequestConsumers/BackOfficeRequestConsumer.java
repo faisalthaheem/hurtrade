@@ -18,10 +18,8 @@ package com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.CoverAccountModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.LedgerModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.PositionModel;
-import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CoverAccount;
-import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.*;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
-import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
 import com.computedsynergy.hurtrade.sharedcomponents.util.MqNamingUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
@@ -38,6 +36,8 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.TYPE_COV_POSITIONS_MAP;
+import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.TYPE_POSITIONS_MAP;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.*;
 
 /**
@@ -49,27 +49,27 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
     private final String officeExhcangeName;
     private final String dealerInQueueName;
     private final String dealerOutQueueName;
-    private final int officeId;
+    //private final int officeId;
+    private final Office _office;
 
     UserModel userModel = new UserModel();
     private Object lockChannelWrite = new Object(); //governs access to write access on mq channel
+    private Gson gson = new Gson();
 
 
     public BackOfficeRequestConsumer(Channel channel,
                          String officeExchangeName,
                          String dealerInQueueName,
                          String dealerOutQueueName,
-                         int officeId
+                         Office office
     ) {
         super(channel);
         this.officeExhcangeName = officeExchangeName;
         this.dealerInQueueName = dealerInQueueName;
         this.dealerOutQueueName = dealerOutQueueName;
-        this.officeId = officeId;
+        _office = office;
 
     }
-
-
 
     @Override
     public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
@@ -91,7 +91,7 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
             String requestType = properties.getType();
             String dealerName = properties.getUserId();
 
-            Map<String, String> request = new Gson().fromJson(new String(body), Constants.TYPE_DICTIONARY);
+            Map<String, String> request = gson.fromJson(new String(body), Constants.TYPE_DICTIONARY);
 
 
             if(requestType.equalsIgnoreCase("client")) {
@@ -111,13 +111,14 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
             }else if(requestType.equalsIgnoreCase("office")) {
 
                 user = userModel.getByUsername(dealerName);
+                clientExchangeName = MqNamingUtil.getClientExchangeName(user.getUseruuid());
                 response = processOfficeCommand(request, dealerName);
 
                 builder.type("commandResult");
             }
 
             if(null != response) {
-                String serializedResponse = new Gson().toJson(response);
+                String serializedResponse = gson.toJson(response);
 
                 synchronized (lockChannelWrite) {
                     getChannel().basicPublish(
@@ -144,29 +145,91 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
 
         if(commandVerb.equalsIgnoreCase("listCoverAccounts")){
 
-            User user = userModel.getByUsername(dealerName);
-            String exchangeName = MqNamingUtil.getClientExchangeName(user.getUseruuid());
-
             List<CoverAccount> coverAccounts =
-                    new CoverAccountModel().listCoverAccountsForOffice(officeId);
+                    new CoverAccountModel().listCoverAccountsForOffice(_office.getId());
 
             AMQP.BasicProperties.Builder builder = new AMQP.BasicProperties.Builder();
-            String serializedResponse = new Gson().toJson(coverAccounts);
+            String serializedResponse = gson.toJson(coverAccounts);
+            ret.put("CoverAccounts", serializedResponse);
 
-            synchronized (lockChannelWrite) {
-                getChannel().basicPublish(
-                        exchangeName,
-                        "response",
-                        builder.build(),
-                        serializedResponse.getBytes()
-                );
-            }
-            ret = null;
         }else if(
                 commandVerb.equalsIgnoreCase("createUpdateCoverPosition")
                 ||
                 commandVerb.equalsIgnoreCase("closeCoverPosition")
         ){
+            CoverPosition position = gson.fromJson(
+                    request.get("position"),
+                    CoverPosition.class);
+
+            String officeCoverPositionsKeyName = getKeyNameForOffCovPos(_office.getOfficeuuid());
+            String officeCoverPositionsLockName = getLockNameForOffCovPos(_office.getOfficeuuid());
+
+            try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
+                JedisLock lock = new JedisLock(
+                        jedis,
+                        officeCoverPositionsLockName,
+                        TIMEOUT_LOCK_COVER_POSITIONS,
+                        EXPIRY_LOCK_COVER_POSITIONS);
+                try{
+                    if(lock.acquire()){
+
+                        Map<UUID, CoverPosition> positions = null;
+                        if(!jedis.exists(officeCoverPositionsKeyName)){
+                            positions = new HashMap<UUID, CoverPosition>();
+                        }else {
+                            positions = gson.fromJson(
+                                    jedis.get(officeCoverPositionsKeyName),
+                                    TYPE_COV_POSITIONS_MAP);
+                        }
+
+                        if(positions.containsKey(position.getInternalid())){
+
+                            if(commandVerb.equalsIgnoreCase("createUpdateCoverPosition")){
+
+                                positions.replace(position.getInternalid(), position);
+
+
+                            }else if(commandVerb.equalsIgnoreCase("closeCoverPosition")){
+
+                                positions.remove(position.getInternalid());
+                            }
+
+                        }else{
+
+                            if(commandVerb.equalsIgnoreCase("createUpdateCoverPosition")){
+
+                                positions.put(position.getInternalid(), position);
+
+                            }else if(commandVerb.equalsIgnoreCase("closeCoverPosition")){
+
+                                Logger.getLogger(
+                                        this.getClass().getName()
+                                ).log(Level.INFO,
+                                        "Office cover position",
+                                        "position does not exist on server " + position.getInternalid());
+                            }
+                        }
+
+                        if(commandVerb.equalsIgnoreCase("createUpdateCoverPosition")){
+
+                            positions.put(position.getInternalid(), position);
+
+                        }else if(commandVerb.equalsIgnoreCase("closeCoverPosition")){
+
+                            positions.remove(position.getInternalid());
+                        }
+
+                        String serializedPositions = gson.toJson(positions);
+                        jedis.set(officeCoverPositionsKeyName, serializedPositions);
+
+                        lock.release();
+                    }else{
+                        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Office cover position", "Unable to lock " + officeCoverPositionsLockName);
+                    }
+                }catch(Exception ex){
+                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                }
+            }
 
         }
 
@@ -181,9 +244,7 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
         UUID orderid = UUID.fromString(request.get("orderId"));
 
         String userPositionsKeyName = getUserPositionsKeyName(user.getUseruuid());
-        Type mapType = new TypeToken<Map<UUID, Position>>(){}.getType();
-
-        Gson gson = new Gson();
+        //Type mapType = new TypeToken<Map<UUID, Position>>(){}.getType();
 
         try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
             JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
@@ -191,7 +252,7 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
                 if(lock.acquire()){
 
                     //get client positions
-                    Map<UUID, Position> positions = gson.fromJson(jedis.get(userPositionsKeyName),mapType);
+                    Map<UUID, Position> positions = gson.fromJson(jedis.get(userPositionsKeyName), TYPE_POSITIONS_MAP);
                     Position position = positions.get(orderid);
                     BigDecimal pl = BigDecimal.ZERO;
 
@@ -204,12 +265,12 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
 
                         switch (commandVerb) {
                             case "approve": {
-                                if(position.getOrderState().equalsIgnoreCase(Position.ORDER_STATE_PENDING_OPEN)) {
-                                    position.setOrderState(Position.ORDER_STATE_OPEN);
+                                if(position.getOrderState().equalsIgnoreCase(Constants.ORDER_STATE_PENDING_OPEN)) {
+                                    position.setOrderState(Constants.ORDER_STATE_OPEN);
                                     clientUpdate.put("order_status", "Order [" + orderid + "] approved open by " + dealerName);
 
-                                }else if(position.getOrderState().equalsIgnoreCase(Position.ORDER_STATE_PENDING_CLOSE)){
-                                    position.setOrderState(Position.ORDER_STATE_CLOSED);
+                                }else if(position.getOrderState().equalsIgnoreCase(Constants.ORDER_STATE_PENDING_CLOSE)){
+                                    position.setOrderState(Constants.ORDER_STATE_CLOSED);
                                     clientUpdate.put("order_status", "Order [" + orderid + "] approved close by " + dealerName);
                                     positions.remove(orderid);
 
@@ -220,13 +281,13 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
                             }
                             break;
                             case "reject": {
-                                if(position.getOrderState().equalsIgnoreCase(Position.ORDER_STATE_PENDING_OPEN)) {
-                                    position.setOrderState(Position.ORDER_STATE_REJECTED_OPEN);
+                                if(position.getOrderState().equalsIgnoreCase(Constants.ORDER_STATE_PENDING_OPEN)) {
+                                    position.setOrderState(Constants.ORDER_STATE_REJECTED_OPEN);
                                     clientUpdate.put("order_status", "Order [" + orderid + "] rejected open by " + dealerName);
                                     positions.remove(orderid);
 
-                                }else if(position.getOrderState().equalsIgnoreCase(Position.ORDER_STATE_PENDING_CLOSE)){
-                                    position.setOrderState(Position.ORDER_STATE_OPEN);
+                                }else if(position.getOrderState().equalsIgnoreCase(Constants.ORDER_STATE_PENDING_CLOSE)){
+                                    position.setOrderState(Constants.ORDER_STATE_OPEN);
                                     clientUpdate.put("order_status", "Order [" + orderid + "] rejected close by " + dealerName);
                                 }
                                 //post the pl

@@ -16,9 +16,7 @@
 package com.computedsynergy.hurtrade.sharedcomponents.util;
 
 import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
-import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
-import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CommodityUser;
-import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.*;
 import com.github.jedis.lock.JedisLock;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -30,6 +28,8 @@ import java.util.logging.Logger;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+
+import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.TYPE_COV_POSITIONS_MAP;
 
 /**
  *
@@ -157,7 +157,7 @@ public class RedisUtil {
     
     /**
      * Returns a lock name which is used to acquire mutex lock over a use's positions
-     * @param userUuid
+     * @param
      * @return 
      */
     public static String getLockNameForUserPositions(String userPositionKey)
@@ -413,6 +413,44 @@ public class RedisUtil {
         }
 
         return retPositions;
+    }
+
+    public List<CoverPosition> GetOfficeCoverPositions(UUID officeUUID){
+
+        List<CoverPosition> ret = new ArrayList<>();
+
+        String officeCoverPositionsKeyName = getKeyNameForOffCovPos(officeUUID);
+        String officeCoverPositionsLockName = getLockNameForOffCovPos(officeUUID);
+
+        try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
+            JedisLock lock = new JedisLock(
+                    jedis,
+                    officeCoverPositionsLockName,
+                    TIMEOUT_LOCK_COVER_POSITIONS,
+                    EXPIRY_LOCK_COVER_POSITIONS);
+            try{
+                if(lock.acquire()){
+
+                    Map<UUID, CoverPosition> positions = null;
+                    if(!jedis.exists(officeCoverPositionsKeyName)){
+                        positions = new HashMap<>();
+                    }else {
+                        positions = gson.fromJson(
+                                jedis.get(officeCoverPositionsKeyName),
+                                TYPE_COV_POSITIONS_MAP);
+                    }
+                    lock.release();
+
+                    ret.addAll(positions.values());
+                }else{
+                    Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Office cover position", "Unable to lock " + officeCoverPositionsLockName);
+                }
+            }catch(Exception ex){
+                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            }
+
+            return ret;
+        }
     }
 
 //    public Office GetOfficeInfo(String officeName){
