@@ -15,12 +15,10 @@
  */
 package com.computedsynergy.hurtrade.hurcpu.cpu;
 
-import com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers.BackOfficeRequestConsumer;
 import com.computedsynergy.hurtrade.sharedcomponents.amqp.AmqpBase;
-import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.SourceQuote;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
-import com.computedsynergy.hurtrade.sharedcomponents.util.HurUtil;
+import com.computedsynergy.hurtrade.sharedcomponents.util.MqNamingUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -29,7 +27,6 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 
 import java.io.IOException;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -87,16 +84,16 @@ public class AuthRequestProcessor extends AmqpBase {
             if(null != u) {
 
 
-                String clientExchangeName = HurUtil.getClientExchangeName(u.getUseruuid());
+                String clientExchangeName = MqNamingUtil.getClientExchangeName(u.getUseruuid());
                 res.put("clientExchangeName", clientExchangeName);
-                String responseQueueName = HurUtil.getClientOutgoingQueueName(u.getUseruuid());
+                String responseQueueName = MqNamingUtil.getClientOutgoingQueueName(u.getUseruuid());
                 res.put("responseQueueName", responseQueueName);
 
 
                 if(u.getUsertype().equalsIgnoreCase(User.USERTYPE_DEALER)){
-                    String officeExchangeName = HurUtil.getOfficeExchangeName(u.getUserOffice().getOfficeuuid());
-                    String officeDealerOutQName = HurUtil.getOfficeDealerOutQueueName(u.getUserOffice().getOfficeuuid());
-                    String officeDealerInQName = HurUtil.getOfficeDealerINQueueName(u.getUserOffice().getOfficeuuid());
+                    String officeExchangeName = MqNamingUtil.getOfficeExchangeName(u.getUserOffice().getOfficeuuid());
+                    String officeDealerOutQName = MqNamingUtil.getOfficeDealerOutQueueName(u.getUserOffice().getOfficeuuid());
+                    String officeDealerInQName = MqNamingUtil.getOfficeDealerINQueueName(u.getUserOffice().getOfficeuuid());
                     res.put("officeExchangeName", officeExchangeName);
                     res.put("officeDealerOutQName", officeDealerOutQName);
                         res.put("officeDealerInQName", officeDealerInQName);

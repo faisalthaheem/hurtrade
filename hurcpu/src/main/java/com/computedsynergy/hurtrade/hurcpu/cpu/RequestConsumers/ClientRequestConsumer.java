@@ -24,10 +24,8 @@ import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeRequest;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeResponse;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.updates.ClientUpdate;
-import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
-import com.computedsynergy.hurtrade.sharedcomponents.util.HurUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.EXPIRY_LOCK_USER_POSITIONS;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.TIMEOUT_LOCK_USER_POSITIONS;
@@ -36,15 +34,15 @@ import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.getUs
 import com.github.jedis.lock.JedisLock;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
+import com.rabbitmq.client.*;
+
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import redis.clients.jedis.Jedis;
@@ -57,6 +55,8 @@ public class ClientRequestConsumer extends DefaultConsumer {
 
     private final User _user;
     private final String _exchangeName;
+    private final Object _channelPublishLock = new Object();
+    private final ExecutorService _singleExecutorService;
 
     private Gson gson = new Gson();
     AMQP.BasicProperties.Builder propsBuilder = new AMQP.BasicProperties.Builder();
@@ -66,6 +66,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
 
         _user = user;
         this._exchangeName= exchangeName;
+        this._singleExecutorService = Executors.newFixedThreadPool(2);
 
     }
 
@@ -92,6 +93,8 @@ public class ClientRequestConsumer extends DefaultConsumer {
                 ClientUpdate update = new ClientUpdate(response);
                 serializedResponse = gson.toJson(update);
 
+                publishToExchange(props, serializedResponse);
+
             }else if(commandVerb.equals("tradeClosure")) {
 
                 Map<String,String> cmdParams =  new Gson().fromJson(new String(body), Constants.TYPE_DICTIONARY);
@@ -99,19 +102,29 @@ public class ClientRequestConsumer extends DefaultConsumer {
 
             }else if(commandVerb.equalsIgnoreCase("candlestick")){
 
-                Map<String,String> cmdParams =  gson.fromJson(new String(body), Constants.TYPE_DICTIONARY);
-                CandleStickChartingDataProvider cstickProvider = new CandleStickChartingDataProvider();
 
-                List<CandleStick> lstRet =  cstickProvider.GetChartData(
-                        cmdParams.get("commodity"),
-                        _user.getId(),
-                        cmdParams.get("resolution"),
-                        Integer.parseInt(cmdParams.get("samples"))
-                );
-                serializedResponse = gson.toJson(lstRet);
-                propsBuilder.type("candlestick");
-                props = propsBuilder.build();
+                _singleExecutorService.submit(new Runnable() {
+                    @Override
+                    public void run() {
 
+                        Gson gson = new Gson();
+                        Map<String,String> cmdParams =  gson.fromJson(new String(body), Constants.TYPE_DICTIONARY);
+                        CandleStickChartingDataProvider cstickProvider = new CandleStickChartingDataProvider();
+
+                        List<CandleStick> lstRet =  cstickProvider.GetChartData(
+                                cmdParams.get("commodity"),
+                                _user.getId(),
+                                cmdParams.get("resolution"),
+                                Integer.parseInt(cmdParams.get("samples"))
+                        );
+                        String serializedResponse = gson.toJson(lstRet);
+                        AMQP.BasicProperties.Builder propsBuilder = new AMQP.BasicProperties.Builder();
+                        propsBuilder.type("candlestick");
+                        com.rabbitmq.client.AMQP.BasicProperties props = propsBuilder.build();
+
+                        publishToExchange(props, serializedResponse);
+                    }
+                });
             }
 
         } catch (Exception ex) {
@@ -120,13 +133,16 @@ public class ClientRequestConsumer extends DefaultConsumer {
 
         getChannel().basicAck(deliveryTag, false);
 
-        if(null != serializedResponse) {
-            try {
-                getChannel().basicPublish(_exchangeName, "response", props, serializedResponse.getBytes());
-            } catch (Exception ex) {
+    }
 
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+    private void publishToExchange(com.rabbitmq.client.AMQP.BasicProperties props, String data){
+
+        try {
+            synchronized (_channelPublishLock) {
+                getChannel().basicPublish(_exchangeName, "response", props, data.getBytes());
             }
+        } catch (Exception ex) {
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
         }
     }
 

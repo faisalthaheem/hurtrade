@@ -19,13 +19,13 @@ import com.computedsynergy.hurtrade.sharedcomponents.amqp.AmqpBase;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeRequest;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
-import com.computedsynergy.hurtrade.sharedcomponents.util.HurUtil;
+import com.computedsynergy.hurtrade.sharedcomponents.util.MqNamingUtil;
 import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Date;
-import static org.testng.Assert.*;
+
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -76,7 +76,7 @@ public class ClientRequestProcessor extends AmqpBase {
         
         UserModel userModel = new UserModel();
         User client = userModel.getByUsername("guest");
-        clientExchangeName = HurUtil.getClientExchangeName(client.getUseruuid());
+        clientExchangeName = MqNamingUtil.getClientExchangeName(client.getUseruuid());
         
         properties = new AMQP.BasicProperties();
         properties = properties.builder().userId(client.getUsername()).build();

@@ -28,7 +28,7 @@ import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.updates.Client
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.SavedPositionModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
-import com.computedsynergy.hurtrade.sharedcomponents.util.HurUtil;
+import com.computedsynergy.hurtrade.sharedcomponents.util.MqNamingUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.EXPIRY_LOCK_USER_POSITIONS;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.TIMEOUT_LOCK_USER_POSITIONS;
@@ -36,12 +36,11 @@ import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.getLo
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.getUserPositionsKeyName;
 import com.github.jedis.lock.JedisLock;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -84,6 +83,8 @@ public class ClientAccountTask extends AmqpBase {
     private BigDecimal _floating = BigDecimal.ZERO;
     private BigDecimal _usedMarginBuy = BigDecimal.ZERO;
     private BigDecimal _usedMarginSell = BigDecimal.ZERO;
+    //use a dedicated channel for client requests/responses
+    Channel _exclusiveChannel = null;
 
 
     public ClientAccountTask(User u){
@@ -91,10 +92,12 @@ public class ClientAccountTask extends AmqpBase {
 
         _userPositionsKeyName = getUserPositionsKeyName(_self.getUseruuid());
 
-        _clientExchangeName = HurUtil.getClientExchangeName(_self.getUseruuid());
-        _incomingQueueName = HurUtil.getClientIncomingQueueName(u.getUseruuid());
-        _outgoingQueueName = HurUtil.getClientOutgoingQueueName(u.getUseruuid());
+        _clientExchangeName = MqNamingUtil.getClientExchangeName(_self.getUseruuid());
+        _incomingQueueName = MqNamingUtil.getClientIncomingQueueName(u.getUseruuid());
+        _outgoingQueueName = MqNamingUtil.getClientOutgoingQueueName(u.getUseruuid());
         _myRateQueueName = Constants.QUEUE_NAME_RATES + _self.getUseruuid().toString();
+
+        _exclusiveChannel = CreateNewChannel();
 
         this.init();
     }
@@ -121,9 +124,10 @@ public class ClientAccountTask extends AmqpBase {
             channel.queueBind(_myRateQueueName, Constants.EXCHANGE_NAME_RATES, _self.getUseruuid().toString());
 
             //consume command related messages from user
-            ClientRequestConsumer consumer = new ClientRequestConsumer(_self, channel, _clientExchangeName);
 
-            channel.basicConsume(_incomingQueueName, false, "command" + _self.getUseruuid().toString(), consumer);
+            ClientRequestConsumer consumer = new ClientRequestConsumer(_self, _exclusiveChannel, _clientExchangeName);
+
+            _exclusiveChannel.basicConsume(_incomingQueueName, false, "command" + _self.getUseruuid().toString(), consumer);
 
             //consume the rates specific messages and send updates to the user as a result
             channel.basicConsume(_myRateQueueName, false, "rates-"+ _self.getUseruuid().toString(),
@@ -269,7 +273,7 @@ public class ClientAccountTask extends AmqpBase {
 
                     //get client positions
                     Map<UUID, Position> positions =
-                            gson.fromJson(jedis.get(_userPositionsKeyName), Constants.POSITIONS_MAP_TYPE);
+                            gson.fromJson(jedis.get(_userPositionsKeyName), Constants.TYPE_POSITIONS_MAP);
 
                     if(positions == null){
                         positions = new HashMap<>();

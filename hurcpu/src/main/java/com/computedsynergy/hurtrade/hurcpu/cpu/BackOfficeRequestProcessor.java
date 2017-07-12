@@ -16,18 +16,14 @@
 package com.computedsynergy.hurtrade.hurcpu.cpu;
 
 import com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers.BackOfficeRequestConsumer;
-import com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers.ClientRequestConsumer;
 import com.computedsynergy.hurtrade.hurcpu.cpu.Tasks.OfficePositionsDispatchTask;
 import com.computedsynergy.hurtrade.sharedcomponents.amqp.AmqpBase;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.OfficeModel;
-import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Office;
-import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
-import com.computedsynergy.hurtrade.sharedcomponents.util.HurUtil;
-import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
+import com.computedsynergy.hurtrade.sharedcomponents.util.MqNamingUtil;
+import com.rabbitmq.client.Channel;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
@@ -48,8 +44,8 @@ public class BackOfficeRequestProcessor extends AmqpBase {
 
         for (Office o : officeList) {
 
-            String officeExchangeName = HurUtil.getOfficeExchangeName(o.getOfficeuuid());
-            String officeDealerInQueueName = HurUtil.getOfficeDealerINQueueName(o.getOfficeuuid());
+            String officeExchangeName = MqNamingUtil.getOfficeExchangeName(o.getOfficeuuid());
+            String officeDealerInQueueName = MqNamingUtil.getOfficeDealerINQueueName(o.getOfficeuuid());
 
             //start office position dispatch task
             OfficePositionsDispatchTask officePositionsDispatchTask = new OfficePositionsDispatchTask(officeExchangeName, o.getId());
@@ -59,8 +55,14 @@ public class BackOfficeRequestProcessor extends AmqpBase {
             channel.queueDeclare(officeDealerInQueueName, true, false, false, null);
             channel.queueBind(officeDealerInQueueName, officeExchangeName, "fromdealer");
 
-            BackOfficeRequestConsumer consumer = new BackOfficeRequestConsumer(channel, officeExchangeName, officeDealerInQueueName,"", o.getId());
-            channel.basicConsume(officeDealerInQueueName, false, officeExchangeName, consumer);
+            Channel consumerChannel = CreateNewChannel();
+            BackOfficeRequestConsumer consumer = new BackOfficeRequestConsumer(
+                    consumerChannel,
+                    officeExchangeName,
+                    officeDealerInQueueName,"",
+                    o.getId()
+            );
+            consumerChannel.basicConsume(officeDealerInQueueName, false, officeExchangeName, consumer);
 
         }
     }

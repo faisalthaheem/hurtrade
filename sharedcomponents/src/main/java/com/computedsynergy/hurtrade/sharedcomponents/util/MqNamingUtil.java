@@ -21,7 +21,7 @@ import java.util.UUID;
  *
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
  */
-public class HurUtil {
+public class MqNamingUtil {
     
     private static final String E_OFFICE_NAME_SUFFIX = "_off";
     private static final String Q_OFFICE_REQUEST_NAME_SUFFIX = "_off_requests";

@@ -52,10 +52,6 @@ public class OfficePositionsDispatchTask extends AmqpBase {
     private Object lockOfficeUsers = new Object(); //governs access to officeUsers
     private Object lockChannelWrite = new Object(); //governs access to write access on mq channel
 
-    private Timer tmrUserKeysUpdateTimer = new Timer(true);
-    private Timer tmrOfficePositionsDispatchTimer = new Timer(true);
-
-
     private Gson gson = new Gson();
 
     public void initialize() throws IOException, TimeoutException {
@@ -123,30 +119,6 @@ public class OfficePositionsDispatchTask extends AmqpBase {
         }catch (Exception ex){
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
         }
-//
-//        //update list as defined
-//        tmrUserKeysUpdateTimer.schedule(
-//            new TimerTask() {
-//                @Override
-//                public void run() {
-//                    updateOfficeUsers();
-//                }
-//            },
-//            CommandLineOptions.getInstance().usersKeysUpdateTimerInterval,
-//            CommandLineOptions.getInstance().usersKeysUpdateTimerInterval
-//        );
-//
-//        //send office positions to dealers
-//        tmrOfficePositionsDispatchTimer.schedule(
-//            new TimerTask(){
-//                @Override
-//                public void run() {
-//                dispatchPositions();
-//                }
-//            },
-//            CommandLineOptions.getInstance().officePositionsUpdateTimer,
-//            CommandLineOptions.getInstance().officePositionsUpdateTimer
-//        );
     }
 
     private void updateOfficeUsers(){

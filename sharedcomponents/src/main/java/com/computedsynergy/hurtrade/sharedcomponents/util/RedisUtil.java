@@ -39,36 +39,41 @@ import redis.clients.jedis.JedisPoolConfig;
  * 
  */
 public class RedisUtil {
-    //public static final String CLIENT_LIST_NAME =
-    public static final String USER_INFO_PREFIX = "user_";
+
     public static final String USER_SPREAD_MAP_PREFIX = "spreadmap_";
-    public static final String USER_POSITIONS_KEY_PREFIX = "positions_";
-    public static final String USER_QUOTES_KEY_PREFIX = "userquotes";
-    public static final String OFFICE_KEY_PREFIX = "office_";
-    
     public static final String LOCK_USER_SPREAD_MAP_PREFIX = "spreadlock_";
     public static final int TIMEOUT_LOCK_SPREAD_MAP = 200;
     public static final int EXPIRY_LOCK_SPREAD_MAP = 300;
-    
+
+    public static final String USER_POSITIONS_KEY_PREFIX = "positions_";
     public static final String LOCK_USER_POSITIONS_PREFIX = "poslock_";
     public static final int TIMEOUT_LOCK_USER_POSITIONS = 200;
     public static final int EXPIRY_LOCK_USER_POSITIONS = 300;
-    
+
+    //this one is just a lock
     public static final String LOCK_USER_PROCESSING_PREFIX = "lock_userprocessing_";
     public static final int TIMEOUT_LOCK_USER_PROCESSING = 5000;
     public static final int EXPIRY_LOCK_USER_PROCESSING = 10000;
-    
+
+    public static final String USER_QUOTES_KEY_PREFIX = "userquotes";
     public static final String LOCK_USER_QUOTES_PREFIX = "lock_userquotes_";
     public static final int TIMEOUT_LOCK_USER_QUOTES = 5000;
     public static final int EXPIRY_LOCK_USER_QUOTES = 10000;
 
+    public static final String USER_INFO_PREFIX = "user_";
     public static final String LOCK_USER_INFO = "lock_userinfo_";
     public static final int TIMEOUT_LOCK_USER_INFO = 5000;
     public static final int EXPIRY_LOCK_USER_INFO = 10000;
 
+    public static final String OFFICE_KEY_PREFIX = "office_";
     public static final String LOCK_OFFICE_INFO = "lock_officeinfo_";
     public static final int TIMEOUT_LOCK_OFFICE_INFO = 5000;
     public static final int EXPIRY_LOCK_OFFICE_INFO = 10000;
+
+    public static final String OFFICE_COVER_POSITIONS_KEY_PREFIX = "off_cov_pos_";
+    public static final String LOCK_COVER_POSITIONS = "lock_cov_pos_";
+    public static final int TIMEOUT_LOCK_COVER_POSITIONS = 5000;
+    public static final int EXPIRY_LOCK_COVER_POSITIONS = 10000;
     
     private static RedisUtil _self = null;
 
@@ -168,6 +173,14 @@ public class RedisUtil {
     public static String getUserPositionsKeyName(UUID userUuid)
     {
         return USER_POSITIONS_KEY_PREFIX + userUuid.toString();
+    }
+
+    public static String getKeyNameForOffCovPos(UUID officeid){
+        return OFFICE_COVER_POSITIONS_KEY_PREFIX + officeid.toString();
+    }
+
+    public static String getLockNameForOffCovPos(UUID officeid){
+        return LOCK_COVER_POSITIONS + officeid.toString();
     }
     
     public void cacheUserCommodities(UUID userUUID, List<CommodityUser> userCommodities)

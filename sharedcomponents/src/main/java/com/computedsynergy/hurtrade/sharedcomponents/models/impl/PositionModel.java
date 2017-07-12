@@ -65,6 +65,7 @@ public class PositionModel extends ModelBase implements IPositionModel {
                     .executeUpdate();
 
             con.commit();
+            con.close();
         }catch(Exception ex){
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }

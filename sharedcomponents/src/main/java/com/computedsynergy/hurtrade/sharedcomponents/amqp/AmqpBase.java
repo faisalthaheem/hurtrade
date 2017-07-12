@@ -20,6 +20,8 @@ import com.rabbitmq.client.Address;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.impl.AMQChannel;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,5 +48,9 @@ public class AmqpBase {
     protected void cleanup()
     {
 
+    }
+
+    protected Channel CreateNewChannel(){
+        return AmqpConnectionFactory.GetInstance().CreateChannel();
     }
 }

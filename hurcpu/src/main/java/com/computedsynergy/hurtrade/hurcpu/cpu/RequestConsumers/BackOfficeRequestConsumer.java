@@ -15,12 +15,15 @@
  */
 package com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers;
 
+import com.computedsynergy.hurtrade.sharedcomponents.models.impl.CoverAccountModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.LedgerModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.PositionModel;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CoverAccount;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
-import com.computedsynergy.hurtrade.sharedcomponents.util.HurUtil;
+import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
+import com.computedsynergy.hurtrade.sharedcomponents.util.MqNamingUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
 import com.github.jedis.lock.JedisLock;
 import com.google.gson.Gson;
@@ -47,16 +50,10 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
     private final String dealerInQueueName;
     private final String dealerOutQueueName;
     private final int officeId;
-    private List<String> officeUsers  = new ArrayList<>();
 
-    private Object lockOfficeUsers = new Object(); //governs access to officeUsers
+    UserModel userModel = new UserModel();
     private Object lockChannelWrite = new Object(); //governs access to write access on mq channel
 
-    private Timer tmrUserKeysUpdateTimer = new Timer(true);
-    private Timer tmrOfficePositionsDispatchTimer = new Timer(true);
-
-
-    private Gson gson = new Gson();
 
     public BackOfficeRequestConsumer(Channel channel,
                          String officeExchangeName,
@@ -83,41 +80,111 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
 
         try {
 
+
+            String clientExchangeName = null;
+            Map<String, String> response = null;
+            AMQP.BasicProperties.Builder builder = new AMQP.BasicProperties.Builder();
+
+
             User user = null;
-            Map<String, String> clientUpdate = null;
 
-            Type requestMapType = new TypeToken<Map<String, String>>(){}.getType();
-            Map<String, String> request = gson.fromJson(new String(body),requestMapType);
+            String requestType = properties.getType();
+            String dealerName = properties.getUserId();
 
-            UserModel userModel = new UserModel();
-            user = userModel.getByUsername(request.get("client"));
-            if (user == null) {
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Could not resolve user for name: ", properties.getUserId());
-                return;
+            Map<String, String> request = new Gson().fromJson(new String(body), Constants.TYPE_DICTIONARY);
+
+
+            if(requestType.equalsIgnoreCase("client")) {
+
+                user = userModel.getByUsername(request.get("client"));
+                if (user == null) {
+                    Logger.getLogger(this.getClass().getName())
+                            .log(Level.SEVERE,
+                                    "Could not resolve user for name: ", properties.getUserId());
+                    return;
+                }
+
+                response = processClientCommand(user, request, dealerName);
+                clientExchangeName = MqNamingUtil.getClientExchangeName(user.getUseruuid());
+                builder.type("orderUpdate");
+
+            }else if(requestType.equalsIgnoreCase("office")) {
+
+                user = userModel.getByUsername(dealerName);
+                response = processOfficeCommand(request, dealerName);
+
+                builder.type("commandResult");
             }
 
-            clientUpdate = processCommand(user, properties.getType(), UUID.fromString(request.get("orderId")), properties.getUserId());
+            if(null != response) {
+                String serializedResponse = new Gson().toJson(response);
 
-            String clientExchangeName = HurUtil.getClientExchangeName(user.getUseruuid());
-            String serializedResponse = gson.toJson(clientUpdate);
-
-            AMQP.BasicProperties.Builder builder = new AMQP.BasicProperties.Builder();
-            builder.type("orderUpdate");
-            getChannel().basicPublish(clientExchangeName, "response", builder.build(), serializedResponse.getBytes());
+                synchronized (lockChannelWrite) {
+                    getChannel().basicPublish(
+                            clientExchangeName,
+                            "response",
+                            builder.build(),
+                            serializedResponse.getBytes()
+                    );
+                }
+            }
 
         }catch (Exception ex) {
 
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+    private Map<String, String> processOfficeCommand(Map<String, String> request, String dealerName)
+            throws Exception
+    {
+        Map<String, String> ret = new HashMap<>();
+
+        String commandVerb = request.get("command");
+
+        if(commandVerb.equalsIgnoreCase("listCoverAccounts")){
+
+            User user = userModel.getByUsername(dealerName);
+            String exchangeName = MqNamingUtil.getClientExchangeName(user.getUseruuid());
+
+            List<CoverAccount> coverAccounts =
+                    new CoverAccountModel().listCoverAccountsForOffice(officeId);
+
+            AMQP.BasicProperties.Builder builder = new AMQP.BasicProperties.Builder();
+            String serializedResponse = new Gson().toJson(coverAccounts);
+
+            synchronized (lockChannelWrite) {
+                getChannel().basicPublish(
+                        exchangeName,
+                        "response",
+                        builder.build(),
+                        serializedResponse.getBytes()
+                );
+            }
+            ret = null;
+        }else if(
+                commandVerb.equalsIgnoreCase("createUpdateCoverPosition")
+                ||
+                commandVerb.equalsIgnoreCase("closeCoverPosition")
+        ){
+
+        }
+
+        return ret;
+    }
     
-    private Map<String, String>  processCommand(User user, String commandVerb, UUID orderid, String dealerName)
+    private Map<String, String> processClientCommand(User user, Map<String, String> request, String dealerName)
     {
         Map<String, String> clientUpdate = new HashMap<>();
 
+        String commandVerb = request.get("command");
+        UUID orderid = UUID.fromString(request.get("orderId"));
+
         String userPositionsKeyName = getUserPositionsKeyName(user.getUseruuid());
         Type mapType = new TypeToken<Map<UUID, Position>>(){}.getType();
-        
+
+        Gson gson = new Gson();
+
         try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
             JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
             try{

@@ -33,5 +33,5 @@ public class Constants {
     public static final String EXCHANGE_NAME_AUTH = "authExchange";
 
     public static Type TYPE_DICTIONARY = new TypeToken<Map<String, String>>(){}.getType();
-    public static Type POSITIONS_MAP_TYPE = new TypeToken<Map<UUID, Position>>(){}.getType();
+    public static Type TYPE_POSITIONS_MAP = new TypeToken<Map<UUID, Position>>(){}.getType();
 }

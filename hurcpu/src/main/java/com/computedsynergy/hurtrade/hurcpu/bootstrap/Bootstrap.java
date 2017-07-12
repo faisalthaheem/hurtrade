@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.computedsynergy.hurtrade.sharedcomponents.util.HurUtil;
+import com.computedsynergy.hurtrade.sharedcomponents.util.MqNamingUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
 
 /**
@@ -70,10 +70,10 @@ public class Bootstrap extends AmqpBase{
 
         for(Office o:officeList){
             
-            String officeExchangeName = HurUtil.getOfficeExchangeName(o.getOfficeuuid());
-            //String officeClientRequestQueueName = HurUtil.getOfficeClientRequestQueueName(o.getOfficeuuid());
-            String officeDealerOutQName = HurUtil.getOfficeDealerOutQueueName(o.getOfficeuuid());
-            String officeDealerInQName = HurUtil.getOfficeDealerINQueueName(o.getOfficeuuid());
+            String officeExchangeName = MqNamingUtil.getOfficeExchangeName(o.getOfficeuuid());
+            //String officeClientRequestQueueName = MqNamingUtil.getOfficeClientRequestQueueName(o.getOfficeuuid());
+            String officeDealerOutQName = MqNamingUtil.getOfficeDealerOutQueueName(o.getOfficeuuid());
+            String officeDealerInQName = MqNamingUtil.getOfficeDealerINQueueName(o.getOfficeuuid());
             
             //declare a queue for this office for incoming messages from the clients
             channel.exchangeDeclare(officeExchangeName, "direct", true);
