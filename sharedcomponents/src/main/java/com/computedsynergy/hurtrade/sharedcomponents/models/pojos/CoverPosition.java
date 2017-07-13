@@ -1,8 +1,12 @@
 package com.computedsynergy.hurtrade.sharedcomponents.models.pojos;
 
+import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
+
 import java.util.Date;
 import java.math.BigDecimal;
 import java.util.UUID;
+
+import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.*;
 
 /**
  * Created by faisal.t on 7/12/2017.
@@ -25,6 +29,32 @@ public class CoverPosition {
     private Date endedat;
     private UUID internalid;
     private String remoteid;
+
+    public void processQuote(QuoteList clientQuotes) {
+
+
+        if(clientQuotes.containsKey(commodity)){
+            BigDecimal closingPrice = BigDecimal.ZERO;
+
+            BigDecimal exchangeRate = BigDecimal.ONE;
+            String baseCurrency = commodity.substring(0,3);
+
+
+            if(orderType.equals(ORDER_TYPE_BUY)){
+                closingPrice = clientQuotes.get(commodity).bid;
+                if(!baseCurrency.equals("USD")) {
+                    exchangeRate = clientQuotes.get(baseCurrency + "USD").bid;
+                }
+            }else{
+                closingPrice = clientQuotes.get(commodity).ask;
+                if(!baseCurrency.equals("USD")) {
+                    exchangeRate = clientQuotes.get(baseCurrency + "USD").ask;
+                }
+            }
+            currentPL = closingPrice.subtract(getOpenPrice()).multiply(exchangeRate).multiply(amount).multiply(clientQuotes.get(commodity).lotSize);
+
+        }
+    }
 
 
     public int getId() {
