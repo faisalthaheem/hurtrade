@@ -26,16 +26,21 @@ import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.*;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
 import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
+import com.github.jedis.lock.JedisLock;
 import com.google.gson.Gson;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
+import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.TYPE_COV_POSITIONS_MAP;
+import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.*;
 
 /**
  *
@@ -116,6 +121,7 @@ public class OfficePositionsDispatchTask extends AmqpBase {
 
                             Runnable task = () -> {
                                 SourceQuote quote = new Gson().fromJson(new String(body), SourceQuote.class);
+                                processQuote(quote);
                                 dispatchPositions(quote);
                             };
                             task.run();
@@ -143,6 +149,53 @@ public class OfficePositionsDispatchTask extends AmqpBase {
                 }
             }
         }catch(Exception ex){
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+        }
+    }
+
+    private void processQuote(SourceQuote quotes){
+
+
+        String officeCoverPositionsKeyName = getKeyNameForOffCovPos(_self.getOfficeuuid());
+        String officeCoverPositionsLockName = getLockNameForOffCovPos(_self.getOfficeuuid());
+
+        try {
+
+
+            try (Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()) {
+                JedisLock lock = new JedisLock(
+                        jedis,
+                        officeCoverPositionsLockName,
+                        TIMEOUT_LOCK_COVER_POSITIONS,
+                        EXPIRY_LOCK_COVER_POSITIONS);
+                try {
+                    if (lock.acquire()) {
+
+                        Map<UUID, CoverPosition> positions = null;
+                        if (jedis.exists(officeCoverPositionsKeyName)) {
+
+                            //positions = new HashMap<UUID, CoverPosition>();
+                            positions = gson.fromJson(
+                                    jedis.get(officeCoverPositionsKeyName),
+                                    TYPE_COV_POSITIONS_MAP);
+
+                            for (CoverPosition p : positions.values()) {
+                                p.processQuote(quotes.getQuoteList());
+                            }
+
+                            String serializedPositions = gson.toJson(positions);
+                            jedis.set(officeCoverPositionsKeyName, serializedPositions);
+                        }
+
+                        lock.release();
+                    } else {
+                        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Office cover position processQuote", "Unable to lock " + officeCoverPositionsLockName);
+                    }
+                } catch (Exception ex) {
+                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                }
+            }
+        }catch (Exception ex){
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
