@@ -81,7 +81,8 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
         try {
 
 
-            String clientExchangeName = null;
+            String exchangeName = null;
+            String routingKey = "response";
             Map<String, String> response = null;
             AMQP.BasicProperties.Builder builder = new AMQP.BasicProperties.Builder();
 
@@ -105,16 +106,23 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
                 }
 
                 response = processClientCommand(user, request, dealerName);
-                clientExchangeName = MqNamingUtil.getClientExchangeName(user.getUseruuid());
+                exchangeName = MqNamingUtil.getClientExchangeName(user.getUseruuid());
                 builder.type("orderUpdate");
 
             }else if(requestType.equalsIgnoreCase("office")) {
 
                 user = userModel.getByUsername(dealerName);
-                clientExchangeName = MqNamingUtil.getClientExchangeName(user.getUseruuid());
+                exchangeName = MqNamingUtil.getClientExchangeName(user.getUseruuid());
                 response = processOfficeCommand(request, dealerName);
 
-                builder.type("commandResult");
+                if(response.containsKey("type")) {
+                    builder.type(response.get("type"));
+                }
+
+                if(request.containsKey("responseQueue")){
+                    routingKey = request.get("responseQueue");
+                    exchangeName = ""; //use default exchange
+                }
             }
 
             if(null != response) {
@@ -122,8 +130,8 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
 
                 synchronized (lockChannelWrite) {
                     getChannel().basicPublish(
-                            clientExchangeName,
-                            "response",
+                            exchangeName,
+                            routingKey,
                             builder.build(),
                             serializedResponse.getBytes()
                     );
@@ -132,7 +140,7 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
 
         }catch (Exception ex) {
 
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 
@@ -148,9 +156,9 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
             List<CoverAccount> coverAccounts =
                     new CoverAccountModel().listCoverAccountsForOffice(_office.getId());
 
-            AMQP.BasicProperties.Builder builder = new AMQP.BasicProperties.Builder();
             String serializedResponse = gson.toJson(coverAccounts);
             ret.put("CoverAccounts", serializedResponse);
+            ret.put("type", "CoverAccounts");
 
         }else if(
                 commandVerb.equalsIgnoreCase("createUpdateCoverPosition")
@@ -198,25 +206,23 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
 
                             if(commandVerb.equalsIgnoreCase("createUpdateCoverPosition")){
 
+                                position.setInternalid(UUID.randomUUID());
+                                position.setOpentime(new Date());
                                 positions.put(position.getInternalid(), position);
 
                             }else if(commandVerb.equalsIgnoreCase("closeCoverPosition")){
 
-                                Logger.getLogger(
-                                        this.getClass().getName()
-                                ).log(Level.INFO,
-                                        "Office cover position",
-                                        "position does not exist on server " + position.getInternalid());
+                                if(!positions.containsKey(position.getInternalid())) {
+
+                                    Logger.getLogger(
+                                            this.getClass().getName()
+                                    ).log(Level.INFO,
+                                            "Office cover position",
+                                            "position does not exist " + position.getInternalid());
+                                }else{
+                                    positions.remove(position.getInternalid());
+                                }
                             }
-                        }
-
-                        if(commandVerb.equalsIgnoreCase("createUpdateCoverPosition")){
-
-                            positions.put(position.getInternalid(), position);
-
-                        }else if(commandVerb.equalsIgnoreCase("closeCoverPosition")){
-
-                            positions.remove(position.getInternalid());
                         }
 
                         String serializedPositions = gson.toJson(positions);
