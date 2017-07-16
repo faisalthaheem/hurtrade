@@ -280,8 +280,7 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
                                     clientUpdate.put("order_status", "Order [" + orderid + "] approved close by " + dealerName);
                                     positions.remove(orderid);
 
-                                    //realize position P/L
-                                    new LedgerModel().SaveRealizedPositionPL(user.getId(), position.getOrderId(), position.getCurrentPl());
+
 
                                 }
                             }
@@ -304,10 +303,6 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
                             }
                             break;
                         }
-
-                        //update the current order state to db
-                        PositionModel positionModel = new PositionModel();
-                        positionModel.saveUpdatePosition(position);
 
                         //update client positions
                         String serializedPositions = gson.toJson(positions);

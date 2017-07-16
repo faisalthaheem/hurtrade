@@ -42,7 +42,7 @@ public class Webauth {
 
     /**
      * https://github.com/rabbitmq/rabbitmq-auth-backend-http
-     * @param args
+     * @param
      */
 
     private static Map<String, String> toMap(List<NameValuePair> pairs){
@@ -95,6 +95,10 @@ public class Webauth {
                         authtags = user.getAuthtags();
                         userValid=true;
                     }
+                }
+
+                if(userValid){
+                    Logger.getLogger(Webauth.class.getName()).log(Level.INFO, "Authorized user : " + username );
                 }
 
             } catch (Exception ex) {

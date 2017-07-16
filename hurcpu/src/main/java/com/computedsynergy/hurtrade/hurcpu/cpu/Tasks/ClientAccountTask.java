@@ -69,6 +69,7 @@ public class ClientAccountTask extends AmqpBase {
     QuoteModel quoteModel = null;
 
     private User _self = null;
+    private ClientRequestConsumer _clientRequestConsumer;
 
     //mq related
     private String _clientExchangeName = "";
@@ -126,9 +127,9 @@ public class ClientAccountTask extends AmqpBase {
 
             //consume command related messages from user
 
-            ClientRequestConsumer consumer = new ClientRequestConsumer(_self, _exclusiveChannel, _clientExchangeName);
+            _clientRequestConsumer = new ClientRequestConsumer(_self, _exclusiveChannel, _clientExchangeName);
 
-            _exclusiveChannel.basicConsume(_incomingQueueName, false, "command" + _self.getUseruuid().toString(), consumer);
+            _exclusiveChannel.basicConsume(_incomingQueueName, false, "command" + _self.getUseruuid().toString(), _clientRequestConsumer);
 
             //consume the rates specific messages and send updates to the user as a result
             channel.basicConsume(_myRateQueueName, false, "rates-"+ _self.getUseruuid().toString(),
@@ -356,6 +357,16 @@ public class ClientAccountTask extends AmqpBase {
 
         } catch (Exception ex) {
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+        }
+
+        //todo introduce a new flag to prevent liquidation
+        //check if margin call and close all positions
+        if(usable.compareTo(BigDecimal.ZERO) <= 0){
+
+            if(null != _clientRequestConsumer){
+                _clientRequestConsumer.CloseAllPositions();
+            }
+
         }
     }
     

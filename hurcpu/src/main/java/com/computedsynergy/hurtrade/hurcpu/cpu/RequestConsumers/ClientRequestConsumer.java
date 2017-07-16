@@ -27,6 +27,10 @@ import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.updates.Client
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
+
+import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.ORDER_STATE_CANCELED;
+import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.ORDER_STATE_CLOSED;
+import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.ORDER_STATE_PENDING_CLOSE;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.EXPIRY_LOCK_USER_POSITIONS;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.TIMEOUT_LOCK_USER_POSITIONS;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.getLockNameForUserPositions;
@@ -38,6 +42,7 @@ import com.rabbitmq.client.*;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -168,38 +173,14 @@ public class ClientRequestConsumer extends DefaultConsumer {
 
 
                         Position position = positions.get(orderId);
-                        //process close request only if order is open
-                        if(position.getOrderState().equalsIgnoreCase(Constants.ORDER_STATE_OPEN)) {
+                        ClosePosition(position,quotesForClient);
 
-                            try {
-
-                                position.setOrderState(Constants.ORDER_STATE_PENDING_CLOSE);
-
-                                switch (position.getOrderType()) {
-                                    case TradeRequest.REQUEST_TYPE_BUY: {
-                                        position.setClosePrice(quotesForClient.get(position.getCommodity()).bid);
-                                    }
-                                    break;
-                                    case TradeRequest.REQUEST_TYPE_SELL: {
-                                        position.setClosePrice(quotesForClient.get(position.getCommodity()).ask);
-                                    }
-                                    break;
-                                }
-
-                                //update the current order state to db
-                                PositionModel positionModel = new PositionModel();
-                                positionModel.saveUpdatePosition(position);
-
-                                //set client positions
-                                String serializedPositions = gson.toJson(positions);
-                                jedis.set(userPositionsKeyName, serializedPositions);
-
-
-                            } catch (Exception ex) {
-                                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
-                            }
-                        }
+                        //set client positions
+                        String serializedPositions = gson.toJson(positions);
+                        jedis.set(userPositionsKeyName, serializedPositions);
                     }
+
+
 
                     lock.release();
 
@@ -208,6 +189,88 @@ public class ClientRequestConsumer extends DefaultConsumer {
                 }
             }catch(Exception ex){
                 Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
+            }
+        }
+    }
+
+    public void CloseAllPositions()
+    {
+
+        //get the last quoted prices for commodities for this user
+        String serializedQuotes = RedisUtil.getInstance().getSeriaizedQuotesForClient(_user.getUseruuid());
+        QuoteList quotesForClient = gson.fromJson(serializedQuotes, QuoteList.class);
+
+
+        String userPositionsKeyName = getUserPositionsKeyName(_user.getUseruuid());
+        Type mapType = new TypeToken<Map<UUID, Position>>(){}.getType();
+
+        try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
+            JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
+            try{
+                if(lock.acquire()){
+
+                    //get client positions
+                    Map<UUID, Position> positions = gson.fromJson(jedis.get(userPositionsKeyName),mapType);
+
+                    Iterator<Map.Entry<UUID, Position>> iter = positions.entrySet().iterator();
+                    while(iter.hasNext()){
+                        Position p = iter.next().getValue();
+
+                        if(p.isOpen()) {
+                            ClosePosition(p, quotesForClient);
+
+                            p.setOrderState(ORDER_STATE_CLOSED);
+
+                        }else if(p.isPendingOpen()){
+                            p.setOrderState(ORDER_STATE_CANCELED);
+                        }
+
+                        iter.remove();
+                    }
+
+                    //set client positions
+                    String serializedPositions = gson.toJson(positions);
+                    jedis.set(userPositionsKeyName, serializedPositions);
+
+                    lock.release();
+
+                }else{
+                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, "Could not process user positions " + _user.getUsername());
+                }
+            }catch(Exception ex){
+                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, "Could not process user positions " + _user.getUsername());
+            }
+        }
+    }
+
+
+    private void ClosePosition(Position position, QuoteList quotesForClient)
+    {
+
+        //process close request only if order is open
+        if(position.getOrderState().equalsIgnoreCase(Constants.ORDER_STATE_OPEN)) {
+
+            try {
+
+                position.setOrderState(Constants.ORDER_STATE_PENDING_CLOSE);
+
+                switch (position.getOrderType()) {
+                    case TradeRequest.REQUEST_TYPE_BUY: {
+                        position.setClosePrice(quotesForClient.get(position.getCommodity()).bid);
+                    }
+                    break;
+                    case TradeRequest.REQUEST_TYPE_SELL: {
+                        position.setClosePrice(quotesForClient.get(position.getCommodity()).ask);
+                    }
+                    break;
+                }
+
+                //update the current order state to db
+                PositionModel positionModel = new PositionModel();
+                positionModel.saveUpdatePosition(position);
+
+            } catch (Exception ex) {
+                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
             }
         }
     }
@@ -264,7 +327,8 @@ public class ClientRequestConsumer extends DefaultConsumer {
                                         response.getRequest().getCommodity(),
                                         response.getRequest().getRequestedLot(),
                                         quotesForClient.get(response.getRequest().getCommodity()).ask,
-                                        userCommodities.get(response.getRequest().getCommodity()).getRatio()
+                                        userCommodities.get(response.getRequest().getCommodity()).getRatio(),
+                                        _user
                                 );
                             }
                             break;
@@ -274,7 +338,8 @@ public class ClientRequestConsumer extends DefaultConsumer {
                                         response.getRequest().getCommodity(),
                                         response.getRequest().getRequestedLot(),
                                         quotesForClient.get(response.getRequest().getCommodity()).bid,
-                                        userCommodities.get(response.getRequest().getCommodity()).getRatio()
+                                        userCommodities.get(response.getRequest().getCommodity()).getRatio(),
+                                        _user
                                 );
                             }
                             break;
@@ -290,11 +355,6 @@ public class ClientRequestConsumer extends DefaultConsumer {
                     }
 
                     if(null != position){
-
-                        //update the current order state to db
-                        PositionModel positionModel = new PositionModel();
-                        positionModel.saveUpdatePosition(position);
-
                         //set client positions
                         String serializedPositions = gson.toJson(positions);
                         jedis.set(userPositionsKeyName, serializedPositions);

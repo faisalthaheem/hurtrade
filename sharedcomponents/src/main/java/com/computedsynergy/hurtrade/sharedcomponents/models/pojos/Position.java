@@ -16,6 +16,9 @@
 package com.computedsynergy.hurtrade.sharedcomponents.models.pojos;
 
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
+import com.computedsynergy.hurtrade.sharedcomponents.models.impl.LedgerModel;
+import com.computedsynergy.hurtrade.sharedcomponents.models.impl.PositionModel;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
@@ -56,8 +59,10 @@ public class Position {
 
     private BigDecimal usedMargin;
     private BigDecimal ratio;
+
+    private User _user;
     
-    public Position(UUID orderId, String orderType, String commodity, BigDecimal amount, BigDecimal requestedPrice, BigDecimal ratio){
+    public Position(UUID orderId, String orderType, String commodity, BigDecimal amount, BigDecimal requestedPrice, BigDecimal ratio, User user){
         
         this.orderId = orderId;
         this.orderType = orderType;
@@ -67,15 +72,14 @@ public class Position {
         this.setOpenPrice(requestedPrice);
         this.setOrderState(ORDER_STATE_PENDING_OPEN);
         this.ratio = ratio; //ratio of leverage allowed on this instrument
+        this._user = user;
+
+        this.usedMargin = BigDecimal.ZERO;
     }
     
     public void processQuote(QuoteList clientQuotes) {
 
-        if (
-                orderState.equalsIgnoreCase(ORDER_STATE_PENDING_CLOSE) ||
-                        orderState.equalsIgnoreCase(ORDER_STATE_CLOSED) ||
-                        orderState.equalsIgnoreCase(ORDER_STATE_REJECTED_OPEN)
-                )
+        if (!orderState.equalsIgnoreCase(ORDER_STATE_OPEN))
         {
             return;
         }
@@ -91,20 +95,23 @@ public class Position {
                 closingPrice = clientQuotes.get(commodity).bid;
                 if(!baseCurrency.equals("USD")){
                    exchangeRate = clientQuotes.get(baseCurrency + "USD").bid;
-                    setUsedMargin(clientQuotes.get(baseCurrency + "USD").bid.multiply(clientQuotes.get(commodity).lotSize).multiply(amount));
+                   usedMargin = clientQuotes.get(baseCurrency + "USD").bid.multiply(clientQuotes.get(commodity).lotSize).multiply(amount).multiply(ratio);
                 }else{
-                    setUsedMargin(closingPrice.multiply(clientQuotes.get(commodity).lotSize).multiply(amount));
+                   usedMargin = clientQuotes.get(commodity).lotSize.multiply(amount).multiply(ratio);
                 }
+                currentPl = closingPrice.subtract(openPrice).multiply(exchangeRate).multiply(amount).multiply(clientQuotes.get(commodity).lotSize);
             }else{
                 closingPrice = clientQuotes.get(commodity).ask;
                 if(!baseCurrency.equals("USD")){
                    exchangeRate = clientQuotes.get(baseCurrency + "USD").ask;
-                    setUsedMargin(clientQuotes.get(baseCurrency + "USD").ask.multiply(clientQuotes.get(commodity).lotSize).multiply(amount));
-                }else{
-                    setUsedMargin(closingPrice.multiply(clientQuotes.get(commodity).lotSize).multiply(amount));
+                   usedMargin = clientQuotes.get(baseCurrency + "USD").ask.multiply(clientQuotes.get(commodity).lotSize).multiply(amount).multiply(ratio);
                 }
+                else{
+                   usedMargin = clientQuotes.get(commodity).lotSize.multiply(amount).multiply(ratio);
+                }
+                currentPl = openPrice.subtract(closingPrice).multiply(exchangeRate).multiply(amount).multiply(clientQuotes.get(commodity).lotSize);
             }
-            currentPl = closingPrice.subtract(getOpenPrice()).multiply(exchangeRate).multiply(amount).multiply(clientQuotes.get(commodity).lotSize);
+
 
         }
     }
@@ -223,6 +230,9 @@ public class Position {
             case ORDER_STATE_CLOSED:
             {
                 setApprovedcloseat(new Date());
+
+                //realize position P/L
+                new LedgerModel().SaveRealizedPositionPL(_user.getId(), getOrderId(), getCurrentPl());
             }
             break;
 
@@ -231,7 +241,26 @@ public class Position {
 
             }
             break;
+
+            case ORDER_STATE_CANCELED:
+            {
+
+            }
+            break;
         }
+
+        PositionModel positionModel = new PositionModel();
+        positionModel.saveUpdatePosition(this);
+    }
+
+    public boolean isOpen(){
+        return this.orderState.equalsIgnoreCase(ORDER_STATE_OPEN) ||
+                this.orderState.equalsIgnoreCase(ORDER_STATE_PENDING_CLOSE);
+    }
+
+    public boolean isPendingOpen(){
+        return
+                this.orderState.equalsIgnoreCase(ORDER_STATE_PENDING_OPEN);
     }
 
 
