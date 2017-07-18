@@ -41,11 +41,12 @@ public class User {
     private Date ended;
     private UUID useruuid;
     private String authtags;
+    private boolean liquidate;
     private Office userOffice;
     
     public User(int id, String username, String pass, boolean locked, String usertype,
         String phonenumber, String fullname, String email, Date created, Date ended, UUID useruuid,
-                String authtags, Office userOffice)
+                String authtags, boolean liquidate, Office userOffice)
     {
         this.id = id;
         this.username = username;
@@ -59,6 +60,7 @@ public class User {
         this.ended = ended;
         this.useruuid = useruuid;
         this.setAuthtags(authtags);
+        this.liquidate = liquidate;
         this.setUserOffice(userOffice);
     }
 
@@ -231,5 +233,13 @@ public class User {
 
     public void setUserOffice(Office userOffice) {
         this.userOffice = userOffice;
+    }
+
+    public boolean isLiquidate() {
+        return liquidate;
+    }
+
+    public void setLiquidate(boolean liquidate) {
+        this.liquidate = liquidate;
     }
 }

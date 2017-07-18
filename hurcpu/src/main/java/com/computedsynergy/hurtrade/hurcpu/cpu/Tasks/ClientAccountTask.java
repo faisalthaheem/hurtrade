@@ -373,9 +373,14 @@ public class ClientAccountTask extends AmqpBase {
         //check if margin call and close all positions
         if(_usableMargin.compareTo(BigDecimal.ZERO) <= 0){
 
-            if(null != _clientRequestConsumer){
-                _log.log(Level.INFO, _self.getUsername() + " margin call.");
-                _clientRequestConsumer.closeAllPositions();
+            if(_self.isLiquidate()) {
+                if (null != _clientRequestConsumer) {
+                    _log.log(Level.INFO, _self.getUsername() + " margin call.");
+                    _clientRequestConsumer.closeAllPositions();
+                }
+            }else{
+                //todo: send notification to client and back office about this
+                _log.log(Level.WARNING, _self.getUsername() + " margin call suppressed.");
             }
 
         }
