@@ -26,12 +26,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
  */
 public class AmqpBase {
+
+    //logging
+    protected Logger _log = Logger.getLogger(this.getClass().getName());
 
     protected Channel channel = null;
     

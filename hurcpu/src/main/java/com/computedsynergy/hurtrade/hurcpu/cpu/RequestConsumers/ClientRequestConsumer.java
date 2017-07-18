@@ -15,6 +15,7 @@
  */
 package com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers;
 
+import com.computedsynergy.hurtrade.hurcpu.cpu.Tasks.ClientAccountTask;
 import com.computedsynergy.hurtrade.sharedcomponents.charting.CandleStickChartingDataProvider;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.charting.CandleStick;
@@ -30,7 +31,6 @@ import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
 
 import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.ORDER_STATE_CANCELED;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.ORDER_STATE_CLOSED;
-import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.ORDER_STATE_PENDING_CLOSE;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.EXPIRY_LOCK_USER_POSITIONS;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.TIMEOUT_LOCK_USER_POSITIONS;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.getLockNameForUserPositions;
@@ -42,6 +42,7 @@ import com.rabbitmq.client.*;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -62,13 +63,17 @@ public class ClientRequestConsumer extends DefaultConsumer {
     private final String _exchangeName;
     private final Object _channelPublishLock = new Object();
     private final ExecutorService _singleExecutorService;
+    private final ClientAccountTask _account;
 
     private Gson gson = new Gson();
-    AMQP.BasicProperties.Builder propsBuilder = new AMQP.BasicProperties.Builder();
 
-    public ClientRequestConsumer(User user, Channel channel, String exchangeName) {
+    //logging
+    protected Logger _log = Logger.getLogger(this.getClass().getName());
+
+    public ClientRequestConsumer(ClientAccountTask account, User user, Channel channel, String exchangeName) {
         super(channel);
 
+        _account = account;
         _user = user;
         this._exchangeName= exchangeName;
         this._singleExecutorService = Executors.newFixedThreadPool(2);
@@ -133,7 +138,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
             }
 
         } catch (Exception ex) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+            _log.log(Level.SEVERE, null, ex);
         }
 
         getChannel().basicAck(deliveryTag, false);
@@ -147,7 +152,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
                 getChannel().basicPublish(_exchangeName, "response", props, data.getBytes());
             }
         } catch (Exception ex) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+            _log.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -173,7 +178,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
 
 
                         Position position = positions.get(orderId);
-                        ClosePosition(position,quotesForClient);
+                        closePosition(position,quotesForClient);
 
                         //set client positions
                         String serializedPositions = gson.toJson(positions);
@@ -185,15 +190,15 @@ public class ClientRequestConsumer extends DefaultConsumer {
                     lock.release();
 
                 }else{
-                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
+                    _log.log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
                 }
             }catch(Exception ex){
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
+                _log.log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
             }
         }
     }
 
-    public void CloseAllPositions()
+    public void closeAllPositions()
     {
 
         //get the last quoted prices for commodities for this user
@@ -217,7 +222,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
                         Position p = iter.next().getValue();
 
                         if(p.isOpen()) {
-                            ClosePosition(p, quotesForClient);
+                            closePosition(p, quotesForClient);
 
                             p.setOrderState(ORDER_STATE_CLOSED);
 
@@ -235,16 +240,16 @@ public class ClientRequestConsumer extends DefaultConsumer {
                     lock.release();
 
                 }else{
-                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, "Could not process user positions " + _user.getUsername());
+                    _log.log(Level.SEVERE, null, "Could not process user positions " + _user.getUsername());
                 }
             }catch(Exception ex){
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, "Could not process user positions " + _user.getUsername());
+                _log.log(Level.SEVERE, null, "Could not process user positions " + _user.getUsername());
             }
         }
     }
 
 
-    private void ClosePosition(Position position, QuoteList quotesForClient)
+    private void closePosition(Position position, QuoteList quotesForClient)
     {
 
         //process close request only if order is open
@@ -270,7 +275,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
                 positionModel.saveUpdatePosition(position);
 
             } catch (Exception ex) {
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                _log.log(Level.SEVERE, ex.getMessage(), ex);
             }
         }
     }
@@ -287,7 +292,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
             
             response.setResponseCommodityNotAllowed();
             
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE,
+            _log.log(Level.SEVERE,
                     "{0} requested invalid commodity: {1}",new Object[]{ user.getUsername() , response.getRequest().getCommodity()});
             return;
         }
@@ -301,7 +306,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
         {
             response.setResponseCommodityNotAllowed();
             
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE,
+            _log.log(Level.SEVERE,
                     "{0} requested unknown commodity: {1}",new Object[]{ user.getUsername() , response.getRequest().getCommodity()});
             return;
         }
@@ -346,12 +351,28 @@ public class ClientRequestConsumer extends DefaultConsumer {
                         }
 
                         if(position != null){
-                            positions.put(position.getOrderId(), position);
-                            response.setResposneOk();
+                            //check if the used margin of this order < usable margin
+                            position.processQuote(quotesForClient, true);
+
+                            BigDecimal usableMargin = _account.get_usableMargin(); //avoid successive locks
+                            if(position.getUsedMargin().compareTo(usableMargin) <= 0) {
+
+                                positions.put(position.getOrderId(), position);
+                                response.setResposneOk();
+                            }else{
+                                //todo: notify client with an error message explainnig there is not enough usable margin available
+                                String logMessage = String.format("New Trade declined because of insufficient usable margin available. [%s] requested [%s] required [%f] available [%f]",
+                                        _user.getUsername(),
+                                        position.getCommodity(),
+                                        position.getUsedMargin(),
+                                        usableMargin
+                                );
+                                _log.log(Level.INFO, logMessage);
+                            }
                         }
 
                     }catch(Exception ex){
-                        Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                        _log.log(Level.SEVERE, ex.getMessage(), ex);
                     }
 
                     if(null != position){
@@ -363,10 +384,10 @@ public class ClientRequestConsumer extends DefaultConsumer {
                     lock.release();
 
                 }else{
-                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
+                    _log.log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
                 }
             }catch(Exception ex){
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
+                _log.log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
             }
         }
     }

@@ -46,7 +46,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import redis.clients.jedis.Jedis;
 
@@ -81,12 +80,19 @@ public class ClientAccountTask extends AmqpBase {
     //redis related
     private String _userPositionsKeyName = "";
 
-    //finances related variables
+    //finance related variables
     private BigDecimal _floating = BigDecimal.ZERO;
+    private BigDecimal _availableCash = BigDecimal.ZERO;
+    private BigDecimal _usedMargin = BigDecimal.ZERO;
+    private BigDecimal _equity = BigDecimal.ZERO;
+    private BigDecimal _usableMargin = BigDecimal.ZERO;
     private BigDecimal _usedMarginBuy = BigDecimal.ZERO;
     private BigDecimal _usedMarginSell = BigDecimal.ZERO;
+    private Object _accountStatusLock = new Object();
+
     //use a dedicated channel for client requests/responses
     Channel _exclusiveChannel = null;
+
 
 
     public ClientAccountTask(User u){
@@ -127,7 +133,7 @@ public class ClientAccountTask extends AmqpBase {
 
             //consume command related messages from user
 
-            _clientRequestConsumer = new ClientRequestConsumer(_self, _exclusiveChannel, _clientExchangeName);
+            _clientRequestConsumer = new ClientRequestConsumer(this, _self, _exclusiveChannel, _clientExchangeName);
 
             _exclusiveChannel.basicConsume(_incomingQueueName, false, "command" + _self.getUseruuid().toString(), _clientRequestConsumer);
 
@@ -153,7 +159,7 @@ public class ClientAccountTask extends AmqpBase {
                         }
                     });
         }catch (Exception ex){
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+            _log.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -217,10 +223,10 @@ public class ClientAccountTask extends AmqpBase {
                     lock.release();
 
                 }else{
-                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Could not lock user position in redis {0}",  _self.getUsername());
+                    _log.log(Level.SEVERE, "Could not lock user position in redis {0}",  _self.getUsername());
                 }
             } catch (InterruptedException ex) {
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+                _log.log(Level.SEVERE, null, ex);
             }
         }
         
@@ -254,7 +260,7 @@ public class ClientAccountTask extends AmqpBase {
             );
         }catch(Exception ex){
 
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+            _log.log(Level.SEVERE, null, ex);
         }
 
     }
@@ -282,7 +288,7 @@ public class ClientAccountTask extends AmqpBase {
                     }
 
                     for(Position p:positions.values()){
-                        p.processQuote(clientQuotes);
+                        p.processQuote(clientQuotes, false);
 
                         _floating = _floating.add(p.getCurrentPl());
 
@@ -312,11 +318,11 @@ public class ClientAccountTask extends AmqpBase {
                     return positions;
 
                 }else{
-                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Could not get lock to process user positions for {0}", user.getUsername());
+                    _log.log(Level.SEVERE, "Could not get lock to process user positions for {0}", user.getUsername());
                 }
             }catch(Exception ex){
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Error processing user positions for {0}", user.getUsername());
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                _log.log(Level.SEVERE, "Error processing user positions for {0}", user.getUsername());
+                _log.log(Level.SEVERE, ex.getMessage(), ex);
             }
             //or return null if problems
             return null;
@@ -325,20 +331,24 @@ public class ClientAccountTask extends AmqpBase {
 
     private void publishAccountStatus()
     {
-        BigDecimal availableCash = new LedgerModel().GetAvailableCashForUser(_self.getId());
+        String serializedAccountStatus = "{}";
 
-        BigDecimal usedMargin = (_usedMarginBuy.subtract(_usedMarginSell)).abs();
-        BigDecimal equity = availableCash.add(_floating);
-        BigDecimal usable = equity.subtract(usedMargin);
+        synchronized (_accountStatusLock) {
+            _availableCash = new LedgerModel().GetAvailableCashForUser(_self.getId());
 
-        HashMap<String, BigDecimal> accountStatus = new HashMap<>();
-        accountStatus.put("floating", _floating);
-        accountStatus.put("usedMargin", usedMargin);
-        accountStatus.put("equity", equity);
-        accountStatus.put("usable", usable);
-        accountStatus.put("availableCash", availableCash);
+            _usedMargin = (_usedMarginBuy.subtract(_usedMarginSell)).abs();
+            _equity = _availableCash.add(_floating);
+            _usableMargin = _equity.subtract(_usedMargin);
 
-        String serializedAccountStatus = gson.toJson(accountStatus);
+            HashMap<String, BigDecimal> accountStatus = new HashMap<>();
+            accountStatus.put("floating", _floating);
+            accountStatus.put("usedMargin", _usedMargin);
+            accountStatus.put("equity", _equity);
+            accountStatus.put("usableMargin", _usableMargin);
+            accountStatus.put("availableCash", _availableCash);
+
+            serializedAccountStatus = gson.toJson(accountStatus);
+        }
 
         propsBuilder.type("accountStatus");
         AMQP.BasicProperties props = propsBuilder.build();
@@ -356,18 +366,30 @@ public class ClientAccountTask extends AmqpBase {
             _usedMarginBuy = BigDecimal.ZERO;
 
         } catch (Exception ex) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            _log.log(Level.SEVERE, ex.getMessage(), ex);
         }
 
         //todo introduce a new flag to prevent liquidation
         //check if margin call and close all positions
-        if(usable.compareTo(BigDecimal.ZERO) <= 0){
+        if(_usableMargin.compareTo(BigDecimal.ZERO) <= 0){
 
             if(null != _clientRequestConsumer){
-                _clientRequestConsumer.CloseAllPositions();
+                _log.log(Level.INFO, _self.getUsername() + " margin call.");
+                _clientRequestConsumer.closeAllPositions();
             }
 
         }
     }
-    
+
+    public BigDecimal get_usableMargin() {
+
+        BigDecimal ret;
+
+        synchronized (_accountStatusLock) {
+
+            ret = _usableMargin;
+        }
+
+        return ret;
+    }
 }

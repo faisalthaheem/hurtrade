@@ -77,9 +77,9 @@ public class Position {
         this.usedMargin = BigDecimal.ZERO;
     }
     
-    public void processQuote(QuoteList clientQuotes) {
+    public void processQuote(QuoteList clientQuotes, boolean forceProcess) {
 
-        if (!orderState.equalsIgnoreCase(ORDER_STATE_OPEN))
+        if (!forceProcess && !orderState.equalsIgnoreCase(ORDER_STATE_OPEN))
         {
             return;
         }

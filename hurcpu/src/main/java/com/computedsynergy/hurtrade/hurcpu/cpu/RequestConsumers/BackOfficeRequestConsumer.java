@@ -56,6 +56,8 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
     private Object lockChannelWrite = new Object(); //governs access to write access on mq channel
     private Gson gson = new Gson();
 
+    //logging
+    protected Logger _log = Logger.getLogger(this.getClass().getName());
 
     public BackOfficeRequestConsumer(Channel channel,
                          String officeExchangeName,
@@ -99,7 +101,7 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
 
                 user = userModel.getByUsername(request.get("client"));
                 if (user == null) {
-                    Logger.getLogger(this.getClass().getName())
+                    _log
                             .log(Level.SEVERE,
                                     "Could not resolve user for name: ", properties.getUserId());
                     return;
@@ -140,7 +142,7 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
 
         }catch (Exception ex) {
 
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            _log.log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 
@@ -230,10 +232,10 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
 
                         lock.release();
                     }else{
-                        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Office cover position", "Unable to lock " + officeCoverPositionsLockName);
+                        _log.log(Level.INFO, "Office cover position", "Unable to lock " + officeCoverPositionsLockName);
                     }
                 }catch(Exception ex){
-                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                    _log.log(Level.SEVERE, ex.getMessage(), ex);
                 }
             }
 
@@ -309,16 +311,16 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
                         jedis.set(userPositionsKeyName, serializedPositions);
 
                     }catch(Exception ex){
-                        Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                        _log.log(Level.SEVERE, ex.getMessage(), ex);
                     }
 
                     lock.release();
 
                 }else{
-                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
+                    _log.log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
                 }
             }catch(Exception ex){
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
+                _log.log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
             }
         }
 

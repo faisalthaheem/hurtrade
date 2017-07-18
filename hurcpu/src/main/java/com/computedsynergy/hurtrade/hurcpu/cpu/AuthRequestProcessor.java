@@ -108,7 +108,7 @@ public class AuthRequestProcessor extends AmqpBase {
                             null,
                             json.getBytes());
                 } catch (IOException ex) {
-                    Logger.getLogger(AuthRequestProcessor.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                    _log.log(Level.SEVERE, ex.getMessage(), ex);
                 }
             }
 
