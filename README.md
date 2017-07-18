@@ -7,3 +7,5 @@
 An Open Source Forex Trading Platform
 
 Notes on development, deployment coming soon.
+
+USD as account currency is supported currently.
