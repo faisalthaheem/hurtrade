@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by faisal.t on 7/12/2017.
  */
-public interface ICoverPosition {
+public interface ICoverPositionModel {
 
     public List<CoverPosition> listCoverPositionsForAccount(int coverAccountId);
     public boolean saveUpdateCoverPosition(CoverPosition p);

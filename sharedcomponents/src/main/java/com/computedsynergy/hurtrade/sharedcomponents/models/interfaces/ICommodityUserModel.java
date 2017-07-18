@@ -22,7 +22,7 @@ import java.util.List;
  *
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
  */
-public interface ICommodityUser {
+public interface ICommodityUserModel {
     
     public List<CommodityUser> getCommoditiesForUser(int user_id);
 }

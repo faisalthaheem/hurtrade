@@ -15,7 +15,7 @@
  */
 package com.computedsynergy.hurtrade.sharedcomponents.models.impl;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CommodityUser;
-import com.computedsynergy.hurtrade.sharedcomponents.models.interfaces.ICommodityUser;
+import com.computedsynergy.hurtrade.sharedcomponents.models.interfaces.ICommodityUserModel;
 import java.util.List;
 import org.sql2o.Connection;
 
@@ -23,7 +23,7 @@ import org.sql2o.Connection;
  *
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
  */
-public class CommodityUserModel extends ModelBase implements ICommodityUser{
+public class CommodityUserModel extends ModelBase implements ICommodityUserModel {
     
     /**
      *
@@ -33,7 +33,7 @@ public class CommodityUserModel extends ModelBase implements ICommodityUser{
     @Override
     public List<CommodityUser> getCommoditiesForUser(int user_id){
 
-    String query = "select c.commodityname commodityname, cu.spread spread, cu.ratio ratio from commodities c, commodities_users cu where c.id = cu.commodity_id and cu.user_id = " + user_id;
+    String query = "select c.commodityname commodityname, cu.spread spread, cu.ratio ratio, cu.fee fee, cu.commission commission from commodities c, commodities_users cu where c.id = cu.commodity_id and cu.user_id = " + user_id;
         
         try (Connection conn = sql2o.open()) {
             List<CommodityUser> commodities = conn.createQuery(query)

@@ -1,6 +1,6 @@
 package com.computedsynergy.hurtrade.sharedcomponents.models.impl;
 
-import com.computedsynergy.hurtrade.sharedcomponents.models.interfaces.ILedger;
+import com.computedsynergy.hurtrade.sharedcomponents.models.interfaces.ILedgerModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.LedgerRow;
 import org.sql2o.Connection;
 import org.sql2o.converters.BigDecimalConverter;
@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 /**
  * Created by faisal.t on 7/3/2017.
  */
-public class LedgerModel extends ModelBase implements ILedger{
+public class LedgerModel extends ModelBase implements ILedgerModel {
     @Override
     public BigDecimal GetAvailableCashForUser(int user_id) {
 
@@ -45,7 +45,7 @@ public class LedgerModel extends ModelBase implements ILedger{
             }
 
         }catch(Exception ex){
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            _log.log(Level.SEVERE, ex.getMessage(), ex);
         }
 
         return bRet;
@@ -57,5 +57,53 @@ public class LedgerModel extends ModelBase implements ILedger{
         List<LedgerRow> ret =new ArrayList<>();
 
         return ret;
+    }
+
+    @Override
+    public boolean saveFeeForPosition(int user_id, UUID orderId, BigDecimal amt) {
+
+        boolean bRet = false;
+
+        try {
+            String description = String.format("Fee for order [%s].", orderId.toString());
+            String query = String.format("INSERT into ledgers(user_id, withdrawal, created, description) values(%1$d, %2$.2f, '%3$s', '%4$s')", user_id, amt, new Date(), description);
+
+            Logger.getLogger(this.getClass().getName()).log(Level.INFO, query);
+
+            try (Connection conn = sql2o.open()) {
+
+                conn.createQuery(query).executeUpdate();
+            }
+
+        }catch(Exception ex){
+            _log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
+
+        return bRet;
+
+    }
+
+    @Override
+    public boolean saveCommissionForPosition(int user_id, UUID orderId, BigDecimal amt) {
+
+        boolean bRet = false;
+
+        try {
+            String description = String.format("Commission for order [%s].", orderId.toString());
+            String query = String.format("INSERT into ledgers(user_id, withdrawal, created, description) values(%1$d, %2$.2f, '%3$s', '%4$s')", user_id, amt, new Date(), description);
+
+            Logger.getLogger(this.getClass().getName()).log(Level.INFO, query);
+
+            try (Connection conn = sql2o.open()) {
+
+                conn.createQuery(query).executeUpdate();
+            }
+
+        }catch(Exception ex){
+            _log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
+
+        return bRet;
+
     }
 }

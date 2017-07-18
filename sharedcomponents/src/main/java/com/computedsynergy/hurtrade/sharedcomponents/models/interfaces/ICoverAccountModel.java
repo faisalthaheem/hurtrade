@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by faisal.t on 7/12/2017.
  */
-public interface ICoverAccount {
+public interface ICoverAccountModel {
 
     List<CoverAccount> listCoverAccountsForOffice(int officeid);
 }

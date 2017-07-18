@@ -1,6 +1,6 @@
 package com.computedsynergy.hurtrade.sharedcomponents.models.impl;
 
-import com.computedsynergy.hurtrade.sharedcomponents.models.interfaces.ICoverPosition;
+import com.computedsynergy.hurtrade.sharedcomponents.models.interfaces.ICoverPositionModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CoverPosition;
 import org.sql2o.Connection;
 
@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Created by faisal.t on 7/12/2017.
  */
-public class CoverPositionModel extends ModelBase implements ICoverPosition {
+public class CoverPositionModel extends ModelBase implements ICoverPositionModel {
     @Override
     public List<CoverPosition> listCoverPositionsForAccount(int coverAccountId) {
 

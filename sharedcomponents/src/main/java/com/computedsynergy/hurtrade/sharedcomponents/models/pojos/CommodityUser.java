@@ -26,12 +26,14 @@ public class CommodityUser {
     private String commodityname;
     private BigDecimal spread;
     private BigDecimal ratio;
+    private BigDecimal fee;
+    private BigDecimal commission;
     
-    public CommodityUser(String c, BigDecimal s, BigDecimal r){
-        this.commodityname = c;
-        this.spread = s;
-        this.ratio = r;
-    }
+//    public CommodityUser(String c, BigDecimal s, BigDecimal r){
+//        this.commodityname = c;
+//        this.spread = s;
+//        this.ratio = r;
+//    }
 
     /**
      * @return the commodityname
@@ -68,5 +70,21 @@ public class CommodityUser {
 
     public void setRatio(BigDecimal ratio) {
         this.ratio = ratio;
+    }
+
+    public BigDecimal getFee() {
+        return fee;
+    }
+
+    public void setFee(BigDecimal fee) {
+        this.fee = fee;
+    }
+
+    public BigDecimal getCommission() {
+        return commission;
+    }
+
+    public void setCommission(BigDecimal commission) {
+        this.commission = commission;
     }
 }

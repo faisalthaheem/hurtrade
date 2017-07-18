@@ -18,9 +18,11 @@ package com.computedsynergy.hurtrade.sharedcomponents.models.pojos;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.LedgerModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.PositionModel;
+import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 
 import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.*;
@@ -231,8 +233,30 @@ public class Position {
             {
                 setApprovedcloseat(new Date());
 
+                Map<String, CommodityUser> userCommodities = RedisUtil
+                        .getInstance()
+                        .getCachedUserCommodities(_user.getUseruuid());
+
+                //charge commmission and fee and post p/l
+                LedgerModel ledger = new LedgerModel();
+
                 //realize position P/L
-                new LedgerModel().SaveRealizedPositionPL(_user.getId(), getOrderId(), getCurrentPl());
+                ledger.SaveRealizedPositionPL(_user.getId(), getOrderId(), getCurrentPl());
+
+                ledger.saveFeeForPosition(
+                        _user.getId(),
+                        orderId,
+                        userCommodities.get(commodity).getFee()
+                );
+
+                //charge commmission only if profitable to the client
+                if(currentPl.compareTo(BigDecimal.ZERO) > 0) {
+                    ledger.saveCommissionForPosition(
+                            _user.getId(),
+                            orderId,
+                            currentPl.multiply(userCommodities.get(commodity).getCommission())
+                    );
+                }
             }
             break;
 

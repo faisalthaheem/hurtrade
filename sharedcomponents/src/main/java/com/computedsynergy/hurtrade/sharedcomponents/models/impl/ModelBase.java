@@ -19,6 +19,8 @@ import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOpti
 import com.computedsynergy.hurtrade.sharedcomponents.db.DbConnection;
 import org.sql2o.Sql2o;
 
+import java.util.logging.Logger;
+
 /**
  *
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
@@ -27,6 +29,9 @@ public class ModelBase {
     
     protected final Sql2o sql2o;
     protected final DbConnection db;
+
+    //logging
+    protected Logger _log = Logger.getLogger(this.getClass().getName());
     
     public ModelBase(){
         

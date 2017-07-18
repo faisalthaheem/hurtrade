@@ -19,6 +19,7 @@ import com.computedsynergy.hurtrade.hurcpu.cpu.Tasks.ClientAccountTask;
 import com.computedsynergy.hurtrade.sharedcomponents.charting.CandleStickChartingDataProvider;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.charting.CandleStick;
+import com.computedsynergy.hurtrade.sharedcomponents.models.impl.LedgerModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.PositionModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CommodityUser;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
@@ -108,7 +109,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
             }else if(commandVerb.equals("tradeClosure")) {
 
                 Map<String,String> cmdParams =  new Gson().fromJson(new String(body), Constants.TYPE_DICTIONARY);
-                closePosition(_user, UUID.fromString(cmdParams.get("orderid")));
+                closePosition(UUID.fromString(cmdParams.get("orderid")));
 
             }else if(commandVerb.equalsIgnoreCase("candlestick")){
 
@@ -156,49 +157,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
         }
     }
 
-    private void closePosition(User user, UUID orderId)
-    {
-
-        //get the last quoted prices for commodities for this user
-        String serializedQuotes = RedisUtil.getInstance().getSeriaizedQuotesForClient(user.getUseruuid());
-        QuoteList quotesForClient = gson.fromJson(serializedQuotes, QuoteList.class);
-
-
-        String userPositionsKeyName = getUserPositionsKeyName(user.getUseruuid());
-        Type mapType = new TypeToken<Map<UUID, Position>>(){}.getType();
-
-        try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
-            JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
-            try{
-                if(lock.acquire()){
-
-                    //get client positions
-                    Map<UUID, Position> positions = gson.fromJson(jedis.get(userPositionsKeyName),mapType);
-                    if(positions.containsKey(orderId)) {
-
-
-                        Position position = positions.get(orderId);
-                        closePosition(position,quotesForClient);
-
-                        //set client positions
-                        String serializedPositions = gson.toJson(positions);
-                        jedis.set(userPositionsKeyName, serializedPositions);
-                    }
-
-
-
-                    lock.release();
-
-                }else{
-                    _log.log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
-                }
-            }catch(Exception ex){
-                _log.log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
-            }
-        }
-    }
-
-    public void closeAllPositions()
+    private void closePosition(UUID orderId)
     {
 
         //get the last quoted prices for commodities for this user
@@ -216,6 +175,48 @@ public class ClientRequestConsumer extends DefaultConsumer {
 
                     //get client positions
                     Map<UUID, Position> positions = gson.fromJson(jedis.get(userPositionsKeyName),mapType);
+                    if(positions.containsKey(orderId)) {
+
+
+                        Position position = positions.get(orderId);
+                        closePosition(position, quotesForClient);
+
+                        //set client positions
+                        String serializedPositions = gson.toJson(positions);
+                        jedis.set(userPositionsKeyName, serializedPositions);
+                    }
+
+
+
+                    lock.release();
+
+                }else{
+                    _log.log(Level.SEVERE, null, "Could not process user positions " + _user.getUsername());
+                }
+            }catch(Exception ex){
+                _log.log(Level.SEVERE, null, "Could not process user positions " + _user.getUsername());
+            }
+        }
+    }
+
+    public void closeAllPositions()
+    {
+
+        //get the last quoted prices for commodities for this user
+        String serializedQuotes = RedisUtil.getInstance().getSeriaizedQuotesForClient(_user.getUseruuid());
+        QuoteList quotesForClient = gson.fromJson(serializedQuotes, QuoteList.class);
+
+        String userPositionsKeyName = getUserPositionsKeyName(_user.getUseruuid());
+        Type mapType = new TypeToken<Map<UUID, Position>>(){}.getType();
+
+        try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
+            JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
+            try{
+                if(lock.acquire()){
+
+                    //get client positions
+                    Map<UUID, Position> positions = gson.fromJson(jedis.get(userPositionsKeyName),mapType);
+
 
                     Iterator<Map.Entry<UUID, Position>> iter = positions.entrySet().iterator();
                     while(iter.hasNext()){
@@ -282,8 +283,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
     
     private void processTradeRequest(TradeResponse response, User user)
     {
-        
-        //todo, check if this commodity is allowed to this customer
+
         Map<String, CommodityUser> userCommodities = RedisUtil
                                                 .getInstance()
                                                 .getCachedUserCommodities(user.getUseruuid());

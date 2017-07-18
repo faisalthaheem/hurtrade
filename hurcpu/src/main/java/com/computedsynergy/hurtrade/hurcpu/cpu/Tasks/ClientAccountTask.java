@@ -81,6 +81,7 @@ public class ClientAccountTask extends AmqpBase {
     private String _userPositionsKeyName = "";
 
     //finance related variables
+    private int _countOpenPositions = 0;
     private BigDecimal _floating = BigDecimal.ZERO;
     private BigDecimal _availableCash = BigDecimal.ZERO;
     private BigDecimal _usedMargin = BigDecimal.ZERO;
@@ -298,7 +299,10 @@ public class ClientAccountTask extends AmqpBase {
                             _usedMarginSell = _usedMarginSell.add(p.getUsedMargin());
                         }
                     }
-                    
+
+                    //set the number of open positions as they are used later in determining whether to issue a margin call
+                    _countOpenPositions = positions.size();
+
                     //set client positions
                     String serializedPositions = gson.toJson(positions);
                     jedis.set(_userPositionsKeyName, serializedPositions);
@@ -371,7 +375,7 @@ public class ClientAccountTask extends AmqpBase {
 
         //todo introduce a new flag to prevent liquidation
         //check if margin call and close all positions
-        if(_usableMargin.compareTo(BigDecimal.ZERO) <= 0){
+        if(_countOpenPositions > 0 && _usableMargin.compareTo(BigDecimal.ZERO) <= 0){
 
             if(_self.isLiquidate()) {
                 if (null != _clientRequestConsumer) {
