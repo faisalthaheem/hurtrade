@@ -289,7 +289,7 @@ public class ClientAccountTask extends AmqpBase {
                     }
 
                     for(Position p:positions.values()){
-                        p.processQuote(clientQuotes, false);
+                        p.processQuote(clientQuotes);
 
                         _floating = _floating.add(p.getCurrentPl());
 
@@ -373,7 +373,6 @@ public class ClientAccountTask extends AmqpBase {
             _log.log(Level.SEVERE, ex.getMessage(), ex);
         }
 
-        //todo introduce a new flag to prevent liquidation
         //check if margin call and close all positions
         if(_countOpenPositions > 0 && _usableMargin.compareTo(BigDecimal.ZERO) <= 0){
 

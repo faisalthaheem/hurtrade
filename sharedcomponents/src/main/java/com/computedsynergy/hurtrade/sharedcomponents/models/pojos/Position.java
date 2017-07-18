@@ -18,15 +18,19 @@ package com.computedsynergy.hurtrade.sharedcomponents.models.pojos;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.LedgerModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.PositionModel;
+import com.computedsynergy.hurtrade.sharedcomponents.util.GeneralUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.*;
 
+//todo: move this class out of poco package
 /**
  *
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
@@ -62,7 +66,12 @@ public class Position {
     private BigDecimal usedMargin;
     private BigDecimal ratio;
 
+    private long friendlyorderid;
+
     private User _user;
+
+    //logging
+    private static final Logger _log = Logger.getLogger(Position.class.getName());
     
     public Position(UUID orderId, String orderType, String commodity, BigDecimal amount, BigDecimal requestedPrice, BigDecimal ratio, User user){
         
@@ -71,23 +80,37 @@ public class Position {
         this.commodity = commodity;
         this.amount = amount;
         this.currentPl = BigDecimal.ZERO;
-        this.setOpenPrice(requestedPrice);
+        this.openPrice = requestedPrice;
         this.setOrderState(ORDER_STATE_PENDING_OPEN);
         this.ratio = ratio; //ratio of leverage allowed on this instrument
         this._user = user;
 
         this.usedMargin = BigDecimal.ZERO;
+
+
+        friendlyorderid = GeneralUtil.GetNextFriendlyOrderId();
+
+    }
+
+    public Position clone(){
+        Position p = new Position(orderId, orderType, commodity, amount, openPrice, ratio, _user);
+        p.setFriendlyorderid(friendlyorderid);
+        return p;
     }
     
-    public void processQuote(QuoteList clientQuotes, boolean forceProcess) {
+    public void processQuote(QuoteList clientQuotes) {
 
-        if (!forceProcess && !orderState.equalsIgnoreCase(ORDER_STATE_OPEN))
+        if (
+                orderState.equalsIgnoreCase(ORDER_STATE_PENDING_CLOSE) ||
+                        orderState.equalsIgnoreCase(ORDER_STATE_CLOSED) ||
+                        orderState.equalsIgnoreCase(ORDER_STATE_REJECTED_OPEN)
+                )
         {
             return;
         }
         
         if(clientQuotes.containsKey(commodity)){
-            BigDecimal closingPrice = BigDecimal.ZERO;
+            BigDecimal closingPrice;
             
             BigDecimal exchangeRate = BigDecimal.ONE;
             String baseCurrency = commodity.substring(0,3);
@@ -275,6 +298,10 @@ public class Position {
 
         PositionModel positionModel = new PositionModel();
         positionModel.saveUpdatePosition(this);
+
+        String logMessage = String.format("[%d] %s [%s]", friendlyorderid, orderId.toString(), orderState);
+        _log.log(Level.INFO, logMessage);
+
     }
 
     public boolean isOpen(){
@@ -350,5 +377,13 @@ public class Position {
 
     public void setUsedMargin(BigDecimal usedMargin) {
         this.usedMargin = usedMargin;
+    }
+
+    public long getFriendlyorderid() {
+        return friendlyorderid;
+    }
+
+    public void setFriendlyorderid(long friendlyorderid) {
+        this.friendlyorderid = friendlyorderid;
     }
 }

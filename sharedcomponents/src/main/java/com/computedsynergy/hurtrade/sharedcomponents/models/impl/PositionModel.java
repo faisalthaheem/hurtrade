@@ -39,8 +39,8 @@ public class PositionModel extends ModelBase implements IPositionModel {
 
         String insertSql =
                 "INSERT INTO positions " +
-                "(ordertype, commodity, amount, currentpl, orderid, openprice, closeprice, orderstate, createdat, endedat, closedat, approvedopenat, approvedcloseat) " +
-                "VALUES(:ordertype, :commodity, :amount, :currentpl, :orderid, :openprice, :closeprice, :orderstate, :createdat, :endedat, :closedat, :approvedopenat, :approvedcloseat) ";
+                "(ordertype, commodity, amount, currentpl, orderid, openprice, closeprice, orderstate, createdat, endedat, closedat, approvedopenat, approvedcloseat, friendlyorderid) " +
+                "VALUES(:ordertype, :commodity, :amount, :currentpl, :orderid, :openprice, :closeprice, :orderstate, :createdat, :endedat, :closedat, :approvedopenat, :approvedcloseat, :friendlyorderid) ";
 
         try (Connection con = sql2o.beginTransaction()) {
 
@@ -62,6 +62,7 @@ public class PositionModel extends ModelBase implements IPositionModel {
                     .addParameter("closedat", p.getClosedat())
                     .addParameter("approvedopenat", p.getApprovedopenat())
                     .addParameter("approvedcloseat", p.getApprovedcloseat())
+                    .addParameter("friendlyorderid", p.getFriendlyorderid())
                     .executeUpdate();
 
             con.commit();

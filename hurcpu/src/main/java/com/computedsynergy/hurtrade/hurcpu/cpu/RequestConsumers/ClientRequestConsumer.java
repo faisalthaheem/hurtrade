@@ -207,7 +207,6 @@ public class ClientRequestConsumer extends DefaultConsumer {
         QuoteList quotesForClient = gson.fromJson(serializedQuotes, QuoteList.class);
 
         String userPositionsKeyName = getUserPositionsKeyName(_user.getUseruuid());
-        Type mapType = new TypeToken<Map<UUID, Position>>(){}.getType();
 
         try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
             JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
@@ -215,7 +214,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
                 if(lock.acquire()){
 
                     //get client positions
-                    Map<UUID, Position> positions = gson.fromJson(jedis.get(userPositionsKeyName),mapType);
+                    Map<UUID, Position> positions = gson.fromJson(jedis.get(userPositionsKeyName), Constants.TYPE_POSITIONS_MAP);
 
 
                     Iterator<Map.Entry<UUID, Position>> iter = positions.entrySet().iterator();
@@ -350,12 +349,16 @@ public class ClientRequestConsumer extends DefaultConsumer {
                             break;
                         }
 
+
                         if(position != null){
+
+                            Position tempPosition = position.clone();
+
                             //check if the used margin of this order < usable margin
-                            position.processQuote(quotesForClient, true);
+                            tempPosition.processQuote(quotesForClient);
 
                             BigDecimal usableMargin = _account.get_usableMargin(); //avoid successive locks
-                            if(position.getUsedMargin().compareTo(usableMargin) <= 0) {
+                            if(tempPosition.getUsedMargin().compareTo(usableMargin) <= 0) {
 
                                 positions.put(position.getOrderId(), position);
                                 response.setResposneOk();
@@ -364,7 +367,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
                                 String logMessage = String.format("New Trade declined because of insufficient usable margin available. [%s] requested [%s] required [%f] available [%f]",
                                         _user.getUsername(),
                                         position.getCommodity(),
-                                        position.getUsedMargin(),
+                                        tempPosition.getUsedMargin(),
                                         usableMargin
                                 );
                                 _log.log(Level.INFO, logMessage);
