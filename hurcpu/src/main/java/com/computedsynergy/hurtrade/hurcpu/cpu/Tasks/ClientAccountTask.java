@@ -30,6 +30,9 @@ import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
 import com.computedsynergy.hurtrade.sharedcomponents.util.MqNamingUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
+
+import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.ORDER_STATE_CANCELED;
+import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.ORDER_STATE_OPEN;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.EXPIRY_LOCK_USER_POSITIONS;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.TIMEOUT_LOCK_USER_POSITIONS;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.getLockNameForUserPositions;
@@ -43,6 +46,7 @@ import com.rabbitmq.client.Envelope;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -288,7 +292,12 @@ public class ClientAccountTask extends AmqpBase {
                         positions = new HashMap<>();
                     }
 
-                    for(Position p:positions.values()){
+                    RedisUtil redis = RedisUtil.getInstance();
+
+                    Iterator<Map.Entry<UUID, Position>> iter = positions.entrySet().iterator();
+                    while(iter.hasNext()){
+
+                        Position p = iter.next().getValue();
                         p.processQuote(clientQuotes);
 
                         _floating = _floating.add(p.getCurrentPl());
@@ -297,6 +306,22 @@ public class ClientAccountTask extends AmqpBase {
                             _usedMarginBuy = _usedMarginBuy.add(p.getUsedMargin());
                         }else{
                             _usedMarginSell = _usedMarginSell.add(p.getUsedMargin());
+                        }
+
+                        if(p.isRequoted()){
+
+                            if(!redis.GetOrderRequoteValid(p.getOrderId())){
+
+                                _log.log(Level.INFO, "Requote expired for " + p.getOrderId().toString());
+
+                                if(p.is_wasPendingClose()) {
+                                    p.setOrderState(ORDER_STATE_OPEN);
+
+                                }else{
+                                    p.setOrderState(ORDER_STATE_CANCELED);
+                                    iter.remove();
+                                }
+                            }
                         }
                     }
 
@@ -307,7 +332,7 @@ public class ClientAccountTask extends AmqpBase {
                     String serializedPositions = gson.toJson(positions);
                     jedis.set(_userPositionsKeyName, serializedPositions);
 
-                    //todo - on a different thread not so often.
+                    //todo - on a different thread not so often. ideally on trade executions
                     //dump client's positions to db only if there are any positions
 //                    if(positions.size() > 0){
 //                        SavedPosition p = new SavedPosition(user.getId(), serializedPositions);

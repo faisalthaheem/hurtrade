@@ -74,11 +74,12 @@ public class RedisUtil {
     public static final String LOCK_COVER_POSITIONS = "lock_cov_pos_";
     public static final int TIMEOUT_LOCK_COVER_POSITIONS = 5000;
     public static final int EXPIRY_LOCK_COVER_POSITIONS = 10000;
+
+    //requotes
+    public static final String REQUOTE_PREFIX = "requote_";
     
     private static RedisUtil _self = null;
 
-
-    
     /**
      * @return the _self
      */
@@ -342,6 +343,42 @@ public class RedisUtil {
         return ret;
     }
 
+    public boolean SetString(String keyName, String value, int expiry){
+
+        boolean ret = false;
+
+        try(Jedis jedis = jedisPool.getResource())
+        {
+            try {
+                jedis.set(keyName, value);
+                ret = jedis.expire(keyName, expiry) == 1;
+
+            } catch (Exception ex) {
+                Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        return ret;
+    }
+
+    public boolean IsKeySet(String keyName){
+
+        boolean ret = false;
+
+        try(Jedis jedis = jedisPool.getResource())
+        {
+            try {
+
+                ret = jedis.exists(keyName);
+
+            } catch (Exception ex) {
+                Logger.getLogger(RedisUtil.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        }
+
+        return ret;
+    }
+
     public User GetUserInfo(String username){
 
         User u = null;
@@ -366,6 +403,18 @@ public class RedisUtil {
 
         return SetString(keyName, lockName, TIMEOUT_LOCK_USER_INFO, EXPIRY_LOCK_USER_INFO, json);
 
+    }
+
+    public boolean SetOrderRequoted(UUID orderid, int expiry)
+    {
+        String keyName = REQUOTE_PREFIX + orderid.toString();
+        return SetString(keyName, "", expiry);
+    }
+
+    public boolean GetOrderRequoteValid(UUID orderid){
+        String keyName = REQUOTE_PREFIX + orderid.toString();
+
+        return IsKeySet(keyName);
     }
 
     public List<Position> GetUserPositions(String username){

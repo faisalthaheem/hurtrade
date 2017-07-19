@@ -16,12 +16,9 @@
 package com.computedsynergy.hurtrade.sharedcomponents.models.impl;
 
 import com.computedsynergy.hurtrade.sharedcomponents.models.interfaces.IPositionModel;
-import com.computedsynergy.hurtrade.sharedcomponents.models.interfaces.ISavedPositionModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
-import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.SavedPosition;
 import org.sql2o.Connection;
 
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,8 +36,8 @@ public class PositionModel extends ModelBase implements IPositionModel {
 
         String insertSql =
                 "INSERT INTO positions " +
-                "(ordertype, commodity, amount, currentpl, orderid, openprice, closeprice, orderstate, createdat, endedat, closedat, approvedopenat, approvedcloseat, friendlyorderid) " +
-                "VALUES(:ordertype, :commodity, :amount, :currentpl, :orderid, :openprice, :closeprice, :orderstate, :createdat, :endedat, :closedat, :approvedopenat, :approvedcloseat, :friendlyorderid) ";
+                "(ordertype, commodity, amount, currentpl, orderid, openprice, closeprice, orderstate, createdat, endedat, closedat, approvedopenat, approvedcloseat, friendlyorderid, requoteprice) " +
+                "VALUES(:ordertype, :commodity, :amount, :currentpl, :orderid, :openprice, :closeprice, :orderstate, :createdat, :endedat, :closedat, :approvedopenat, :approvedcloseat, :friendlyorderid, :requoteprice) ";
 
         try (Connection con = sql2o.beginTransaction()) {
 
@@ -63,6 +60,7 @@ public class PositionModel extends ModelBase implements IPositionModel {
                     .addParameter("approvedopenat", p.getApprovedopenat())
                     .addParameter("approvedcloseat", p.getApprovedcloseat())
                     .addParameter("friendlyorderid", p.getFriendlyorderid())
+                    .addParameter("requoteprice", p.getRequoteprice())
                     .executeUpdate();
 
             con.commit();

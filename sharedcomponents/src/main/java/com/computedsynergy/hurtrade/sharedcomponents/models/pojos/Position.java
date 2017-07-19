@@ -70,6 +70,10 @@ public class Position {
 
     private User _user;
 
+    private BigDecimal requoteprice;
+
+    private boolean _wasPendingClose; //this is used with order requotes to apply the requoted price to the appropriate field
+
     //logging
     private static final Logger _log = Logger.getLogger(Position.class.getName());
     
@@ -205,21 +209,6 @@ public class Position {
     }
 
   
-
-    /**
-     * @return the openPrice
-     */
-    public BigDecimal getRequestedPrice() {
-        return getOpenPrice();
-    }
-
-    /**
-     * @param requestedPrice the openPrice to set
-     */
-    public void setRequestedPrice(BigDecimal requestedPrice) {
-        this.setOpenPrice(requestedPrice);
-    }
-
     /**
      * @return the orderState
      */
@@ -236,18 +225,21 @@ public class Position {
         switch (this.orderState){
             case ORDER_STATE_PENDING_OPEN:
             {
+                _wasPendingClose = false;
                 setCreatedat(new Date());
             }
             break;
 
             case ORDER_STATE_OPEN:
             {
+                _wasPendingClose = false;
                 setApprovedopenat(new Date());
             }
             break;
 
             case ORDER_STATE_PENDING_CLOSE:
             {
+                _wasPendingClose = true;
                 setClosedat(new Date());
             }
             break;
@@ -385,5 +377,26 @@ public class Position {
 
     public void setFriendlyorderid(long friendlyorderid) {
         this.friendlyorderid = friendlyorderid;
+    }
+
+    public boolean isRequoted() {
+
+        return orderState.equalsIgnoreCase(ORDER_STATE_REQUOTED);
+    }
+
+    public BigDecimal getRequoteprice() {
+        return requoteprice;
+    }
+
+    public void setRequoteprice(BigDecimal requoteprice) {
+        this.requoteprice = requoteprice;
+    }
+
+    public boolean is_wasPendingClose() {
+        return _wasPendingClose;
+    }
+
+    public void set_wasPendingClose(boolean _wasPendingClose) {
+        this._wasPendingClose = _wasPendingClose;
     }
 }

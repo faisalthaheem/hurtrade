@@ -53,9 +53,9 @@ public class CommandLineOptions {
     @Parameter(names = {"--yahoo-fx-frequency"})
     public Integer yahooFxFrequency = 3000;
 
-    @Parameter(names = {"--users-keys-update-timer-interval"})
-    public Integer usersKeysUpdateTimerInterval = 60000;
+    @Parameter(names = {"--requote-network-delay"})
+    public Integer requoteNetworkDelay = 1; //how much grace period on top of the allowed time within which the client has to respond (in secs)
 
-    @Parameter(names = {"--office-positions-update-timer"})
-    public Integer officePositionsUpdateTimer = 1000;
+    @Parameter(names = {"--requote-timeout"})
+    public Integer requoteTimeout = 10; //(in secs)
 }

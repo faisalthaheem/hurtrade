@@ -15,9 +15,8 @@
  */
 package com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers;
 
+import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.CoverAccountModel;
-import com.computedsynergy.hurtrade.sharedcomponents.models.impl.LedgerModel;
-import com.computedsynergy.hurtrade.sharedcomponents.models.impl.PositionModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.*;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
 import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
@@ -25,13 +24,12 @@ import com.computedsynergy.hurtrade.sharedcomponents.util.MqNamingUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
 import com.github.jedis.lock.JedisLock;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.rabbitmq.client.*;
 import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,6 +54,8 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
     private Object lockChannelWrite = new Object(); //governs access to write access on mq channel
     private Gson gson = new Gson();
 
+    private DecimalFormat decimalParser = new DecimalFormat();
+
     //logging
     protected Logger _log = Logger.getLogger(this.getClass().getName());
 
@@ -70,6 +70,8 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
         this.dealerInQueueName = dealerInQueueName;
         this.dealerOutQueueName = dealerOutQueueName;
         _office = office;
+
+        decimalParser.setParseBigDecimal(true);
 
     }
 
@@ -281,9 +283,6 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
                                     position.setOrderState(Constants.ORDER_STATE_CLOSED);
                                     clientUpdate.put("order_status", "Order [" + orderid + "] approved close by " + dealerName);
                                     positions.remove(orderid);
-
-
-
                                 }
                             }
                             break;
@@ -300,8 +299,33 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
                                 //post the pl
                             }
                             break;
-                            case "requote": {
-                                //position.setOrderState(Position.ORDER_STATE_OPEN);
+                            case "requote":
+                            {
+                                position.setRequoteprice(
+                                        (BigDecimal) decimalParser.parse(request.get("requoted_price"))
+                                );
+
+                                position.setOrderState(Constants.ORDER_STATE_REQUOTED);
+
+                                //set requoted price in redis with an expiry as defined in params
+                                int tiemout = CommandLineOptions.getInstance().requoteNetworkDelay
+                                        +
+                                        CommandLineOptions.getInstance().requoteTimeout;
+
+                                RedisUtil.getInstance().SetOrderRequoted(
+                                        position.getOrderId(),
+                                        tiemout
+                                );
+                                //send to client
+                                clientUpdate.put("requote","yes");
+                                clientUpdate.put("orderid", position.getOrderId().toString());
+                                clientUpdate.put("timeout","" + tiemout);
+                                clientUpdate.put("requoteprice","" + position.getRequoteprice());
+                                if(position.is_wasPendingClose()){
+                                    clientUpdate.put("pendingclose","yes");
+                                }else{
+                                    clientUpdate.put("pendingclose","");
+                                }
                             }
                             break;
                         }

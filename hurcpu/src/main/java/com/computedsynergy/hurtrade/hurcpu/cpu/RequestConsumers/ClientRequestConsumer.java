@@ -32,6 +32,7 @@ import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
 
 import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.ORDER_STATE_CANCELED;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.ORDER_STATE_CLOSED;
+import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.ORDER_STATE_OPEN;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.EXPIRY_LOCK_USER_POSITIONS;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.TIMEOUT_LOCK_USER_POSITIONS;
 import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.getLockNameForUserPositions;
@@ -111,6 +112,11 @@ public class ClientRequestConsumer extends DefaultConsumer {
                 Map<String,String> cmdParams =  new Gson().fromJson(new String(body), Constants.TYPE_DICTIONARY);
                 closePosition(UUID.fromString(cmdParams.get("orderid")));
 
+            }else if(commandVerb.equals("requote")) {
+
+                Map<String,String> cmdParams =  new Gson().fromJson(new String(body), Constants.TYPE_DICTIONARY);
+                processRequoteCommand(cmdParams);
+
             }else if(commandVerb.equalsIgnoreCase("candlestick")){
 
 
@@ -157,6 +163,68 @@ public class ClientRequestConsumer extends DefaultConsumer {
         }
     }
 
+    private void processRequoteCommand(Map<String,String> params){
+
+        if(params.containsKey("orderid")){
+            UUID orderId = UUID.fromString(params.get("orderid"));
+
+            String userPositionsKeyName = getUserPositionsKeyName(_user.getUseruuid());
+
+            //get the last quoted prices for commodities for this user
+            String serializedQuotes = RedisUtil.getInstance().getSeriaizedQuotesForClient(_user.getUseruuid());
+            QuoteList quotesForClient = gson.fromJson(serializedQuotes, QuoteList.class);
+
+            try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
+                JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
+                try{
+                    if(lock.acquire()){
+
+                        //get client positions
+                        Map<UUID, Position> positions = gson.fromJson(jedis.get(userPositionsKeyName), Constants.TYPE_POSITIONS_MAP);
+
+                        if(positions.containsKey(orderId)){
+
+                            Position p = positions.get(orderId);
+                            if(p.isRequoted()){
+
+                                if(p.is_wasPendingClose()){
+                                    p.setClosePrice(p.getRequoteprice());
+                                    p.setOrderState(Constants.ORDER_STATE_CLOSED);
+                                    positions.remove(orderId);
+
+                                }else {
+                                    p.setOpenPrice(p.getRequoteprice());
+                                    p.setOrderState(ORDER_STATE_OPEN);
+                                }
+
+
+                                //set client positions
+                                String serializedPositions = gson.toJson(positions);
+                                jedis.set(userPositionsKeyName, serializedPositions);
+
+                            }else {
+                                _log.log(Level.INFO, _user.getUsername() + " requested requote on an order that has not been requoted: " + orderId);
+                                //todo: record this breach
+                            }
+
+                        }else{
+                            _log.log(Level.INFO, _user.getUsername() + " requested requote on non-existent order: " + orderId);
+                        }
+
+
+                        lock.release();
+
+                    }else{
+                        _log.log(Level.SEVERE, null, "Could not process user positions " + _user.getUsername());
+                    }
+                }catch(Exception ex){
+                    _log.log(Level.SEVERE, null, "Could not process user positions " + _user.getUsername());
+                }
+            }
+        }
+
+    }
+
     private void closePosition(UUID orderId)
     {
 
@@ -180,13 +248,12 @@ public class ClientRequestConsumer extends DefaultConsumer {
 
                         Position position = positions.get(orderId);
                         closePosition(position, quotesForClient);
+                        //do not remove from here as this position has been marked close and now pending dealer revie.
 
                         //set client positions
                         String serializedPositions = gson.toJson(positions);
                         jedis.set(userPositionsKeyName, serializedPositions);
                     }
-
-
 
                     lock.release();
 
@@ -279,7 +346,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
             }
         }
     }
-    
+
     private void processTradeRequest(TradeResponse response, User user)
     {
 

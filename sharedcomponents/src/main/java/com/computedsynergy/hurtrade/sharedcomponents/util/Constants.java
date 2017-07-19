@@ -47,6 +47,7 @@ public class Constants {
     public static final String ORDER_STATE_CLOSED = "closed";
     public static final String ORDER_STATE_REJECTED_OPEN = "rejected_open";
     public static final String ORDER_STATE_CANCELED = "canceled";
+    public static final String ORDER_STATE_REQUOTED = "requoted";
 
 
     public static final String SERIALS_POSITIONS_FRIENDLY_ORDER_ID = "positions";
