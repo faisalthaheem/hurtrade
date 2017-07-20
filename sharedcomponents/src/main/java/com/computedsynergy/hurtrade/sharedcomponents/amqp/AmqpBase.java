@@ -16,16 +16,14 @@
 package com.computedsynergy.hurtrade.sharedcomponents.amqp;
 
 import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
-import com.rabbitmq.client.Address;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.*;
 import com.rabbitmq.client.impl.AMQChannel;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -34,11 +32,16 @@ import java.util.logging.Logger;
  */
 public class AmqpBase {
 
+    protected Channel channel = null;
+    private AMQP.BasicProperties.Builder propsBuilder = new AMQP.BasicProperties.Builder();
+
+    //lock for accessing this instance's channel
+    private Object lockChannel = new Object();
+
     //logging
     protected Logger _log = Logger.getLogger(this.getClass().getName());
 
-    protected Channel channel = null;
-    
+
     /**
      * Sets the ConnectionFactory parameters
      * @throws java.io.IOException
@@ -56,5 +59,30 @@ public class AmqpBase {
 
     protected Channel CreateNewChannel(){
         return AmqpConnectionFactory.GetInstance().CreateChannel();
+    }
+
+
+    protected void publishMessage(String exchange,
+                                String routingKey,
+                                String messageTypeProperty,
+                                String payload)
+    {
+        synchronized (lockChannel) {
+
+            propsBuilder.type(messageTypeProperty);
+            AMQP.BasicProperties props = propsBuilder.build();
+
+            try{
+                channel.basicPublish(
+                        exchange,
+                        routingKey,
+                        props,
+                        payload.getBytes()
+                );
+            }catch(Exception ex){
+
+                _log.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+        }
     }
 }

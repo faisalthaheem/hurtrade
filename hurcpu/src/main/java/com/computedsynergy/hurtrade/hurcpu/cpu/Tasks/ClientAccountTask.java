@@ -79,7 +79,7 @@ public class ClientAccountTask extends AmqpBase {
     private String _myRateQueueName = "";
     private String _incomingQueueName = "";
     private String _outgoingQueueName = "";
-    private AMQP.BasicProperties.Builder propsBuilder = new AMQP.BasicProperties.Builder();
+    private String _officeExchangeName = "";
 
     //redis related
     private String _userPositionsKeyName = "";
@@ -96,9 +96,7 @@ public class ClientAccountTask extends AmqpBase {
     private Object _accountStatusLock = new Object();
 
     //use a dedicated channel for client requests/responses
-    Channel _exclusiveChannel = null;
-
-
+    Channel _exclusiveChannelClientRequestConsumer = null;
 
     public ClientAccountTask(User u){
         _self = u;
@@ -109,8 +107,9 @@ public class ClientAccountTask extends AmqpBase {
         _incomingQueueName = MqNamingUtil.getClientIncomingQueueName(u.getUseruuid());
         _outgoingQueueName = MqNamingUtil.getClientOutgoingQueueName(u.getUseruuid());
         _myRateQueueName = Constants.QUEUE_NAME_RATES + _self.getUseruuid().toString();
+        _officeExchangeName = MqNamingUtil.getOfficeExchangeName(_self.getUserOffice().getOfficeuuid());
 
-        _exclusiveChannel = CreateNewChannel();
+        _exclusiveChannelClientRequestConsumer = CreateNewChannel();
 
         this.init();
     }
@@ -138,9 +137,9 @@ public class ClientAccountTask extends AmqpBase {
 
             //consume command related messages from user
 
-            _clientRequestConsumer = new ClientRequestConsumer(this, _self, _exclusiveChannel, _clientExchangeName);
+            _clientRequestConsumer = new ClientRequestConsumer(this, _self, _exclusiveChannelClientRequestConsumer, _clientExchangeName);
 
-            _exclusiveChannel.basicConsume(_incomingQueueName, false, "command" + _self.getUseruuid().toString(), _clientRequestConsumer);
+            _exclusiveChannelClientRequestConsumer.basicConsume(_incomingQueueName, false, "command" + _self.getUseruuid().toString(), _clientRequestConsumer);
 
             //consume the rates specific messages and send updates to the user as a result
             channel.basicConsume(_myRateQueueName, false, "rates-"+ _self.getUseruuid().toString(),
@@ -247,28 +246,19 @@ public class ClientAccountTask extends AmqpBase {
             }
         }
 
-
-
-        propsBuilder.type("update");
-        AMQP.BasicProperties props = propsBuilder.build();
-
         ClientUpdate update = new ClientUpdate(clientPositions, clientQuotes);
-        
         String serializedQuotesForClient = gson.toJson(update);
+
         //finally send out the quotes and updated positions to the client
-        try{
-            channel.basicPublish(
-                    _clientExchangeName,
-                    "response",
-                    props,
-                    serializedQuotesForClient.getBytes()
-            );
-        }catch(Exception ex){
-
-            _log.log(Level.SEVERE, null, ex);
-        }
-
+        publishMessage(
+                _clientExchangeName,
+                "response",
+                "update",
+                serializedQuotesForClient
+        );
     }
+
+
     
     private Map<UUID, Position> updateClientPositions(User user, QuoteList clientQuotes)
     {
@@ -379,41 +369,69 @@ public class ClientAccountTask extends AmqpBase {
             serializedAccountStatus = gson.toJson(accountStatus);
         }
 
-        propsBuilder.type("accountStatus");
-        AMQP.BasicProperties props = propsBuilder.build();
+        publishMessage(
+                _clientExchangeName,
+                "response",
+                "accountStatus",
+                serializedAccountStatus
+        );
 
-        try {
-            channel.basicPublish(
-                    _clientExchangeName,
-                    "response",
-                    props,
-                    serializedAccountStatus.getBytes()
-            );
-
-            _floating = BigDecimal.ZERO;
-            _usedMarginSell = BigDecimal.ZERO;
-            _usedMarginBuy = BigDecimal.ZERO;
-
-        } catch (Exception ex) {
-            _log.log(Level.SEVERE, ex.getMessage(), ex);
-        }
+        _floating = BigDecimal.ZERO;
+        _usedMarginSell = BigDecimal.ZERO;
+        _usedMarginBuy = BigDecimal.ZERO;
 
         //check if margin call and close all positions
         if(_countOpenPositions > 0 && _usableMargin.compareTo(BigDecimal.ZERO) <= 0){
 
             if(_self.isLiquidate()) {
                 if (null != _clientRequestConsumer) {
-                    _log.log(Level.INFO, _self.getUsername() + " margin call.");
+
+                    String notification = String.format("[%s] margin call.", _self.getUsername());
+
+                    _log.log(Level.INFO, notification);
                     _clientRequestConsumer.closeAllPositions();
+
+                    publishMessage(
+                            _clientExchangeName,
+                            "response",
+                            "notification",
+                            notification
+                    );
+
+                    publishMessage(
+                            _officeExchangeName,
+                            "todealer",
+                            "notification",
+                            notification
+                    );
                 }
             }else{
-                //todo: send notification to client and back office about this
-                _log.log(Level.WARNING, _self.getUsername() + " margin call suppressed.");
+
+                String notification = String.format("[%s] margin call suppressed.", _self.getUsername());
+                _log.log(Level.WARNING, notification);
+
+                publishMessage(
+                        _clientExchangeName,
+                        "response",
+                        "notification",
+                        notification
+                );
+
+                publishMessage(
+                        _officeExchangeName,
+                        "todealer",
+                        "notification",
+                        notification
+                );
             }
 
         }
     }
 
+    /**
+     * Used with new trade requests
+     * @return
+     */
     public BigDecimal get_usableMargin() {
 
         BigDecimal ret;

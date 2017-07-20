@@ -16,31 +16,27 @@
 package com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers;
 
 import com.computedsynergy.hurtrade.hurcpu.cpu.Tasks.ClientAccountTask;
+import com.computedsynergy.hurtrade.sharedcomponents.amqp.CustomDefaultConsumer;
 import com.computedsynergy.hurtrade.sharedcomponents.charting.CandleStickChartingDataProvider;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.charting.CandleStick;
-import com.computedsynergy.hurtrade.sharedcomponents.models.impl.LedgerModel;
-import com.computedsynergy.hurtrade.sharedcomponents.models.impl.PositionModel;
-import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CommodityUser;
-import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeRequest;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeResponse;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.updates.ClientUpdate;
+import com.computedsynergy.hurtrade.sharedcomponents.models.impl.PositionModel;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CommodityUser;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
+import com.computedsynergy.hurtrade.sharedcomponents.util.MqNamingUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
-
-import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.ORDER_STATE_CANCELED;
-import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.ORDER_STATE_CLOSED;
-import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.ORDER_STATE_OPEN;
-import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.EXPIRY_LOCK_USER_POSITIONS;
-import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.TIMEOUT_LOCK_USER_POSITIONS;
-import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.getLockNameForUserPositions;
-import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.getUserPositionsKeyName;
 import com.github.jedis.lock.JedisLock;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.rabbitmq.client.*;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Envelope;
+import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -53,17 +49,19 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import redis.clients.jedis.Jedis;
+
+import static com.computedsynergy.hurtrade.sharedcomponents.util.Constants.*;
+import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.*;
 
 /**
  *
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
  */
-public class ClientRequestConsumer extends DefaultConsumer {
+public class ClientRequestConsumer extends CustomDefaultConsumer {
 
     private final User _user;
     private final String _exchangeName;
-    private final Object _channelPublishLock = new Object();
+    private final String _officeExchangeName;
     private final ExecutorService _singleExecutorService;
     private final ClientAccountTask _account;
 
@@ -78,6 +76,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
         _account = account;
         _user = user;
         this._exchangeName= exchangeName;
+        this._officeExchangeName = MqNamingUtil.getOfficeExchangeName(_user.getUserOffice().getOfficeuuid());
         this._singleExecutorService = Executors.newFixedThreadPool(2);
 
     }
@@ -88,7 +87,6 @@ public class ClientRequestConsumer extends DefaultConsumer {
 
         long deliveryTag = envelope.getDeliveryTag();
 
-        AMQP.BasicProperties props = null;
         String serializedResponse = null;
 
         try {
@@ -105,7 +103,12 @@ public class ClientRequestConsumer extends DefaultConsumer {
                 ClientUpdate update = new ClientUpdate(response);
                 serializedResponse = gson.toJson(update);
 
-                publishToExchange(props, serializedResponse);
+                publishMessage(
+                        _exchangeName,
+                        "response",
+                        null,
+                        serializedResponse
+                );
 
             }else if(commandVerb.equals("tradeClosure")) {
 
@@ -135,11 +138,14 @@ public class ClientRequestConsumer extends DefaultConsumer {
                                 Integer.parseInt(cmdParams.get("samples"))
                         );
                         String serializedResponse = gson.toJson(lstRet);
-                        AMQP.BasicProperties.Builder propsBuilder = new AMQP.BasicProperties.Builder();
-                        propsBuilder.type("candlestick");
-                        com.rabbitmq.client.AMQP.BasicProperties props = propsBuilder.build();
 
-                        publishToExchange(props, serializedResponse);
+                        publishMessage(
+                                _exchangeName,
+                                "response",
+                                "candlestick",
+                                serializedResponse
+                        );
+
                     }
                 });
             }
@@ -152,27 +158,12 @@ public class ClientRequestConsumer extends DefaultConsumer {
 
     }
 
-    private void publishToExchange(com.rabbitmq.client.AMQP.BasicProperties props, String data){
-
-        try {
-            synchronized (_channelPublishLock) {
-                getChannel().basicPublish(_exchangeName, "response", props, data.getBytes());
-            }
-        } catch (Exception ex) {
-            _log.log(Level.SEVERE, null, ex);
-        }
-    }
-
     private void processRequoteCommand(Map<String,String> params){
 
         if(params.containsKey("orderid")){
             UUID orderId = UUID.fromString(params.get("orderid"));
 
             String userPositionsKeyName = getUserPositionsKeyName(_user.getUseruuid());
-
-            //get the last quoted prices for commodities for this user
-            String serializedQuotes = RedisUtil.getInstance().getSeriaizedQuotesForClient(_user.getUseruuid());
-            QuoteList quotesForClient = gson.fromJson(serializedQuotes, QuoteList.class);
 
             try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
                 JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
@@ -234,7 +225,10 @@ public class ClientRequestConsumer extends DefaultConsumer {
 
 
         String userPositionsKeyName = getUserPositionsKeyName(_user.getUseruuid());
-        Type mapType = new TypeToken<Map<UUID, Position>>(){}.getType();
+        Type mapType = Constants.TYPE_POSITIONS_MAP;
+
+        String notification = null;
+
 
         try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
             JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
@@ -250,6 +244,9 @@ public class ClientRequestConsumer extends DefaultConsumer {
                         closePosition(position, quotesForClient);
                         //do not remove from here as this position has been marked close and now pending dealer revie.
 
+                        notification = String.format("[%d]:[%s] requested close and is pending review.",
+                                position.getFriendlyorderid(), _user.getUsername());
+
                         //set client positions
                         String serializedPositions = gson.toJson(positions);
                         jedis.set(userPositionsKeyName, serializedPositions);
@@ -264,6 +261,24 @@ public class ClientRequestConsumer extends DefaultConsumer {
                 _log.log(Level.SEVERE, null, "Could not process user positions " + _user.getUsername());
             }
         }
+
+        //dispatch notification
+        if(null != notification){
+
+            publishNotificationMessage(
+                _exchangeName,
+                "response",
+                notification
+            );
+
+            publishNotificationMessage(
+                _officeExchangeName,
+                "todealer",
+                notification
+            );
+
+        }
+
     }
 
     public void closeAllPositions()
@@ -275,6 +290,8 @@ public class ClientRequestConsumer extends DefaultConsumer {
 
         String userPositionsKeyName = getUserPositionsKeyName(_user.getUseruuid());
 
+        StringBuilder builder = new StringBuilder();
+
         try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
             JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
             try{
@@ -283,6 +300,7 @@ public class ClientRequestConsumer extends DefaultConsumer {
                     //get client positions
                     Map<UUID, Position> positions = gson.fromJson(jedis.get(userPositionsKeyName), Constants.TYPE_POSITIONS_MAP);
 
+                    String notification = "";
 
                     Iterator<Map.Entry<UUID, Position>> iter = positions.entrySet().iterator();
                     while(iter.hasNext()){
@@ -293,9 +311,19 @@ public class ClientRequestConsumer extends DefaultConsumer {
 
                             p.setOrderState(ORDER_STATE_CLOSED);
 
+                            notification = String.format("[%d]:[%s] liquidated.\n",
+                                    p.getFriendlyorderid(), _user.getUsername());
+
                         }else if(p.isPendingOpen()){
                             p.setOrderState(ORDER_STATE_CANCELED);
+
+                            notification = String.format("[%d]:[%s] cancelled due to margin call.\n",
+                                    p.getFriendlyorderid(), _user.getUsername());
                         }
+
+                        builder.append(notification);
+                        _log.info(notification);
+
 
                         iter.remove();
                     }
@@ -312,6 +340,25 @@ public class ClientRequestConsumer extends DefaultConsumer {
             }catch(Exception ex){
                 _log.log(Level.SEVERE, null, "Could not process user positions " + _user.getUsername());
             }
+        }
+
+        String notification = builder.toString();
+
+        //dispatch notification
+        if(null != notification){
+
+            publishNotificationMessage(
+                    _exchangeName,
+                    "response",
+                    notification
+            );
+
+            publishNotificationMessage(
+                    _officeExchangeName,
+                    "todealer",
+                    notification
+            );
+
         }
     }
 
@@ -336,10 +383,6 @@ public class ClientRequestConsumer extends DefaultConsumer {
                     }
                     break;
                 }
-
-                //update the current order state to db
-                PositionModel positionModel = new PositionModel();
-                positionModel.saveUpdatePosition(position);
 
             } catch (Exception ex) {
                 _log.log(Level.SEVERE, ex.getMessage(), ex);

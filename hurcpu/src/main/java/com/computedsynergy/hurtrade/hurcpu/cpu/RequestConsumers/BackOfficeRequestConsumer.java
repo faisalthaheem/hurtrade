@@ -15,6 +15,7 @@
  */
 package com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers;
 
+import com.computedsynergy.hurtrade.sharedcomponents.amqp.CustomDefaultConsumer;
 import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.CoverAccountModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.*;
@@ -42,7 +43,7 @@ import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.*;
  *
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
  */
-public class BackOfficeRequestConsumer extends DefaultConsumer {
+public class BackOfficeRequestConsumer extends CustomDefaultConsumer {
 
     private final String officeExhcangeName;
     private final String dealerInQueueName;
@@ -66,6 +67,8 @@ public class BackOfficeRequestConsumer extends DefaultConsumer {
                          Office office
     ) {
         super(channel);
+
+
         this.officeExhcangeName = officeExchangeName;
         this.dealerInQueueName = dealerInQueueName;
         this.dealerOutQueueName = dealerOutQueueName;
