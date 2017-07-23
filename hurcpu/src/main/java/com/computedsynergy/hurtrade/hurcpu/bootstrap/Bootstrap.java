@@ -17,6 +17,7 @@ package com.computedsynergy.hurtrade.hurcpu.bootstrap;
 
 import com.computedsynergy.hurtrade.hurcpu.cpu.Tasks.ClientAccountTask;
 import com.computedsynergy.hurtrade.sharedcomponents.amqp.AmqpBase;
+import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.CommodityUserModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.OfficeModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
@@ -56,9 +57,9 @@ public class Bootstrap extends AmqpBase{
      */
     protected void bootstrapExchanges() throws Exception{
 
-
         Map<String, Object> args = new HashMap<String, Object>();
-        args.put("x-max-length", 5); //retain only 5 latest messages for clients
+        args.put("x-max-length", CommandLineOptions.getInstance().maxQueuedMessages); //retain only x messages
+        args.put("x-message-ttl", CommandLineOptions.getInstance().maxQueueTtl); //retain only for x seconds
 
         //fetch all offices
         OfficeModel offices = new OfficeModel();
@@ -69,23 +70,7 @@ public class Bootstrap extends AmqpBase{
         CommodityUserModel cuModel = new CommodityUserModel();
 
         for(Office o:officeList){
-            
-            String officeExchangeName = MqNamingUtil.getOfficeExchangeName(o.getOfficeuuid());
-            //String officeClientRequestQueueName = MqNamingUtil.getOfficeClientRequestQueueName(o.getOfficeuuid());
-            String officeDealerOutQName = MqNamingUtil.getOfficeDealerOutQueueName(o.getOfficeuuid());
-            String officeDealerInQName = MqNamingUtil.getOfficeDealerINQueueName(o.getOfficeuuid());
-            
-            //declare a queue for this office for incoming messages from the clients
-            channel.exchangeDeclare(officeExchangeName, "direct", true);
-            channel.queueDeclare(officeDealerOutQName, true, false, false, args);
-            channel.queueDeclare(officeDealerInQName, true, false, false, null);
-            
-            channel.queueBind(officeDealerOutQName, officeExchangeName, "todealer");
-            channel.queueBind(officeDealerInQName, officeExchangeName, "fromdealer");
 
-            //requests sent by client on their exchanges are delivered to this queue bound in following code
-            //channel.queueDeclare(officeClientRequestQueueName, true, false, false, null); //used below with client exchanges
-            
             //get all clients of this office
             List<User> userList = users.getAllUsersForOffice(o.getId());
 

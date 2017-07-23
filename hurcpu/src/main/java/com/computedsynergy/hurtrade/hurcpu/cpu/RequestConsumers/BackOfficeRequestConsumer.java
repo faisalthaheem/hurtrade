@@ -17,6 +17,7 @@ package com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers;
 
 import com.computedsynergy.hurtrade.sharedcomponents.amqp.CustomDefaultConsumer;
 import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
+import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.updates.ClientUpdate;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.CoverAccountModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.*;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
@@ -94,7 +95,7 @@ public class BackOfficeRequestConsumer extends CustomDefaultConsumer {
             AMQP.BasicProperties.Builder builder = new AMQP.BasicProperties.Builder();
 
 
-            User user = null;
+            User user;
 
             String requestType = properties.getType();
             String dealerName = properties.getUserId();
@@ -104,21 +105,18 @@ public class BackOfficeRequestConsumer extends CustomDefaultConsumer {
 
             if(requestType.equalsIgnoreCase("client")) {
 
-                user = userModel.getByUsername(request.get("client"));
+                user = resolveUser(request.get("client"));
                 if (user == null) {
-                    _log
-                            .log(Level.SEVERE,
-                                    "Could not resolve user for name: ", properties.getUserId());
+                    _log.log(Level.SEVERE,
+                            "Could not resolve user for name: ", properties.getUserId());
                     return;
                 }
 
-                response = processClientCommand(user, request, dealerName);
-                exchangeName = MqNamingUtil.getClientExchangeName(user.getUseruuid());
-                builder.type("orderUpdate");
+                processClientCommand(user, request, dealerName);
 
             }else if(requestType.equalsIgnoreCase("office")) {
 
-                user = userModel.getByUsername(dealerName);
+                user = resolveUser(dealerName);
                 exchangeName = MqNamingUtil.getClientExchangeName(user.getUseruuid());
                 response = processOfficeCommand(request, dealerName);
 
@@ -179,6 +177,8 @@ public class BackOfficeRequestConsumer extends CustomDefaultConsumer {
             String officeCoverPositionsKeyName = getKeyNameForOffCovPos(_office.getOfficeuuid());
             String officeCoverPositionsLockName = getLockNameForOffCovPos(_office.getOfficeuuid());
 
+            String notification = null;
+
             try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
                 JedisLock lock = new JedisLock(
                         jedis,
@@ -203,10 +203,13 @@ public class BackOfficeRequestConsumer extends CustomDefaultConsumer {
 
                                 positions.replace(position.getInternalid(), position);
 
+                                notification = String.format("Cover position [%s] updated.", position.getRemoteid());
 
                             }else if(commandVerb.equalsIgnoreCase("closeCoverPosition")){
 
                                 positions.remove(position.getInternalid());
+
+                                notification = String.format("Cover position [%s] closed.", position.getRemoteid());
                             }
 
                         }else{
@@ -217,6 +220,8 @@ public class BackOfficeRequestConsumer extends CustomDefaultConsumer {
                                 position.setOpentime(new Date());
                                 positions.put(position.getInternalid(), position);
 
+                                notification = String.format("Cover position [%s] created.", position.getRemoteid());
+
                             }else if(commandVerb.equalsIgnoreCase("closeCoverPosition")){
 
                                 if(!positions.containsKey(position.getInternalid())) {
@@ -226,8 +231,8 @@ public class BackOfficeRequestConsumer extends CustomDefaultConsumer {
                                     ).log(Level.INFO,
                                             "Office cover position",
                                             "position does not exist " + position.getInternalid());
-                                }else{
-                                    positions.remove(position.getInternalid());
+
+                                    notification = String.format("Cover position [%s] does not exist.", position.getRemoteid());
                                 }
                             }
                         }
@@ -244,20 +249,41 @@ public class BackOfficeRequestConsumer extends CustomDefaultConsumer {
                 }
             }
 
+            if(null != notification){
+
+                publishNotificationMessage(
+                        officeExhcangeName,
+                        "todealer",
+                        notification
+                );
+            }
         }
 
         return ret;
     }
-    
-    private Map<String, String> processClientCommand(User user, Map<String, String> request, String dealerName)
+
+    private User resolveUser(String username){
+
+        User ret = RedisUtil.getInstance().GetUserInfo(username);
+
+        if(null == ret){
+            ret = userModel.getByUsername(username);
+        }
+
+        return ret;
+    }
+
+    private void processClientCommand(User user, Map<String, String> request, String dealerName)
     {
-        Map<String, String> clientUpdate = new HashMap<>();
 
         String commandVerb = request.get("command");
         UUID orderid = UUID.fromString(request.get("orderId"));
+        String clientExchangeName = MqNamingUtil.getClientExchangeName(user.getUseruuid());
 
         String userPositionsKeyName = getUserPositionsKeyName(user.getUseruuid());
-        //Type mapType = new TypeToken<Map<UUID, Position>>(){}.getType();
+
+        String notification = null;
+
 
         try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
             JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
@@ -267,78 +293,117 @@ public class BackOfficeRequestConsumer extends CustomDefaultConsumer {
                     //get client positions
                     Map<UUID, Position> positions = gson.fromJson(jedis.get(userPositionsKeyName), TYPE_POSITIONS_MAP);
                     Position position = positions.get(orderid);
-                    BigDecimal pl = BigDecimal.ZERO;
 
                     if(null == position){
-                        clientUpdate.put("order_status","Order " + orderid + " not found.");
-                        return clientUpdate;
-                    }
+                        notification = String.format("[%s] for [%s] not found.", orderid.toString(), user.getUsername());
+                    }else {
 
-                    try {
+                        try {
 
-                        switch (commandVerb) {
-                            case "approve": {
-                                if(position.getOrderState().equalsIgnoreCase(Constants.ORDER_STATE_PENDING_OPEN)) {
-                                    position.setOrderState(Constants.ORDER_STATE_OPEN);
-                                    clientUpdate.put("order_status", "Order [" + orderid + "] approved open by " + dealerName);
+                            switch (commandVerb) {
+                                case "approve": {
+                                    if (position.getOrderState().equalsIgnoreCase(Constants.ORDER_STATE_PENDING_OPEN)) {
+                                        position.setOrderState(Constants.ORDER_STATE_OPEN);
 
-                                }else if(position.getOrderState().equalsIgnoreCase(Constants.ORDER_STATE_PENDING_CLOSE)){
-                                    position.setOrderState(Constants.ORDER_STATE_CLOSED);
-                                    clientUpdate.put("order_status", "Order [" + orderid + "] approved close by " + dealerName);
-                                    positions.remove(orderid);
+                                        notification = String.format(
+                                          "[%s][%d] approved open by [%s]",
+                                          user.getUsername(),
+                                          position.getFriendlyorderid(),
+                                          dealerName
+                                        );
+
+                                    } else if (position.getOrderState().equalsIgnoreCase(Constants.ORDER_STATE_PENDING_CLOSE)) {
+                                        position.setOrderState(Constants.ORDER_STATE_CLOSED);
+                                        positions.remove(orderid);
+
+                                        notification = String.format(
+                                                "[%s][%d] approved close by [%s]",
+                                                user.getUsername(),
+                                                position.getFriendlyorderid(),
+                                                dealerName
+                                        );
+
+                                    }
                                 }
-                            }
-                            break;
-                            case "reject": {
-                                if(position.getOrderState().equalsIgnoreCase(Constants.ORDER_STATE_PENDING_OPEN)) {
-                                    position.setOrderState(Constants.ORDER_STATE_REJECTED_OPEN);
-                                    clientUpdate.put("order_status", "Order [" + orderid + "] rejected open by " + dealerName);
-                                    positions.remove(orderid);
+                                break;
+                                case "reject": {
+                                    if (position.getOrderState().equalsIgnoreCase(Constants.ORDER_STATE_PENDING_OPEN)) {
+                                        position.setOrderState(Constants.ORDER_STATE_REJECTED_OPEN);
+                                        positions.remove(orderid);
 
-                                }else if(position.getOrderState().equalsIgnoreCase(Constants.ORDER_STATE_PENDING_CLOSE)){
-                                    position.setOrderState(Constants.ORDER_STATE_OPEN);
-                                    clientUpdate.put("order_status", "Order [" + orderid + "] rejected close by " + dealerName);
+                                        notification = String.format(
+                                                "[%s][%d] rejected open by [%s]",
+                                                user.getUsername(),
+                                                position.getFriendlyorderid(),
+                                                dealerName
+                                        );
+
+                                    } else if (position.getOrderState().equalsIgnoreCase(Constants.ORDER_STATE_PENDING_CLOSE)) {
+                                        position.setOrderState(Constants.ORDER_STATE_OPEN);
+
+                                        notification = String.format(
+                                                "[%s][%d] rejected close by [%s]",
+                                                user.getUsername(),
+                                                position.getFriendlyorderid(),
+                                                dealerName
+                                        );
+                                    }
                                 }
-                                //post the pl
-                            }
-                            break;
-                            case "requote":
-                            {
-                                position.setRequoteprice(
-                                        (BigDecimal) decimalParser.parse(request.get("requoted_price"))
-                                );
+                                break;
+                                case "requote": {
+                                    position.setRequoteprice(
+                                            (BigDecimal) decimalParser.parse(request.get("requoted_price"))
+                                    );
 
-                                position.setOrderState(Constants.ORDER_STATE_REQUOTED);
+                                    position.setOrderState(Constants.ORDER_STATE_REQUOTED);
 
-                                //set requoted price in redis with an expiry as defined in params
-                                int tiemout = CommandLineOptions.getInstance().requoteNetworkDelay
-                                        +
-                                        CommandLineOptions.getInstance().requoteTimeout;
+                                    //set requoted price in redis with an expiry as defined in params
+                                    int tiemout = CommandLineOptions.getInstance().requoteNetworkDelay
+                                            +
+                                            CommandLineOptions.getInstance().requoteTimeout;
 
-                                RedisUtil.getInstance().SetOrderRequoted(
-                                        position.getOrderId(),
-                                        tiemout
-                                );
-                                //send to client
-                                clientUpdate.put("requote","yes");
-                                clientUpdate.put("orderid", position.getOrderId().toString());
-                                clientUpdate.put("timeout","" + tiemout);
-                                clientUpdate.put("requoteprice","" + position.getRequoteprice());
-                                if(position.is_wasPendingClose()){
-                                    clientUpdate.put("pendingclose","yes");
-                                }else{
-                                    clientUpdate.put("pendingclose","");
+                                    RedisUtil.getInstance().SetOrderRequoted(
+                                            position.getOrderId(),
+                                            tiemout
+                                    );
+
+                                    Map<String, String> clientUpdate = new HashMap<>();
+                                    //send to client
+                                    clientUpdate.put("requote", "yes");
+                                    clientUpdate.put("orderid", position.getOrderId().toString());
+                                    clientUpdate.put("timeout", "" + tiemout);
+                                    clientUpdate.put("requoteprice", "" + position.getRequoteprice());
+                                    if (position.is_wasPendingClose()) {
+                                        clientUpdate.put("pendingclose", "yes");
+                                    } else {
+                                        clientUpdate.put("pendingclose", "");
+                                    }
+
+                                    //send to client
+                                    publishMessage(
+                                            clientExchangeName,
+                                            "response",
+                                            "orderUpdate",
+                                            new Gson().toJson(clientUpdate)
+                                    );
+
+                                    notification = String.format(
+                                            "[%s][%d] requoted by [%s]",
+                                            user.getUsername(),
+                                            position.getFriendlyorderid(),
+                                            dealerName
+                                    );
                                 }
+                                break;
                             }
-                            break;
+
+                            //update client positions
+                            String serializedPositions = gson.toJson(positions);
+                            jedis.set(userPositionsKeyName, serializedPositions);
+
+                        } catch (Exception ex) {
+                            _log.log(Level.SEVERE, ex.getMessage(), ex);
                         }
-
-                        //update client positions
-                        String serializedPositions = gson.toJson(positions);
-                        jedis.set(userPositionsKeyName, serializedPositions);
-
-                    }catch(Exception ex){
-                        _log.log(Level.SEVERE, ex.getMessage(), ex);
                     }
 
                     lock.release();
@@ -351,7 +416,20 @@ public class BackOfficeRequestConsumer extends CustomDefaultConsumer {
             }
         }
 
-        return clientUpdate;
+        if(null != notification) {
+            publishNotificationMessage(
+                    clientExchangeName,
+                    "response",
+                    notification
+            );
+
+            publishNotificationMessage(
+                    officeExhcangeName,
+                    "todealer",
+                    notification
+            );
+        }
+
     }
 
 }

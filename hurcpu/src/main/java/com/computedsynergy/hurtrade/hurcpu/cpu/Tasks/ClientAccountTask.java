@@ -17,6 +17,7 @@ package com.computedsynergy.hurtrade.hurcpu.cpu.Tasks;
 
 import com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers.ClientRequestConsumer;
 import com.computedsynergy.hurtrade.sharedcomponents.amqp.AmqpBase;
+import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.Quote;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.SourceQuote;
@@ -122,7 +123,8 @@ public class ClientAccountTask extends AmqpBase {
             quoteModel = new QuoteModel();
 
             Map<String, Object> args = new HashMap<String, Object>();
-            args.put("x-max-length", 5); //retain only 5 latest messages for clients
+            args.put("x-max-length", CommandLineOptions.getInstance().maxQueuedMessages); //retain only x messages
+            args.put("x-message-ttl", CommandLineOptions.getInstance().maxQueueTtl); //retain only for x seconds
 
             channel.exchangeDeclare(_clientExchangeName, "direct", true);
 

@@ -122,13 +122,21 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
 
             }else if(commandVerb.equalsIgnoreCase("candlestick")){
 
-
                 _singleExecutorService.submit(new Runnable() {
                     @Override
                     public void run() {
 
                         Gson gson = new Gson();
                         Map<String,String> cmdParams =  gson.fromJson(new String(body), Constants.TYPE_DICTIONARY);
+
+                        //todo dealers are not getting these
+                        String notification = String.format("Candlestick chart request received for commodity [%s]", cmdParams.get("commodity"));
+                        publishNotificationMessage(
+                                _exchangeName,
+                                "response",
+                                notification
+                        );
+
                         CandleStickChartingDataProvider cstickProvider = new CandleStickChartingDataProvider();
 
                         List<CandleStick> lstRet =  cstickProvider.GetChartData(
@@ -165,6 +173,8 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
 
             String userPositionsKeyName = getUserPositionsKeyName(_user.getUseruuid());
 
+            String notification = null;
+
             try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
                 JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
                 try{
@@ -183,9 +193,13 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
                                     p.setOrderState(Constants.ORDER_STATE_CLOSED);
                                     positions.remove(orderId);
 
+                                    notification = String.format("Requote accepted by [%s] for position [%d] -> closed.", _user.getUsername() ,p.getFriendlyorderid());
+
                                 }else {
                                     p.setOpenPrice(p.getRequoteprice());
                                     p.setOrderState(ORDER_STATE_OPEN);
+
+                                    notification = String.format("Requote accepted by [%s] for position [%d] -> opened.", _user.getUsername() ,p.getFriendlyorderid());
                                 }
 
 
@@ -211,6 +225,22 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
                 }catch(Exception ex){
                     _log.log(Level.SEVERE, null, "Could not process user positions " + _user.getUsername());
                 }
+            }
+
+
+            if(null != notification) {
+
+                publishNotificationMessage(
+                        _exchangeName,
+                        "response",
+                        notification
+                );
+
+                publishNotificationMessage(
+                        _officeExchangeName,
+                        "todealer",
+                        notification
+                );
             }
         }
 
@@ -363,6 +393,11 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
     }
 
 
+    /**
+     * On request of trader the selected trade is queued for dealer's review.
+     * @param position
+     * @param quotesForClient
+     */
     private void closePosition(Position position, QuoteList quotesForClient)
     {
 
@@ -421,12 +456,14 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
         }
         
         String userPositionsKeyName = getUserPositionsKeyName(user.getUseruuid());
-        Type mapType = new TypeToken<Map<UUID, Position>>(){}.getType();
+        Type mapType = Constants.TYPE_POSITIONS_MAP;
+
+        String notification = null;
         
         try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
             JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
             try{
-                if(lock.acquire()){
+                 if(lock.acquire()){
 
                     //get client positions
                     Map<UUID, Position> positions = gson.fromJson(jedis.get(userPositionsKeyName),mapType);
@@ -470,17 +507,26 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
                             BigDecimal usableMargin = _account.get_usableMargin(); //avoid successive locks
                             if(tempPosition.getUsedMargin().compareTo(usableMargin) <= 0) {
 
+                                notification = String.format(
+                                        "[%s] requested new trade position [%d] [%s] [%s] [%f] ",
+                                        _user.getUsername(),
+                                        position.getFriendlyorderid(),
+                                        position.getCommodity(),
+                                        position.getOrderType(),
+                                        position.getAmount()
+                                );
+
                                 positions.put(position.getOrderId(), position);
                                 response.setResposneOk();
                             }else{
-                                //todo: notify client with an error message explainnig there is not enough usable margin available
-                                String logMessage = String.format("New Trade declined because of insufficient usable margin available. [%s] requested [%s] required [%f] available [%f]",
+
+                                notification = String.format("New Trade declined because of insufficient usable margin available. [%s] requested [%s] required [%f] available [%f]",
                                         _user.getUsername(),
                                         position.getCommodity(),
                                         tempPosition.getUsedMargin(),
                                         usableMargin
                                 );
-                                _log.log(Level.INFO, logMessage);
+                                _log.log(Level.INFO, notification);
                             }
                         }
 
@@ -497,11 +543,27 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
                     lock.release();
 
                 }else{
-                    _log.log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
+                    _log.log(Level.SEVERE, null, "Could not lock user positions " + user.getUsername());
                 }
             }catch(Exception ex){
                 _log.log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
             }
+        }
+
+
+        if(null != notification) {
+
+            publishNotificationMessage(
+                    _exchangeName,
+                    "response",
+                    notification
+            );
+
+            publishNotificationMessage(
+                    _officeExchangeName,
+                    "todealer",
+                    notification
+            );
         }
     }
 

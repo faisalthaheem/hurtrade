@@ -57,5 +57,11 @@ public class CommandLineOptions {
     public Integer requoteNetworkDelay = 1; //how much grace period on top of the allowed time within which the client has to respond (in secs)
 
     @Parameter(names = {"--requote-timeout"})
-    public Integer requoteTimeout = 10; //(in secs)
+    public Integer requoteTimeout = 10; //(in secs
+
+    @Parameter(names = {"--max-queue-ttl"})
+    public Integer maxQueueTtl = 5000; //(in secs// )
+
+    @Parameter(names = {"--max-queued-messages"})
+    public Integer maxQueuedMessages = 50; // max messages stored in the queue
 }

@@ -18,13 +18,16 @@ package com.computedsynergy.hurtrade.hurcpu.cpu;
 import com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers.BackOfficeRequestConsumer;
 import com.computedsynergy.hurtrade.hurcpu.cpu.Tasks.OfficePositionsDispatchTask;
 import com.computedsynergy.hurtrade.sharedcomponents.amqp.AmqpBase;
+import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.OfficeModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Office;
 import com.computedsynergy.hurtrade.sharedcomponents.util.MqNamingUtil;
 import com.rabbitmq.client.Channel;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -42,27 +45,37 @@ public class BackOfficeRequestProcessor extends AmqpBase {
         OfficeModel offices = new OfficeModel();
         List<Office> officeList = offices.getAllOffices();
 
+        Map<String, Object> args = new HashMap<String, Object>();
+        args.put("x-max-length", CommandLineOptions.getInstance().maxQueuedMessages); //retain only x messages
+        args.put("x-message-ttl", CommandLineOptions.getInstance().maxQueueTtl); //retain only for x seconds
+
         for (Office o : officeList) {
 
             String officeExchangeName = MqNamingUtil.getOfficeExchangeName(o.getOfficeuuid());
-            String officeDealerInQueueName = MqNamingUtil.getOfficeDealerINQueueName(o.getOfficeuuid());
+            String officeDealerInQName = MqNamingUtil.getOfficeDealerINQueueName(o.getOfficeuuid());
+            String officeDealerOutQName = MqNamingUtil.getOfficeDealerOutQueueName(o.getOfficeuuid());
 
             //start office position dispatch task
             OfficePositionsDispatchTask officePositionsDispatchTask = new OfficePositionsDispatchTask(officeExchangeName, o.getId());
             officePositionsDispatchTask.initialize();
 
             //declare and bind to queue
-            channel.queueDeclare(officeDealerInQueueName, true, false, false, null);
-            channel.queueBind(officeDealerInQueueName, officeExchangeName, "fromdealer");
+            channel.exchangeDeclare(officeExchangeName, "direct", true);
+            channel.queueDeclare(officeDealerOutQName, true, false, false, args);
+            channel.queueDeclare(officeDealerInQName, true, false, false, args);
+
+            channel.queueBind(officeDealerOutQName, officeExchangeName, "todealer");
+            channel.queueBind(officeDealerInQName, officeExchangeName, "fromdealer");
 
             Channel consumerChannel = CreateNewChannel();
             BackOfficeRequestConsumer consumer = new BackOfficeRequestConsumer(
                     consumerChannel,
                     officeExchangeName,
-                    officeDealerInQueueName,"",
+                    officeDealerInQName,
+                    officeDealerOutQName,
                     o
             );
-            consumerChannel.basicConsume(officeDealerInQueueName, false, officeExchangeName, consumer);
+            consumerChannel.basicConsume(officeDealerInQName, false, officeExchangeName, consumer);
 
         }
     }
