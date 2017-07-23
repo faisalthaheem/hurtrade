@@ -252,6 +252,8 @@ public class BackOfficeRequestConsumer extends CustomDefaultConsumer {
             if(null != notification){
 
                 publishNotificationMessage(
+                        -1,
+                        _office.getId(),
                         officeExhcangeName,
                         "todealer",
                         notification
@@ -418,12 +420,16 @@ public class BackOfficeRequestConsumer extends CustomDefaultConsumer {
 
         if(null != notification) {
             publishNotificationMessage(
+                    user.getId(),
+                    -1,
                     clientExchangeName,
                     "response",
                     notification
             );
 
             publishNotificationMessage(
+                    -1,
+                    _office.getId(),
                     officeExhcangeName,
                     "todealer",
                     notification

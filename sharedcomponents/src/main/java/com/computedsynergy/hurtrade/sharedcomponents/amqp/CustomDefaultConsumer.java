@@ -1,5 +1,6 @@
 package com.computedsynergy.hurtrade.sharedcomponents.amqp;
 
+import com.computedsynergy.hurtrade.sharedcomponents.models.impl.NotificationModel;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DefaultConsumer;
@@ -18,6 +19,7 @@ public class CustomDefaultConsumer extends DefaultConsumer {
 
     //logging
     protected Logger _log = Logger.getLogger(this.getClass().getName());
+    NotificationModel dbNotification = new NotificationModel();
 
     public CustomDefaultConsumer(Channel channel) {
         super(channel);
@@ -28,13 +30,19 @@ public class CustomDefaultConsumer extends DefaultConsumer {
     /**
      * Prepends time to the notification message and sends it out
      * message type property is set to 'notification'
+     *
+     * @param notificationForUser if > 0 then notificationForOffice is ignored and data row refers to an event specifically for the trader
+     * @param notificationForOffice if > 0 then notificationForUser is ignored and data row refers to an event for the office
      * @param exchange
      * @param routingKey
-     * @param notification always a plain string, no json here...
+     * @param notification
      */
-    protected void publishNotificationMessage(String exchange,
-                                  String routingKey,
-                                  String notification)
+    protected void publishNotificationMessage(
+                                int notificationForUser,
+                                int notificationForOffice,
+                                String exchange,
+                                String routingKey,
+                                String notification)
     {
 
         notification = String.format("%s:\n%s\n", new Date().toString(), notification);
@@ -46,6 +54,7 @@ public class CustomDefaultConsumer extends DefaultConsumer {
                 notification
         );
 
+        dbNotification.saveNotification(notificationForUser, notificationForOffice, notification);
     }
 
     protected void publishMessage(String exchange,

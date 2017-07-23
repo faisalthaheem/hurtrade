@@ -100,16 +100,6 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
 
                 processTradeRequest(response, _user);
 
-                ClientUpdate update = new ClientUpdate(response);
-                serializedResponse = gson.toJson(update);
-
-                publishMessage(
-                        _exchangeName,
-                        "response",
-                        null,
-                        serializedResponse
-                );
-
             }else if(commandVerb.equals("tradeClosure")) {
 
                 Map<String,String> cmdParams =  new Gson().fromJson(new String(body), Constants.TYPE_DICTIONARY);
@@ -132,6 +122,8 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
                         //todo dealers are not getting these
                         String notification = String.format("Candlestick chart request received for commodity [%s]", cmdParams.get("commodity"));
                         publishNotificationMessage(
+                                _user.getId(),
+                                -1,
                                 _exchangeName,
                                 "response",
                                 notification
@@ -231,12 +223,16 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
             if(null != notification) {
 
                 publishNotificationMessage(
+                        _user.getId(),
+                        -1,
                         _exchangeName,
                         "response",
                         notification
                 );
 
                 publishNotificationMessage(
+                        -1,
+                        _user.getUserOffice().getId(),
                         _officeExchangeName,
                         "todealer",
                         notification
@@ -296,12 +292,16 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
         if(null != notification){
 
             publishNotificationMessage(
+                _user.getId(),
+                -1,
                 _exchangeName,
                 "response",
                 notification
             );
 
             publishNotificationMessage(
+                -1,
+                _user.getUserOffice().getId(),
                 _officeExchangeName,
                 "todealer",
                 notification
@@ -378,12 +378,16 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
         if(null != notification){
 
             publishNotificationMessage(
+                    _user.getId(),
+                    -1,
                     _exchangeName,
                     "response",
                     notification
             );
 
             publishNotificationMessage(
+                    -1,
+                    _user.getUserOffice().getId(),
                     _officeExchangeName,
                     "todealer",
                     notification
@@ -554,12 +558,16 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
         if(null != notification) {
 
             publishNotificationMessage(
+                    _user.getId(),
+                    -1,
                     _exchangeName,
                     "response",
                     notification
             );
 
             publishNotificationMessage(
+                    -1,
+                    _user.getUserOffice().getId(),
                     _officeExchangeName,
                     "todealer",
                     notification
