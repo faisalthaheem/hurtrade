@@ -28,12 +28,9 @@ public class CommodityUser {
     private BigDecimal ratio;
     private BigDecimal fee;
     private BigDecimal commission;
-    
-//    public CommodityUser(String c, BigDecimal s, BigDecimal r){
-//        this.commodityname = c;
-//        this.spread = s;
-//        this.ratio = r;
-//    }
+    private BigDecimal minamount;
+    private BigDecimal maxamount;
+
 
     /**
      * @return the commodityname
@@ -86,5 +83,21 @@ public class CommodityUser {
 
     public void setCommission(BigDecimal commission) {
         this.commission = commission;
+    }
+
+    public BigDecimal getMinamount() {
+        return minamount;
+    }
+
+    public void setMinamount(BigDecimal minamount) {
+        this.minamount = minamount;
+    }
+
+    public BigDecimal getMaxamount() {
+        return maxamount;
+    }
+
+    public void setMaxamount(BigDecimal maxamount) {
+        this.maxamount = maxamount;
     }
 }

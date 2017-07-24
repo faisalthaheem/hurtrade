@@ -449,108 +449,121 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
         //get the last quoted prices for commodities for this user
         String serializedQuotes = RedisUtil.getInstance().getSeriaizedQuotesForClient(user.getUseruuid());
         QuoteList quotesForClient = gson.fromJson(serializedQuotes, QuoteList.class);
+
+        String notification = null;
         
         if(!quotesForClient.containsKey(response.getRequest().getCommodity()))
         {
-            response.setResponseCommodityNotAllowed();
-            
-            _log.log(Level.SEVERE,
-                    "{0} requested unknown commodity: {1}",new Object[]{ user.getUsername() , response.getRequest().getCommodity()});
-            return;
+            notification = String.format("[{0}] is not allowed to trade [{1}]",user.getUsername() , response.getRequest().getCommodity());
+            _log.log(Level.SEVERE, notification);
+        }else{
+            CommodityUser userCommodity = userCommodities.get(response.getRequest().getCommodity());
+            if(
+                    response.getRequest().getRequestedLot().compareTo(userCommodity.getMinamount()) < 0
+                    ||
+                    response.getRequest().getRequestedLot().compareTo(userCommodity.getMaxamount()) > 0
+            ){
+                notification = String.format(
+                        "Requested amount outside of allowed range [%s] to [%s]",
+                        userCommodity.getMinamount().toString(),
+                        userCommodity.getMaxamount().toString()
+                        );
+            }
         }
         
         String userPositionsKeyName = getUserPositionsKeyName(user.getUseruuid());
         Type mapType = Constants.TYPE_POSITIONS_MAP;
 
-        String notification = null;
-        
-        try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
-            JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
-            try{
-                 if(lock.acquire()){
 
-                    //get client positions
-                    Map<UUID, Position> positions = gson.fromJson(jedis.get(userPositionsKeyName),mapType);
-                    Position position = null;
+        if(null == notification) {
+            try (Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()) {
+                JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
+                try {
+                    if (lock.acquire()) {
 
-                    try {
+                        //get client positions
+                        Map<UUID, Position> positions = gson.fromJson(jedis.get(userPositionsKeyName), mapType);
+                        Position position = null;
 
-                        switch (response.getRequest().getRequestType()) {
-                            case TradeRequest.REQUEST_TYPE_BUY: {
-                                position = new Position(
-                                        UUID.randomUUID(), Constants.ORDER_TYPE_BUY,
-                                        response.getRequest().getCommodity(),
-                                        response.getRequest().getRequestedLot(),
-                                        quotesForClient.get(response.getRequest().getCommodity()).ask,
-                                        userCommodities.get(response.getRequest().getCommodity()).getRatio(),
-                                        _user
-                                );
+                        try {
+
+                            switch (response.getRequest().getRequestType()) {
+                                case TradeRequest.REQUEST_TYPE_BUY: {
+                                    position = new Position(
+                                            UUID.randomUUID(), Constants.ORDER_TYPE_BUY,
+                                            response.getRequest().getCommodity(),
+                                            response.getRequest().getRequestedLot(),
+                                            quotesForClient.get(response.getRequest().getCommodity()).ask,
+                                            userCommodities.get(response.getRequest().getCommodity()).getRatio(),
+                                            _user
+                                    );
+                                }
+                                break;
+                                case TradeRequest.REQUEST_TYPE_SELL: {
+                                    position = new Position(
+                                            UUID.randomUUID(), Constants.ORDER_TYPE_SELL,
+                                            response.getRequest().getCommodity(),
+                                            response.getRequest().getRequestedLot(),
+                                            quotesForClient.get(response.getRequest().getCommodity()).bid,
+                                            userCommodities.get(response.getRequest().getCommodity()).getRatio(),
+                                            _user
+                                    );
+                                }
+                                break;
                             }
-                            break;
-                            case TradeRequest.REQUEST_TYPE_SELL: {
-                                position = new Position(
-                                        UUID.randomUUID(), Constants.ORDER_TYPE_SELL,
-                                        response.getRequest().getCommodity(),
-                                        response.getRequest().getRequestedLot(),
-                                        quotesForClient.get(response.getRequest().getCommodity()).bid,
-                                        userCommodities.get(response.getRequest().getCommodity()).getRatio(),
-                                        _user
-                                );
+
+
+                            if (position != null) {
+
+                                Position tempPosition = position.clone();
+
+                                //check if the used margin of this order < usable margin
+                                tempPosition.processQuote(quotesForClient);
+
+                                BigDecimal usableMargin = _account.get_usableMargin(); //avoid successive locks
+                                if (tempPosition.getUsedMargin().compareTo(usableMargin) <= 0) {
+
+                                    notification = String.format(
+                                            "[%s] requested new trade position [%d] [%s] [%s] [%f] ",
+                                            _user.getUsername(),
+                                            position.getFriendlyorderid(),
+                                            position.getCommodity(),
+                                            position.getOrderType(),
+                                            position.getAmount()
+                                    );
+
+                                    positions.put(position.getOrderId(), position);
+                                    response.setResposneOk();
+                                } else {
+
+                                    notification = String.format("New Trade declined because of insufficient usable margin available. [%s] requested [%s] required [%f] available [%f]",
+                                            _user.getUsername(),
+                                            position.getCommodity(),
+                                            tempPosition.getUsedMargin(),
+                                            usableMargin
+                                    );
+                                    _log.log(Level.INFO, notification);
+                                }
                             }
-                            break;
+
+                        } catch (Exception ex) {
+                            _log.log(Level.SEVERE, ex.getMessage(), ex);
                         }
 
-
-                        if(position != null){
-
-                            Position tempPosition = position.clone();
-
-                            //check if the used margin of this order < usable margin
-                            tempPosition.processQuote(quotesForClient);
-
-                            BigDecimal usableMargin = _account.get_usableMargin(); //avoid successive locks
-                            if(tempPosition.getUsedMargin().compareTo(usableMargin) <= 0) {
-
-                                notification = String.format(
-                                        "[%s] requested new trade position [%d] [%s] [%s] [%f] ",
-                                        _user.getUsername(),
-                                        position.getFriendlyorderid(),
-                                        position.getCommodity(),
-                                        position.getOrderType(),
-                                        position.getAmount()
-                                );
-
-                                positions.put(position.getOrderId(), position);
-                                response.setResposneOk();
-                            }else{
-
-                                notification = String.format("New Trade declined because of insufficient usable margin available. [%s] requested [%s] required [%f] available [%f]",
-                                        _user.getUsername(),
-                                        position.getCommodity(),
-                                        tempPosition.getUsedMargin(),
-                                        usableMargin
-                                );
-                                _log.log(Level.INFO, notification);
-                            }
+                        if (null != position) {
+                            //set client positions
+                            String serializedPositions = gson.toJson(positions);
+                            jedis.set(userPositionsKeyName, serializedPositions);
                         }
 
-                    }catch(Exception ex){
-                        _log.log(Level.SEVERE, ex.getMessage(), ex);
+                        lock.release();
+
+                    } else {
+                        _log.log(Level.SEVERE, null, "Could not lock user positions " + user.getUsername());
                     }
-
-                    if(null != position){
-                        //set client positions
-                        String serializedPositions = gson.toJson(positions);
-                        jedis.set(userPositionsKeyName, serializedPositions);
-                    }
-
-                    lock.release();
-
-                }else{
-                    _log.log(Level.SEVERE, null, "Could not lock user positions " + user.getUsername());
+                } catch (Exception ex) {
+                    _log.log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
                 }
-            }catch(Exception ex){
-                _log.log(Level.SEVERE, null, "Could not process user positions " + user.getUsername());
             }
         }
 

@@ -33,7 +33,12 @@ public class CommodityUserModel extends ModelBase implements ICommodityUserModel
     @Override
     public List<CommodityUser> getCommoditiesForUser(int user_id){
 
-    String query = "select c.commodityname commodityname, cu.spread spread, cu.ratio ratio, cu.fee fee, cu.commission commission from commodities c, commodities_users cu where c.id = cu.commodity_id and cu.user_id = " + user_id;
+    String query = "select " +
+            "c.commodityname commodityname, cu.spread spread, cu.ratio ratio, cu.fee fee, cu.commission commission, cu.minamount minamount, cu.maxamount maxamount " +
+            "from " +
+            "commodities c, commodities_users cu " +
+            "where " +
+            "c.id = cu.commodity_id and cu.user_id = " + user_id;
         
         try (Connection conn = sql2o.open()) {
             List<CommodityUser> commodities = conn.createQuery(query)
