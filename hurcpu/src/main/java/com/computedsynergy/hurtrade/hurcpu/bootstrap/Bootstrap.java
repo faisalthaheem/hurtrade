@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.computedsynergy.hurtrade.sharedcomponents.util.GeneralUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.MqNamingUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
 
@@ -42,7 +43,10 @@ public class Bootstrap extends AmqpBase{
     private ArrayList<ClientAccountTask> clientTasks = new ArrayList<>();
 
     public void bootstrap() throws Exception{
-        
+
+        //make sure we are open before any trades come in
+        GeneralUtil.refreshTradingSchedule();
+
         //setup amqp
         setupAMQP();
         //setup queues and exchanges

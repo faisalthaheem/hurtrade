@@ -20,6 +20,7 @@ import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -36,6 +37,7 @@ public class Constants {
     public static Type TYPE_DICTIONARY = new TypeToken<Map<String, String>>(){}.getType();
     public static Type TYPE_POSITIONS_MAP = new TypeToken<Map<UUID, Position>>(){}.getType();
     public static Type TYPE_COV_POSITIONS_MAP = new TypeToken<Map<UUID, CoverPosition>>(){}.getType();
+    public static Type TYPE_TRADING_SCHEDULE = new TypeToken<List<int[]>>(){}.getType();
 
 
     public static final String ORDER_TYPE_BUY = "buy";

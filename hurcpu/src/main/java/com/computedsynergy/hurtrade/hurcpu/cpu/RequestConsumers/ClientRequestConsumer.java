@@ -22,22 +22,19 @@ import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.charting.CandleStick;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeRequest;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.trade.TradeResponse;
-import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.updates.ClientUpdate;
-import com.computedsynergy.hurtrade.sharedcomponents.models.impl.PositionModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.CommodityUser;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Position;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
+import com.computedsynergy.hurtrade.sharedcomponents.util.GeneralUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.MqNamingUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
 import com.github.jedis.lock.JedisLock;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Envelope;
 import redis.clients.jedis.Jedis;
-
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -86,8 +83,6 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
         super.handleDelivery(consumerTag, envelope, properties, body); //To change body of generated methods, choose Tools | Templates.
 
         long deliveryTag = envelope.getDeliveryTag();
-
-        String serializedResponse = null;
 
         try {
 
@@ -160,12 +155,19 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
 
     private void processRequoteCommand(Map<String,String> params){
 
-        if(params.containsKey("orderid")){
+
+        String notification = null;
+
+        if(!GeneralUtil.isTradingOpen()){
+            notification = String.format("[%s] Floor is closed for trading. Cannot close posittion.", _user.getUsername());
+        }
+
+        if(null == notification && params.containsKey("orderid")){
             UUID orderId = UUID.fromString(params.get("orderid"));
 
             String userPositionsKeyName = getUserPositionsKeyName(_user.getUseruuid());
 
-            String notification = null;
+
 
             try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
                 JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
@@ -244,47 +246,54 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
 
     private void closePosition(UUID orderId)
     {
-
-        //get the last quoted prices for commodities for this user
-        String serializedQuotes = RedisUtil.getInstance().getSeriaizedQuotesForClient(_user.getUseruuid());
-        QuoteList quotesForClient = gson.fromJson(serializedQuotes, QuoteList.class);
-
-
-        String userPositionsKeyName = getUserPositionsKeyName(_user.getUseruuid());
-        Type mapType = Constants.TYPE_POSITIONS_MAP;
-
         String notification = null;
 
+        if(!GeneralUtil.isTradingOpen()){
+            notification = String.format("[%s] Floor is closed for trading. Cannot close posittion.", _user.getUsername());
+        }
 
-        try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
-            JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
-            try{
-                if(lock.acquire()){
+        if(null == notification) {
 
-                    //get client positions
-                    Map<UUID, Position> positions = gson.fromJson(jedis.get(userPositionsKeyName),mapType);
-                    if(positions.containsKey(orderId)) {
+            try (Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()) {
+
+                //get the last quoted prices for commodities for this user
+                String serializedQuotes = RedisUtil.getInstance().getSeriaizedQuotesForClient(_user.getUseruuid());
+                QuoteList quotesForClient = gson.fromJson(serializedQuotes, QuoteList.class);
+
+                String userPositionsKeyName = getUserPositionsKeyName(_user.getUseruuid());
+                Type mapType = Constants.TYPE_POSITIONS_MAP;
+
+                JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
+                try {
+                    if (lock.acquire()) {
+
+                        //get client positions
+                        Map<UUID, Position> positions = gson.fromJson(jedis.get(userPositionsKeyName), mapType);
+                        if (positions.containsKey(orderId)) {
 
 
-                        Position position = positions.get(orderId);
-                        closePosition(position, quotesForClient);
-                        //do not remove from here as this position has been marked close and now pending dealer revie.
+                            Position position = positions.get(orderId);
+                            if(position.isOpen()) {
+                                closePosition(position, quotesForClient);
+                                //do not remove from here as this position has been marked close and now pending dealer revie.
 
-                        notification = String.format("[%d]:[%s] requested close and is pending review.",
-                                position.getFriendlyorderid(), _user.getUsername());
+                                notification = String.format("[%d]:[%s] requested close and is pending dealer review.",
+                                        position.getFriendlyorderid(), _user.getUsername());
 
-                        //set client positions
-                        String serializedPositions = gson.toJson(positions);
-                        jedis.set(userPositionsKeyName, serializedPositions);
+                                //set client positions
+                                String serializedPositions = gson.toJson(positions);
+                                jedis.set(userPositionsKeyName, serializedPositions);
+                            }
+                        }
+
+                        lock.release();
+
+                    } else {
+                        _log.log(Level.SEVERE, null, "Could not process user positions " + _user.getUsername());
                     }
-
-                    lock.release();
-
-                }else{
+                } catch (Exception ex) {
                     _log.log(Level.SEVERE, null, "Could not process user positions " + _user.getUsername());
                 }
-            }catch(Exception ex){
-                _log.log(Level.SEVERE, null, "Could not process user positions " + _user.getUsername());
             }
         }
 
@@ -451,12 +460,19 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
         QuoteList quotesForClient = gson.fromJson(serializedQuotes, QuoteList.class);
 
         String notification = null;
+
+        if(!GeneralUtil.isTradingOpen()){
+            notification = String.format("[%s][%s] Floor is closed for trading.", user.getUsername(), response.getRequest().getCommodity());
+        }
         
-        if(!quotesForClient.containsKey(response.getRequest().getCommodity()))
+        if(notification == null && !quotesForClient.containsKey(response.getRequest().getCommodity()))
         {
             notification = String.format("[{0}] is not allowed to trade [{1}]",user.getUsername() , response.getRequest().getCommodity());
             _log.log(Level.SEVERE, notification);
-        }else{
+        }
+
+        if(null == notification)
+        {
             CommodityUser userCommodity = userCommodities.get(response.getRequest().getCommodity());
             if(
                     response.getRequest().getRequestedLot().compareTo(userCommodity.getMinamount()) < 0
@@ -471,12 +487,13 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
             }
         }
         
-        String userPositionsKeyName = getUserPositionsKeyName(user.getUseruuid());
-        Type mapType = Constants.TYPE_POSITIONS_MAP;
-
 
         if(null == notification) {
             try (Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()) {
+
+                String userPositionsKeyName = getUserPositionsKeyName(user.getUseruuid());
+                Type mapType = Constants.TYPE_POSITIONS_MAP;
+
                 JedisLock lock = new JedisLock(jedis, getLockNameForUserPositions(userPositionsKeyName), TIMEOUT_LOCK_USER_POSITIONS, EXPIRY_LOCK_USER_POSITIONS);
                 try {
                     if (lock.acquire()) {
