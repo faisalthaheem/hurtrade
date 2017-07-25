@@ -24,11 +24,6 @@ import java.util.UUID;
  */
 public class User {
 
-
-    public static final String USERTYPE_ADMIN = "admin";
-    public static final String USERTYPE_DEALER = "dealer";
-    public static final String USERTYPE_TRADER = "trader";
-
     private int id;
     private String username;
     private String pass;

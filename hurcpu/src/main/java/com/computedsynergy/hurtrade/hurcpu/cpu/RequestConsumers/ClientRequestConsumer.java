@@ -107,41 +107,38 @@ public class ClientRequestConsumer extends CustomDefaultConsumer {
 
             }else if(commandVerb.equalsIgnoreCase("candlestick")){
 
-                _singleExecutorService.submit(new Runnable() {
-                    @Override
-                    public void run() {
+                _singleExecutorService.submit(() -> {
 
-                        Gson gson = new Gson();
-                        Map<String,String> cmdParams =  gson.fromJson(new String(body), Constants.TYPE_DICTIONARY);
+                    Gson gson = new Gson();
+                    Map<String,String> cmdParams =  gson.fromJson(new String(body), Constants.TYPE_DICTIONARY);
 
-                        //todo dealers are not getting these
-                        String notification = String.format("Candlestick chart request received for commodity [%s]", cmdParams.get("commodity"));
-                        publishNotificationMessage(
-                                _user.getId(),
-                                -1,
-                                _exchangeName,
-                                "response",
-                                notification
-                        );
+                    //todo dealers are not getting these
+                    String notification = String.format("Candlestick chart request received for commodity [%s]", cmdParams.get("commodity"));
+                    publishNotificationMessage(
+                            _user.getId(),
+                            -1,
+                            _exchangeName,
+                            "response",
+                            notification
+                    );
 
-                        CandleStickChartingDataProvider cstickProvider = new CandleStickChartingDataProvider();
+                    CandleStickChartingDataProvider cstickProvider = new CandleStickChartingDataProvider();
 
-                        List<CandleStick> lstRet =  cstickProvider.GetChartData(
-                                cmdParams.get("commodity"),
-                                _user.getId(),
-                                cmdParams.get("resolution"),
-                                Integer.parseInt(cmdParams.get("samples"))
-                        );
-                        String serializedResponse = gson.toJson(lstRet);
+                    List<CandleStick> lstRet =  cstickProvider.GetChartData(
+                            cmdParams.get("commodity"),
+                            _user.getId(),
+                            cmdParams.get("resolution"),
+                            Integer.parseInt(cmdParams.get("samples"))
+                    );
+                    String serializedResponse = gson.toJson(lstRet);
 
-                        publishMessage(
-                                _exchangeName,
-                                "response",
-                                "candlestick",
-                                serializedResponse
-                        );
+                    publishMessage(
+                            _exchangeName,
+                            "response",
+                            "candlestick",
+                            serializedResponse
+                    );
 
-                    }
                 });
             }
 

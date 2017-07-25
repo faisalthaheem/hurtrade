@@ -29,23 +29,24 @@ import org.sql2o.Connection;
 public class SavedPositionModel extends ModelBase implements ISavedPositionModel{
 
     @Override
-    public List<SavedPosition> getAllPositions(int userid) {
+    public SavedPosition getPositions(int userid) {
         String query = "select * from savedpositions where user_id = " + userid;
         
         try (Connection conn = sql2o.open()) {
-            List<SavedPosition> positions = conn.createQuery(query)
-                    .executeAndFetch(SavedPosition.class);
+            SavedPosition positions = conn.createQuery(query)
+                    .executeAndFetchFirst(SavedPosition.class);
             
             return positions;
         }
     }
 
     @Override
-    public void savePosition(SavedPosition p) {
+    public void savePositions(SavedPosition p) {
         
         String insertSql = 
 	"INSERT INTO savedpositions(user_id, positiondata, created) " +
-            "values (:user_id, to_json(:positiondata::json), :created)";
+            "values (:user_id, to_json(:positiondata::json), :created) " +
+            "ON CONFLICT (user_id) DO UPDATE SET positiondata = EXCLUDED.positiondata, created = EXCLUDED.created";
 
         try (Connection con = sql2o.open()) {
             con.createQuery(insertSql)

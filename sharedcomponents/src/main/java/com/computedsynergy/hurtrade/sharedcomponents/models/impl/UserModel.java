@@ -85,15 +85,11 @@ public class UserModel extends ModelBase implements IUserModel{
         
         
         String query = String.format("select * from users where username = '%s' LIMIT 1", username);
-        User ret = null;
+        User ret;
         
         try (Connection conn = sql2o.open()) {
-            List<User> users = conn.createQuery(query)
-                    .executeAndFetch(User.class);
-            
-            if(users.size() > 0){
-                ret = users.get(0);
-            }
+            ret = conn.createQuery(query)
+                    .executeAndFetchFirst(User.class);
         }
         
         return ret;

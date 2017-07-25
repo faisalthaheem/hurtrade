@@ -62,15 +62,14 @@ public class Position {
     private Date closedat;
     private Date approvedopenat;
     private Date approvedcloseat;
+    private BigDecimal requoteprice;
+    private long friendlyorderid;
+    private int user_id;
+
 
     private BigDecimal usedMargin;
     private BigDecimal ratio;
-
-    private long friendlyorderid;
-
     private User _user;
-
-    private BigDecimal requoteprice;
 
     private boolean _wasPendingClose; //this is used with order requotes to apply the requoted price to the appropriate field
 
@@ -88,12 +87,10 @@ public class Position {
         this.setOrderState(ORDER_STATE_PENDING_OPEN);
         this.ratio = ratio; //ratio of leverage allowed on this instrument
         this._user = user;
+        friendlyorderid = GeneralUtil.GetNextFriendlyOrderId();
+        this.user_id = user.getId();
 
         this.usedMargin = BigDecimal.ZERO;
-
-
-        friendlyorderid = GeneralUtil.GetNextFriendlyOrderId();
-
     }
 
     public Position clone(){
@@ -398,5 +395,13 @@ public class Position {
 
     public void set_wasPendingClose(boolean _wasPendingClose) {
         this._wasPendingClose = _wasPendingClose;
+    }
+
+    public int getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(int user_id) {
+        this.user_id = user_id;
     }
 }

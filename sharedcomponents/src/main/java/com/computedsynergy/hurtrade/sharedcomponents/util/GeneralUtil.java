@@ -1,15 +1,24 @@
 package com.computedsynergy.hurtrade.sharedcomponents.util;
 
+import com.computedsynergy.hurtrade.sharedcomponents.models.impl.SavedPositionModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.ScheduleModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.SerialsModel;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.SavedPosition;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Schedule;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.google.gson.Gson;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.EXPIRY_LOCK_USER_POSITIONS;
+import static com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil.TIMEOUT_LOCK_USER_POSITIONS;
 
 /**
  * Created by faisal.t on 7/18/2017.
@@ -18,6 +27,8 @@ public class GeneralUtil {
 
     private static final SerialsModel serials = new SerialsModel();
     private static final ConcurrentHashMap<Integer, List<int[]>> _schedules = new ConcurrentHashMap<>();
+    private static final SavedPositionModel savedPositionModel = new SavedPositionModel();
+    private static final ExecutorService _singleExecutorService = Executors.newFixedThreadPool(10);;
 
     private static Logger _log = Logger.getLogger(GeneralUtil.class.getName());
 
@@ -85,8 +96,62 @@ public class GeneralUtil {
                 }
             }
         }
-
-
         return ret;
+    }
+
+    public static void loadClientPositions(User user)
+    {
+        try {
+            _singleExecutorService.submit(() -> {
+                 try {
+
+                    SavedPosition position = savedPositionModel.getPositions(user.getId());
+
+                    if(position != null) {
+
+                        String keyName = RedisUtil.getUserPositionsKeyName(user.getUseruuid());
+                        String lockName = RedisUtil.getLockNameForUserPositions(keyName);
+
+                        RedisUtil.getInstance().SetString(
+                                keyName,
+                                lockName,
+                                TIMEOUT_LOCK_USER_POSITIONS,
+                                EXPIRY_LOCK_USER_POSITIONS,
+                                position.getPositiondata()
+                        );
+
+                        _log.info("Loaded positions for: " + user.getUsername());
+                    }else{
+                        _log.warning("Saved positions found null for: " + user.getUsername());
+                    }
+
+                }catch (Exception ex){
+                    _log.log(Level.SEVERE, ex.getMessage(), ex);
+                }
+            });
+
+        }catch (Exception ex){
+            _log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
+
+    }
+
+    public static void saveClientPositions(User user, String positions)
+    {
+        try {
+
+            _singleExecutorService.submit(() -> {
+
+                try {
+                    SavedPosition p = new SavedPosition(user.getId(), positions);
+                    savedPositionModel.savePositions(p);
+                }catch (Exception ex){
+                    _log.log(Level.SEVERE, ex.getMessage(), ex);
+                }
+            });
+
+        }catch (Exception ex){
+            _log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
     }
 }

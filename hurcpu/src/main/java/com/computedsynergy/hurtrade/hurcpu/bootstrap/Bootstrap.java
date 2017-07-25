@@ -30,8 +30,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
 import com.computedsynergy.hurtrade.sharedcomponents.util.GeneralUtil;
-import com.computedsynergy.hurtrade.sharedcomponents.util.MqNamingUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
 
 /**
@@ -83,9 +83,17 @@ public class Bootstrap extends AmqpBase{
                 List<CommodityUser> userCommodities = cuModel.getCommoditiesForUser(u.getId());
                 RedisUtil.getInstance().cacheUserCommodities(u.getUseruuid(), userCommodities);
 
+                //associate as we are not fetching relationship from db
                 u.setUserOffice(o);
+
+                //cache user info to redis
                 RedisUtil.getInstance().SetUserInfo(u);
 
+                //restore saved positions from db to redis
+                if(u.getUsertype().equalsIgnoreCase(Constants.USERTYPE_TRADER))
+                GeneralUtil.loadClientPositions(u);
+
+                //
                 clientTasks.add(new ClientAccountTask(u));
             }
         }

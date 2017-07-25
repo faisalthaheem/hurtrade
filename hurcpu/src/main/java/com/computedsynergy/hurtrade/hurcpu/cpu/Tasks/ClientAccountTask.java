@@ -29,6 +29,7 @@ import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.updates.Client
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.SavedPositionModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
+import com.computedsynergy.hurtrade.sharedcomponents.util.GeneralUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.MqNamingUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
 
@@ -67,7 +68,7 @@ import redis.clients.jedis.Jedis;
  */
 public class ClientAccountTask extends AmqpBase {
     
-    SavedPositionModel savedPositionModel = new SavedPositionModel();
+
 
     Gson gson = new Gson();
     QuoteModel quoteModel = null;
@@ -324,14 +325,10 @@ public class ClientAccountTask extends AmqpBase {
                     String serializedPositions = gson.toJson(positions);
                     jedis.set(_userPositionsKeyName, serializedPositions);
 
-                    //todo - on a different thread not so often. ideally on trade executions
-                    //dump client's positions to db only if there are any positions
-//                    if(positions.size() > 0){
-//                        SavedPosition p = new SavedPosition(user.getId(), serializedPositions);
-//                        savedPositionModel.savePosition(p);
-//                    }
-
                     lock.release();
+
+                    //dump positions to db
+                    GeneralUtil.saveClientPositions(user, serializedPositions);
 
                     //insert quotes to db
                     quoteModel.saveQuote(user.getId(), clientQuotes.values());
@@ -352,7 +349,7 @@ public class ClientAccountTask extends AmqpBase {
 
     private void publishAccountStatus()
     {
-        String serializedAccountStatus = "{}";
+        String serializedAccountStatus;
 
         synchronized (_accountStatusLock) {
             _availableCash = new LedgerModel().GetAvailableCashForUser(_self.getId());

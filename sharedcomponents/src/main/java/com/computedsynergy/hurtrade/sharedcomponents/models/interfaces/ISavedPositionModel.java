@@ -24,6 +24,6 @@ import java.util.List;
  */
 public interface ISavedPositionModel {
     
-    public List<SavedPosition> getAllPositions(int userid);
-    public void savePosition(SavedPosition p);
+    SavedPosition getPositions(int userid);
+    void savePositions(SavedPosition p);
 }

@@ -23,7 +23,6 @@ import java.util.UUID;
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
  */
 public class SavedPosition {
-    private int id;
     private int user_id;
     private String positiondata;
     private Date created;
@@ -32,20 +31,6 @@ public class SavedPosition {
         this.user_id = user_id;
         this.positiondata = positiondata;
         this.created = new Date();
-    }
-
-    /**
-     * @return the id
-     */
-    public int getId() {
-        return id;
-    }
-
-    /**
-     * @param id the id to set
-     */
-    public void setId(int id) {
-        this.id = id;
     }
 
     /**

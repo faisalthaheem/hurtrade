@@ -95,7 +95,7 @@ public class AuthRequestProcessor extends AmqpBase {
                 res.put("responseQueueName", responseQueueName);
 
 
-                if(u.getUsertype().equalsIgnoreCase(User.USERTYPE_DEALER)){
+                if(u.getUsertype().equalsIgnoreCase(Constants.USERTYPE_DEALER)){
                     String officeExchangeName = MqNamingUtil.getOfficeExchangeName(u.getUserOffice().getOfficeuuid());
                     String officeDealerOutQName = MqNamingUtil.getOfficeDealerOutQueueName(u.getUserOffice().getOfficeuuid());
                     String officeDealerInQName = MqNamingUtil.getOfficeDealerINQueueName(u.getUserOffice().getOfficeuuid());
