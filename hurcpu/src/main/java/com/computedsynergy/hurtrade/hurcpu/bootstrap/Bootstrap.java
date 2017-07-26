@@ -86,9 +86,6 @@ public class Bootstrap extends AmqpBase{
                 //associate as we are not fetching relationship from db
                 u.setUserOffice(o);
 
-                //cache user info to redis
-                RedisUtil.getInstance().SetUserInfo(u);
-
                 //restore saved positions from db to redis
                 if(u.getUsertype().equalsIgnoreCase(Constants.USERTYPE_TRADER))
                 GeneralUtil.loadClientPositions(u);

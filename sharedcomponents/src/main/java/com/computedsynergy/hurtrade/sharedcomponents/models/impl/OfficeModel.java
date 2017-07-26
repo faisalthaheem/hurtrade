@@ -56,4 +56,20 @@ public class OfficeModel extends ModelBase implements IOfficeModel{
 
         return ret;
     }
+
+    @Override
+    public Office getOfficeForUser(int userid)
+    {
+        Office ret;
+
+        String query = "Select * from offices where id = (select id from offices_users where user_id = :userid)";
+
+        try (Connection conn = sql2o.open()) {
+            ret = conn.createQuery(query)
+                    .addParameter("userid", userid)
+                    .executeAndFetchFirst(Office.class);
+        }
+
+        return ret;
+    }
 }

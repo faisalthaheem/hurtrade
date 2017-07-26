@@ -15,24 +15,23 @@
  */
 package com.computedsynergy.hurtrade.webauth;
 
+import com.computedsynergy.hurtrade.sharedcomponents.models.impl.OfficeModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Office;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
-import com.computedsynergy.hurtrade.sharedcomponents.transformers.JsonTransformer;
-import com.computedsynergy.hurtrade.sharedcomponents.util.ObjectUtils;
+import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
+import com.computedsynergy.hurtrade.sharedcomponents.util.MqNamingUtil;
 import com.computedsynergy.hurtrade.sharedcomponents.util.RedisUtil;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
-import redis.clients.jedis.Jedis;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.nio.charset.Charset;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static spark.Spark.port;
 import static spark.Spark.post;
-import java.nio.charset.Charset;
 
 /**
  *
@@ -45,6 +44,8 @@ public class Webauth {
      * @param
      */
 
+    private static final Logger _log = Logger.getLogger(Webauth.class.getName());
+
     private static Map<String, String> toMap(List<NameValuePair> pairs){
         Map<String, String> map = new HashMap<>();
         for(int i=0; i<pairs.size(); i++){
@@ -54,7 +55,77 @@ public class Webauth {
         return map;
     }
 
+    private static void bootstrap(){
+
+        try{
+
+            OfficeModel officeModel = new OfficeModel();
+            UserModel userModel = new UserModel();
+
+            List<Office> offices = officeModel.getAllOffices();
+
+            for(Office office : offices){
+
+                List<User> usersList = userModel.getAllUsersForOffice(office.getId());
+
+                for(User user : usersList){
+                    user.setUserOffice(office);
+                    cacheUser(user);
+                }
+            }
+
+        }catch(Exception ex){
+            _log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
+
+    }
+
+    private static void cacheUser(User user){
+
+        String authtags = user.getAuthtags();
+        user.getTagsList().addAll(
+                Arrays.asList(authtags.split(" "))
+        );
+
+        //set resources
+        List<String> resources = user.getResourcesList();
+        resources.add(Constants.EXCHANGE_NAME_AUTH);
+        resources.add(MqNamingUtil.MQ_GEN_Q_NAME_PREFIX);
+
+        resources.add(
+                MqNamingUtil.getClientExchangeName(user.getUseruuid())
+        );
+
+        resources.add(
+                MqNamingUtil.getClientOutgoingQueueName(user.getUseruuid())
+        );
+
+        resources.add(
+                MqNamingUtil.getClientIncomingQueueName(user.getUseruuid())
+        );
+
+        if(user.getUsertype().equalsIgnoreCase(Constants.USERTYPE_DEALER)){
+
+            resources.add(
+                    MqNamingUtil.getOfficeExchangeName(user.getUserOffice().getOfficeuuid())
+            );
+
+            resources.add(
+                    MqNamingUtil.getOfficeDealerINQueueName(user.getUserOffice().getOfficeuuid())
+            );
+
+            resources.add(
+                    MqNamingUtil.getOfficeDealerOutQueueName(user.getUserOffice().getOfficeuuid())
+            );
+        }
+
+        RedisUtil.getInstance().SetUserInfo(user);
+
+    }
+
     public static void main(String[] args){
+
+        bootstrap();
 
         port(80);
 
@@ -82,10 +153,12 @@ public class Webauth {
 
                     if(dbUser != null){
 
-                        RedisUtil.getInstance().SetUserInfo(dbUser);
+                        OfficeModel officeModel = new OfficeModel();
+                        dbUser.setUserOffice(officeModel.getOfficeForUser(dbUser.getId()));
+
+                        cacheUser(dbUser);
 
                         if(dbUser.getPass().equals(password)) {
-                            authtags = dbUser.getAuthtags();
                             userValid = true;
                         }
                     }
@@ -97,12 +170,12 @@ public class Webauth {
                     }
                 }
 
-                if(userValid){
-                    Logger.getLogger(Webauth.class.getName()).log(Level.INFO, "Authorized user : " + username );
+                if(false == userValid){
+                    _log.log(Level.INFO, "Authentication failed for " + username );
                 }
 
             } catch (Exception ex) {
-                Logger.getLogger(Webauth.class.getName()).log(Level.SEVERE, null, ex);
+                _log.log(Level.SEVERE, null, ex);
             }
 
             res.status(200);
@@ -116,15 +189,92 @@ public class Webauth {
 
         post("/vhost", (req, res) -> {
 
+            String returnString = "allow";
+            try {
+                List<NameValuePair> pairs = URLEncodedUtils.parse(req.body(), Charset.defaultCharset());
+                Map<String, String> params = toMap(pairs);
+
+                if(params.containsKey("vhost")) {
+                    String vhost = params.get("vhost");
+                    if(!vhost.equalsIgnoreCase("/")){
+                        returnString = "deny";
+                    }
+                }
+
+            }catch(Exception ex){
+
+                _log.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+
             res.status(200);
-            return "allow";
+            return returnString;
 
         });
 
         post("/resource", (req, res) -> {
 
+            String ret = "deny";
+
+            try {
+                List<NameValuePair> pairs = URLEncodedUtils.parse(req.body(), Charset.defaultCharset());
+                Map<String, String> params = toMap(pairs);
+
+                String username = params.get("username");
+                String vhost = params.get("vhost");
+                String resource = params.get("resource");
+                String permission = params.get("permission");
+                String resourceName = params.get("name");
+
+                User user = RedisUtil.getInstance().GetUserInfo(username);
+                if(null != user){
+
+                    if(
+                            user.getUsertype().equalsIgnoreCase(Constants.USERTYPE_TRADER) ||
+                                    user.getUsertype().equalsIgnoreCase(Constants.USERTYPE_DEALER)
+                        ){
+
+                        //traders and dealers are not allowed to declare/delete auth exchange
+                        if(resource.equalsIgnoreCase("exchange")
+                                &&
+                                resourceName.equalsIgnoreCase(Constants.EXCHANGE_NAME_AUTH)
+                                &&
+                                permission.equalsIgnoreCase("configure")
+                            ){
+                            ret = "deny"; //
+                        }else{
+                            for(String allowedResource : user.getResourcesList()){
+                                if(resourceName.startsWith(allowedResource)){
+                                    ret = "allow";
+                                }
+                            }
+                        }
+
+                    }else if(
+                            user.getUsertype().equalsIgnoreCase(Constants.USERTYPE_ADMIN) ||
+                                    user.getUsertype().equalsIgnoreCase(Constants.USERTYPE_SERVICE)
+                            ){
+                            ret = "allow";
+                    }
+
+                    String logLine = String.format("resource u:[%s] v:[%s] r:[%s] p:[%s] :n[%s] -> %s.",
+                            username,
+                            vhost,
+                            resource,
+                            permission,
+                            resourceName,
+                            ret
+                            );
+                    _log.info(logLine);
+                }
+
+            }catch(Exception ex){
+
+                _log.log(Level.SEVERE, ex.getMessage(), ex);
+            }
+
+
             res.status(200);
-            return "allow";
+            return ret;
 
         });
 

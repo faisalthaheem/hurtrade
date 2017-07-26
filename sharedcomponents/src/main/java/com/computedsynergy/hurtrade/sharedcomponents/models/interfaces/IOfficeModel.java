@@ -15,6 +15,7 @@
  */
 package com.computedsynergy.hurtrade.sharedcomponents.models.interfaces;
 
+import com.computedsynergy.hurtrade.sharedcomponents.models.impl.OfficeModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Office;
 import java.util.List;
 
@@ -24,6 +25,7 @@ import java.util.List;
  */
 public interface IOfficeModel {
     
-    public List<Office> getAllOffices();
-    public Office getOffice(int id);
+    List<Office> getAllOffices();
+    Office getOffice(int id);
+    Office getOfficeForUser(int userid);
 }

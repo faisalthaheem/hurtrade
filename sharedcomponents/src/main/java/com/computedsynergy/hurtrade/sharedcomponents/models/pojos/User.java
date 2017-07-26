@@ -15,7 +15,9 @@
  */
 package com.computedsynergy.hurtrade.sharedcomponents.models.pojos;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -38,6 +40,14 @@ public class User {
     private String authtags;
     private boolean liquidate;
     private Office userOffice;
+
+    private List<String> tagsList;
+    private List<String> resourcesList;
+
+    public User(){
+        tagsList = new ArrayList();
+        resourcesList = new ArrayList();
+    }
     
     public User(int id, String username, String pass, boolean locked, String usertype,
         String phonenumber, String fullname, String email, Date created, Date ended, UUID useruuid,
@@ -236,5 +246,21 @@ public class User {
 
     public void setLiquidate(boolean liquidate) {
         this.liquidate = liquidate;
+    }
+
+    public List<String> getTagsList() {
+        return tagsList;
+    }
+
+    public void setTagsList(List<String> tagsList) {
+        this.tagsList = tagsList;
+    }
+
+    public List<String> getResourcesList() {
+        return resourcesList;
+    }
+
+    public void setResourcesList(List<String> resourcesList) {
+        this.resourcesList = resourcesList;
     }
 }

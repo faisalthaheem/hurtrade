@@ -30,6 +30,9 @@ public class MqNamingUtil {
     private static final String E_CLIENT_NAME_SUFFIX = "_client";
     private static final String Q_CLIENT_OUTGOING_NAME_SUFFIX = "_client_outgoing";
     private static final String Q_CLIENT_INCOMING_NAME_SUFFIX = "_client_incoming";
+
+    public static final String MQ_GEN_Q_NAME_PREFIX = "amq.gen";
+
     
     public static String getOfficeExchangeName(UUID uuid){
         return uuid.toString() + E_OFFICE_NAME_SUFFIX;
