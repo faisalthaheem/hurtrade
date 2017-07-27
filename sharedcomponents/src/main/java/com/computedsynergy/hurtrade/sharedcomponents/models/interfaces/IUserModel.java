@@ -24,9 +24,10 @@ import java.util.List;
  */
 public interface IUserModel {
     
-    public List<User> getAllUsers();
-    public List<User> getAllUsersForOffice(int id);
-    public User getByUsername(String username);
+    List<User> getAllUsers();
+    List<User> getAllUsersForOffice(int id);
+    List<User> getNonOfficeUsers();
+    User getByUsername(String username);
     
     public User authenticate(String username, String password);
 }

@@ -46,6 +46,15 @@ public class CommandLineOptions {
     
     @Parameter(names = {"--mq-password"})
     public String mqPassword = "svc";
+
+    @Parameter(names = {"--mq-stats-interval"})
+    public Integer mqStatsInterval = 5000;
+
+    @Parameter(names = {"--mq-exchange-name-stats"})
+    public String mqExchangeNameStats = "stats";
+
+    @Parameter(names = {"--mq-rabbitmq-management-base-url"})
+    public String mqRabbitMqManagementBaseUrl = "http://localhost:15672";
     
     @Parameter(names = {"--redis-server"})
     public String redisServer = "localhost";

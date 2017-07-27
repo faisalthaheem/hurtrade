@@ -56,6 +56,19 @@ public class UserModel extends ModelBase implements IUserModel{
     }
 
     @Override
+    public List<User> getNonOfficeUsers() {
+
+        String query = "select * from users where id not in (select distinct(user_id) user_id from offices_users)";
+
+        try (Connection conn = sql2o.open()) {
+            List<User> users = conn.createQuery(query)
+                    .executeAndFetch(User.class);
+
+            return users;
+        }
+    }
+
+    @Override
     public User authenticate(String username, String password) {
         
         

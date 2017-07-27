@@ -49,11 +49,22 @@ public class BackOfficeRequestProcessor extends AmqpBase {
         args.put("x-max-length", CommandLineOptions.getInstance().maxQueuedMessages); //retain only x messages
         args.put("x-message-ttl", CommandLineOptions.getInstance().maxQueueTtl); //retain only for x seconds
 
+        //as we will be receiving information on connected users, don't want to crash first time app is run
+        channel.exchangeDeclare(
+                CommandLineOptions.getInstance().mqExchangeNameStats,
+                "fanout",
+                true
+        );
+
+
         for (Office o : officeList) {
 
             String officeExchangeName = MqNamingUtil.getOfficeExchangeName(o.getOfficeuuid());
             String officeDealerInQName = MqNamingUtil.getOfficeDealerINQueueName(o.getOfficeuuid());
             String officeDealerOutQName = MqNamingUtil.getOfficeDealerOutQueueName(o.getOfficeuuid());
+
+            //bind the stats exchange to this office's exchange
+            channel.exchangeBind(officeExchangeName, CommandLineOptions.getInstance().mqExchangeNameStats, "connections");
 
             //start office position dispatch task
             OfficePositionsDispatchTask officePositionsDispatchTask = new OfficePositionsDispatchTask(officeExchangeName, o.getId());
@@ -64,6 +75,7 @@ public class BackOfficeRequestProcessor extends AmqpBase {
             channel.queueDeclare(officeDealerOutQName, true, false, false, args);
             channel.queueDeclare(officeDealerInQName, true, false, false, args);
 
+            channel.queueBind(officeDealerOutQName, officeExchangeName, "connections");
             channel.queueBind(officeDealerOutQName, officeExchangeName, "todealer");
             channel.queueBind(officeDealerInQName, officeExchangeName, "fromdealer");
 

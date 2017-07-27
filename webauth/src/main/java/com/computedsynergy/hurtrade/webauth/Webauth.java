@@ -74,6 +74,12 @@ public class Webauth {
                 }
             }
 
+            //save all others such as services and administrative
+            List<User> usersList = userModel.getNonOfficeUsers();
+            for(User user : usersList){
+                cacheUser(user);
+            }
+
         }catch(Exception ex){
             _log.log(Level.SEVERE, ex.getMessage(), ex);
         }

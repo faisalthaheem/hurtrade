@@ -75,6 +75,8 @@ public class RedisUtil {
     public static final int TIMEOUT_LOCK_COVER_POSITIONS = 5000;
     public static final int EXPIRY_LOCK_COVER_POSITIONS = 10000;
 
+    //active mq users
+
     //requotes
     public static final String REQUOTE_PREFIX = "requote_";
     
