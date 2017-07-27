@@ -38,6 +38,7 @@ public class Constants {
     public static Type TYPE_POSITIONS_MAP = new TypeToken<Map<UUID, Position>>(){}.getType();
     public static Type TYPE_COV_POSITIONS_MAP = new TypeToken<Map<UUID, CoverPosition>>(){}.getType();
     public static Type TYPE_TRADING_SCHEDULE = new TypeToken<List<int[]>>(){}.getType();
+    public static Type TYPE_STRING_ARRAY = new TypeToken<String[]>(){}.getType();
 
     public static final String USERTYPE_SERVICE = "service";
     public static final String USERTYPE_ADMIN = "admin";

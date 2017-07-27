@@ -164,13 +164,13 @@ public class Webauth {
 
                         cacheUser(dbUser);
 
-                        if(dbUser.getPass().equals(password)) {
+                        if(!user.isLocked() && dbUser.getPass().equals(password)) {
                             userValid = true;
                         }
                     }
 
                 }else{
-                    if(user.getPass().equals(password)){
+                    if(!user.isLocked() && user.getPass().equals(password)){
                         authtags = user.getAuthtags();
                         userValid=true;
                     }
@@ -232,7 +232,7 @@ public class Webauth {
                 String resourceName = params.get("name");
 
                 User user = RedisUtil.getInstance().GetUserInfo(username);
-                if(null != user){
+                if(null != user && !user.isLocked()){
 
                     if(
                             user.getUsertype().equalsIgnoreCase(Constants.USERTYPE_TRADER) ||

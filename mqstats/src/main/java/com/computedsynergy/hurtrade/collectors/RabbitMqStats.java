@@ -2,22 +2,31 @@ package com.computedsynergy.hurtrade.collectors;
 
 import com.computedsynergy.hurtrade.sharedcomponents.amqp.AmqpBase;
 import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
+import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.SourceQuote;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.ConnectionInfo;
+import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
+import com.computedsynergy.hurtrade.sharedcomponents.util.MqNamingUtil;
 import com.google.gson.*;
 import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.impl.AMQBasicProperties;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
 public class RabbitMqStats extends AmqpBase {
 
+    private final ExecutorService _singleExecutorService;
     private JsonParser _par = new JsonParser();
     private Gson _gson = new Gson();
 
@@ -26,6 +35,10 @@ public class RabbitMqStats extends AmqpBase {
         RabbitMqStats mqStats = new RabbitMqStats();
 
         mqStats.run();
+    }
+
+    private RabbitMqStats(){
+        this._singleExecutorService = Executors.newFixedThreadPool(2);
     }
 
     private void run(){
@@ -40,6 +53,30 @@ public class RabbitMqStats extends AmqpBase {
                     true
                     );
 
+            channel.queueDeclare(MqNamingUtil.Q_NAME_MQ_STATS_COMMAND, true, false, false, null);
+            channel.queueBind(MqNamingUtil.Q_NAME_MQ_STATS_COMMAND, CommandLineOptions.getInstance().mqExchangeNameStats, "command");
+
+            channel.basicConsume(MqNamingUtil.Q_NAME_MQ_STATS_COMMAND, false, "commands_consumer",
+                    new DefaultConsumer(channel) {
+                        @Override
+                        public void handleDelivery(String consumerTag,
+                                                   Envelope envelope,
+                                                   AMQP.BasicProperties properties,
+                                                   byte[] body)
+                                throws IOException {
+                            String routingKey = envelope.getRoutingKey();
+                            String contentType = properties.getContentType();
+                            long deliveryTag = envelope.getDeliveryTag();
+
+
+                            _singleExecutorService.submit(() -> {
+                                processCommand(properties, new String(body));
+                            });
+
+                            channel.basicAck(deliveryTag, false);
+                        }
+                    });
+
         }catch(Exception ex){
             _log.log(Level.SEVERE,ex.getMessage(), ex);
             return;
@@ -53,6 +90,57 @@ public class RabbitMqStats extends AmqpBase {
             }catch (Exception ex){
                 _log.log(Level.SEVERE, ex.getMessage(), ex);
             }
+        }
+    }
+
+    private void processCommand(AMQP.BasicProperties properties, String payload){
+
+        String type = properties.getType();
+        if(type.equalsIgnoreCase("disconnect")){
+
+            String[] users = _gson.fromJson(payload, Constants.TYPE_STRING_ARRAY);
+
+            for(String user : users) {
+                disconnectUser(user);
+            }
+        }
+    }
+
+    private void disconnectUser(String username)
+    {
+        try{
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .authenticator((route, response) -> {
+
+                        _log.info("Authenticating for response: " + response);
+                        _log.info("Challenges: " + response.challenges());
+
+                        String credential = Credentials.basic(
+                                CommandLineOptions.getInstance().mqUsername,
+                                CommandLineOptions.getInstance().mqPassword
+                        );
+                        return response.request().newBuilder()
+                                .header("Authorization", credential)
+                                .build();
+                    })
+                    .build();
+
+
+
+            Request request = new Request.Builder()
+                    .url(CommandLineOptions.getInstance().mqRabbitMqManagementBaseUrl + "/api/connections/" + username)
+                    .delete()
+                    .addHeader("content-type", "application/json")
+                    .addHeader("cache-control", "no-cache")
+                    .addHeader("X-Reason", "session-killed")
+                    .build();
+
+            Response response = client.newCall(request).execute();
+
+            _log.info("Executed disconnect on client [" + username + "] with response code: " + response.code());
+
+        }catch(Exception ex){
+            _log.severe(ex.getMessage());
         }
     }
 

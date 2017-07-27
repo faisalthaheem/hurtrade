@@ -28,6 +28,7 @@ public interface IUserModel {
     List<User> getAllUsersForOffice(int id);
     List<User> getNonOfficeUsers();
     User getByUsername(String username);
+    void updateUser(User u);
     
     public User authenticate(String username, String password);
 }

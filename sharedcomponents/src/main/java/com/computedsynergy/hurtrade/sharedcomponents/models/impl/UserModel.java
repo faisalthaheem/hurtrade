@@ -15,10 +15,15 @@
  */
 package com.computedsynergy.hurtrade.sharedcomponents.models.impl;
 
+import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.Quote;
 import com.computedsynergy.hurtrade.sharedcomponents.models.interfaces.IUserModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.sql2o.Connection;
+import org.sql2o.Query;
 
 /**
  *
@@ -31,7 +36,7 @@ public class UserModel extends ModelBase implements IUserModel{
     @Override
     public List<User> getAllUsers() {
         
-        String query = "select * from users where usertype in ('trader','dealer')";
+        String query = "select * from users where usertype in ('trader','dealer') and ended is null";
         
         try (Connection conn = sql2o.open()) {
             List<User> users = conn.createQuery(query)
@@ -44,7 +49,7 @@ public class UserModel extends ModelBase implements IUserModel{
     @Override
     public List<User> getAllUsersForOffice(int id) {
         
-        String query = "select * from users where usertype in ('trader','dealer') AND id IN (select user_id from offices_users where office_id ="+ id + ")";
+        String query = "select * from users where usertype in ('trader','dealer') AND id IN (select user_id from offices_users where office_id ="+ id + ") and ended is null";
         
         try (Connection conn = sql2o.open()) {
             List<User> users = conn.createQuery(query)
@@ -58,7 +63,7 @@ public class UserModel extends ModelBase implements IUserModel{
     @Override
     public List<User> getNonOfficeUsers() {
 
-        String query = "select * from users where id not in (select distinct(user_id) user_id from offices_users)";
+        String query = "select * from users where id not in (select distinct(user_id) user_id from offices_users) and ended is null";
 
         try (Connection conn = sql2o.open()) {
             List<User> users = conn.createQuery(query)
@@ -72,7 +77,7 @@ public class UserModel extends ModelBase implements IUserModel{
     public User authenticate(String username, String password) {
         
         
-        String query = String.format(("select * from users where username = '%s' AND password='%s' LIMIT 1"), username, password);
+        String query = String.format(("select * from users where username = '%s' AND password='%s' and ended is null LIMIT 1"), username, password);
         User ret = null;
         
         try (Connection conn = sql2o.open()) {
@@ -97,7 +102,7 @@ public class UserModel extends ModelBase implements IUserModel{
     public User getByUsername(String username) {
         
         
-        String query = String.format("select * from users where username = '%s' LIMIT 1", username);
+        String query = String.format("select * from users where username = '%s' and ended is null LIMIT 1", username);
         User ret;
         
         try (Connection conn = sql2o.open()) {
@@ -107,6 +112,44 @@ public class UserModel extends ModelBase implements IUserModel{
         
         return ret;
         
+    }
+
+    @Override
+    public void updateUser(User u) {
+
+        String queryEndRecord = "Update users set ended = current_timestamp where id = :id";
+        String queryInsert = "INSERT INTO public.users" +
+        "(username, pass, locked, usertype, phonenumber, fullname, email, created, ended, useruuid, authtags, liquidate) " +
+        "VALUES (:username, :pass, :locked, :usertype, :phonenumber, :fullname, :email, current_timestamp, null, :useruuid, :authtags, :liquidate)";
+
+
+
+        try (Connection con = sql2o.beginTransaction()) {
+
+            con.createQuery(queryEndRecord)
+                    .addParameter("id",u.getId())
+                    .executeUpdate();
+
+
+            con.createQuery(queryInsert)
+                    .addParameter("username",u.getUsername())
+                    .addParameter("pass",u.getPass())
+                    .addParameter("locked",u.isLocked())
+                    .addParameter("usertype",u.getUsertype())
+                    .addParameter("phonenumber",u.getPhonenumber())
+                    .addParameter("fullname",u.getFullname())
+                    .addParameter("email",u.getEmail())
+                    .addParameter("useruuid",u.getUseruuid())
+                    .addParameter("authtags",u.getAuthtags())
+                    .addParameter("liquidate",u.isLiquidate())
+                    .executeUpdate();
+
+
+            con.commit();
+
+        }catch(Exception ex){
+            _log.log(Level.SEVERE, ex.getMessage(), ex);
+        }
     }
 
 }

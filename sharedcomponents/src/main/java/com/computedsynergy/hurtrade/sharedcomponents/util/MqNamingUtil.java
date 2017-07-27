@@ -32,6 +32,7 @@ public class MqNamingUtil {
     private static final String Q_CLIENT_INCOMING_NAME_SUFFIX = "_client_incoming";
 
     public static final String MQ_GEN_Q_NAME_PREFIX = "amq.gen";
+    public static final String Q_NAME_MQ_STATS_COMMAND = "mqstats.commands";
 
     
     public static String getOfficeExchangeName(UUID uuid){

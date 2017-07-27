@@ -155,6 +155,7 @@ public class BackOfficeRequestConsumer extends CustomDefaultConsumer {
         Map<String, String> ret = new HashMap<>();
 
         String commandVerb = request.get("command");
+        String notification = null;
 
         if(commandVerb.equalsIgnoreCase("listCoverAccounts")){
 
@@ -176,8 +177,6 @@ public class BackOfficeRequestConsumer extends CustomDefaultConsumer {
 
             String officeCoverPositionsKeyName = getKeyNameForOffCovPos(_office.getOfficeuuid());
             String officeCoverPositionsLockName = getLockNameForOffCovPos(_office.getOfficeuuid());
-
-            String notification = null;
 
             try(Jedis jedis = RedisUtil.getInstance().getJedisPool().getResource()){
                 JedisLock lock = new JedisLock(
@@ -249,16 +248,48 @@ public class BackOfficeRequestConsumer extends CustomDefaultConsumer {
                 }
             }
 
-            if(null != notification){
 
-                publishNotificationMessage(
-                        -1,
-                        _office.getId(),
-                        officeExhcangeName,
-                        "todealer",
-                        notification
+        }else if(commandVerb.equalsIgnoreCase("lockuser"))
+        {
+
+            //todo: publish to global notification exchange so that user information is updated on
+            //all services and nodes
+
+            //lock user in db
+            User u = userModel.getByUsername(request.get("username"));
+            if(u == null){
+                notification = String.format("Received lock request for non-existent user [%s].", request.get("username"));
+                _log.info(notification);
+            }else{
+                u.setLocked(true);
+                userModel.updateUser(u);
+
+                //update cache
+                RedisUtil.getInstance().SetUserInfo(u);
+
+                //dispatch to upstream to disconnect user
+                publishMessage(
+                        CommandLineOptions.getInstance().mqExchangeNameStats,
+                        "command",
+                        "disconnect",
+                        request.get("mqName")
                 );
+
+
+                notification = String.format("Successfully locked user [%s].", request.get("username"));
+                _log.info(notification);
             }
+        }
+
+        if(null != notification){
+
+            publishNotificationMessage(
+                    -1,
+                    _office.getId(),
+                    officeExhcangeName,
+                    "todealer",
+                    notification
+            );
         }
 
         return ret;
