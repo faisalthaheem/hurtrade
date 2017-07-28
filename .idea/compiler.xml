@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="fxyahoo" />
+        <module name="hurcpu" />
+        <module name="maven-archiver (1)" />
+        <module name="maven-archiver (2)" />
+        <module name="maven-archiver (3)" />
+        <module name="maven-archiver (4)" />
+        <module name="maven-archiver (5)" />
+        <module name="mqstats" />
+        <module name="sharedcomponents" />
+        <module name="TestClient" />
+        <module name="webauth" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="fxyahoo" target="1.8" />
+      <module name="hurcpu" target="1.8" />
+      <module name="hurtrade" target="1.5" />
+      <module name="maven-archiver (1)" target="1.5" />
+      <module name="maven-archiver (2)" target="1.5" />
+      <module name="maven-archiver (3)" target="1.5" />
+      <module name="maven-archiver (4)" target="1.5" />
+      <module name="maven-archiver (5)" target="1.5" />
+      <module name="mqstats" target="1.8" />
+      <module name="sharedcomponents" target="1.8" />
+      <module name="TestClient" target="1.8" />
+      <module name="webauth" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

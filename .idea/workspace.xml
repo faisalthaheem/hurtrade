@@ -1,0 +1,1503 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BookmarkManager">
+    <bookmark url="file://$PROJECT_DIR$/webauth/src/main/java/com/computedsynergy/hurtrade/webauth/Webauth.java" line="153" mnemonic="1" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="f8298c3e-3541-451c-b61e-72de481f1a64" name="Default" comment="" />
+    <ignored path="$PROJECT_DIR$/webauth/target/" />
+    <ignored path="$PROJECT_DIR$/sharedcomponents/target/" />
+    <ignored path="$PROJECT_DIR$/TestClient/target/" />
+    <ignored path="$PROJECT_DIR$/fxyahoo/target/" />
+    <ignored path="$PROJECT_DIR$/hurcpu/target/" />
+    <ignored path="$PROJECT_DIR$/target/" />
+    <ignored path="$PROJECT_DIR$/mqstats/target/" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CoverageDataManager">
+    <SUITE FILE_PATH="coverage/hurtrade$HurCpu.coverage" NAME="HurCpu Coverage Results" MODIFIED="1499945789653" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>com.computedsynergy.hurtrade.hurcpu.*</FILTER>
+    </SUITE>
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="hurtrade" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="BackOfficeRequestConsumer.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/cpu/RequestConsumers/BackOfficeRequestConsumer.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="351">
+              <caret line="267" column="52" lean-forward="false" selection-start-line="267" selection-start-column="52" selection-end-line="267" selection-end-column="52" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Constants.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/util/Constants.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="204">
+              <caret line="40" column="40" lean-forward="true" selection-start-line="40" selection-start-column="23" selection-end-line="40" selection-end-column="40" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Webauth.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/webauth/src/main/java/com/computedsynergy/hurtrade/webauth/Webauth.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="301">
+              <caret line="160" column="0" lean-forward="true" selection-start-line="160" selection-start-column="0" selection-end-line="160" selection-end-column="0" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ClientAccountTask.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/cpu/Tasks/ClientAccountTask.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="85">
+              <caret line="276" column="16" lean-forward="true" selection-start-line="276" selection-start-column="16" selection-end-line="276" selection-end-column="16" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="RabbitMqStats.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/mqstats/src/main/java/com/computedsynergy/hurtrade/collectors/RabbitMqStats.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="446">
+              <caret line="134" column="60" lean-forward="true" selection-start-line="134" selection-start-column="60" selection-end-line="134" selection-end-column="60" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#1371#1372#0" expanded="true" />
+                <element signature="e#1448#1449#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CommandLineOptions.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/commandline/CommandLineOptions.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="430">
+              <caret line="53" column="42" lean-forward="false" selection-start-line="53" selection-start-column="42" selection-end-line="53" selection-end-column="42" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="UserModel.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/UserModel.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="421">
+              <caret line="152" column="0" lean-forward="false" selection-start-line="152" selection-start-column="0" selection-end-line="152" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="OfficePositionsDispatchTask.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/cpu/Tasks/OfficePositionsDispatchTask.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="233">
+              <caret line="217" column="59" lean-forward="true" selection-start-line="217" selection-start-column="59" selection-end-line="217" selection-end-column="59" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="RedisUtil.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/util/RedisUtil.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="214">
+              <caret line="391" column="0" lean-forward="false" selection-start-line="391" selection-start-column="0" selection-end-line="391" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MqNamingUtil.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/util/MqNamingUtil.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="340">
+              <caret line="34" column="31" lean-forward="true" selection-start-line="34" selection-start-column="31" selection-end-line="34" selection-end-column="54" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>client spre</find>
+      <find>Logger.getLogger(AuthRequestProcessor.class.getName())</find>
+      <find>Logger.getLogger(this.getClass().getName())</find>
+      <find>ledger</find>
+      <find>commodi</find>
+      <find>userCommodities</find>
+      <find>getCachedUserCommodities</find>
+      <find>closePosition</find>
+      <find>proces</find>
+      <find>requote</find>
+      <find>margin</find>
+      <find>basicpublish</find>
+      <find>props</find>
+      <find>publish</find>
+      <find>requested</find>
+      <find>requested close</find>
+      <find>not so</find>
+      <find>savedPositionModel</find>
+      <find>constants</find>
+      <find>officeMap</find>
+      <find>basic</find>
+      <find>declare</find>
+      <find>amq</find>
+      <find>isLocked</find>
+      <find>serializedPositions</find>
+      <find>task</find>
+      <find>candlest</find>
+      <find>_singleExecutorService</find>
+      <find>gson</find>
+      <find>locked</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>Date</replace>
+      <replace>log</replace>
+      <replace>_log</replace>
+    </replaceStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GradleLocalSettings">
+    <option name="externalProjectsViewState">
+      <projects_view />
+    </option>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/HurCpu.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/amqp/AmqpConnectionFactory.java" />
+        <option value="$PROJECT_DIR$/fxyahoo/src/main/java/com/computedsynergy/hurtrade/fxyahoo/FxYahoo.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/ICoverPosition.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/ICoverAccount.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/CoverAccountModel.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/CoverPositionModel.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/dataexchange/updates/BackofficeUpdate.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/pojos/CoverAccount.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/pojos/CoverPosition.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/ILedgerModel.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/ModelBase.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/LedgerModel.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/ISerialsModel.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/SerialsModel.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/amqp/AmqpBase.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/INotificationModel.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/NotificationModel.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/amqp/CustomDefaultConsumer.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/pojos/CommodityUser.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/CommodityUserModel.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/IScheduleModel.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/pojos/Schedule.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/ScheduleModel.java" />
+        <option value="$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/cpu/RequestConsumers/ClientRequestConsumer.java" />
+        <option value="$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/cpu/Tasks/ClientAccountTask.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/ISavedPositionModel.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/pojos/SavedPosition.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/SavedPositionModel.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/pojos/Position.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/PositionModel.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/util/GeneralUtil.java" />
+        <option value="$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/cpu/AuthRequestProcessor.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/pojos/User.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/OfficeModel.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/IOfficeModel.java" />
+        <option value="$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/bootstrap/Bootstrap.java" />
+        <option value="$PROJECT_DIR$/mqstats/pom.xml" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/util/RedisUtil.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/pojos/ConnectionInfo.java" />
+        <option value="$PROJECT_DIR$/mqstats/src/main/java/com/computedsynergy/hurtrade/collectors/RabbitMq.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/commandline/CommandLineOptions.java" />
+        <option value="$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/cpu/Tasks/OfficePositionsDispatchTask.java" />
+        <option value="$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/cpu/BackOfficeRequestProcessor.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/IUserModel.java" />
+        <option value="$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/cpu/RequestConsumers/BackOfficeRequestConsumer.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/util/MqNamingUtil.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/util/Constants.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/UserModel.java" />
+        <option value="$PROJECT_DIR$/webauth/src/main/java/com/computedsynergy/hurtrade/webauth/Webauth.java" />
+        <option value="$PROJECT_DIR$/mqstats/src/main/java/com/computedsynergy/hurtrade/collectors/RabbitMqStats.java" />
+      </list>
+    </option>
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="createModuleGroups" value="true" />
+        <option name="importAutomatically" value="true" />
+        <option name="lookForNested" value="true" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="MavenProjectNavigator">
+    <treeState />
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="172" />
+    <option name="y" value="55" />
+    <option name="width" value="1932" />
+    <option name="height" value="1045" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectView">
+    <navigator currentView="PackagesPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane" />
+      <pane id="PackagesPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+              <item name="fxyahoo" type="616d4139:PackageViewModuleNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+              <item name="fxyahoo" type="616d4139:PackageViewModuleNode" />
+              <item name="com.computedsynergy.hurtrade.fxyahoo" type="1f31426a:PackageElementNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+              <item name="hurcpu" type="616d4139:PackageViewModuleNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+              <item name="hurcpu" type="616d4139:PackageViewModuleNode" />
+              <item name="com.computedsynergy.hurtrade.hurcpu" type="1f31426a:PackageElementNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+              <item name="hurcpu" type="616d4139:PackageViewModuleNode" />
+              <item name="com.computedsynergy.hurtrade.hurcpu" type="1f31426a:PackageElementNode" />
+              <item name="bootstrap" type="1f31426a:PackageElementNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+              <item name="hurcpu" type="616d4139:PackageViewModuleNode" />
+              <item name="com.computedsynergy.hurtrade.hurcpu" type="1f31426a:PackageElementNode" />
+              <item name="cpu" type="1f31426a:PackageElementNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+              <item name="hurcpu" type="616d4139:PackageViewModuleNode" />
+              <item name="com.computedsynergy.hurtrade.hurcpu" type="1f31426a:PackageElementNode" />
+              <item name="cpu" type="1f31426a:PackageElementNode" />
+              <item name="RequestConsumers" type="1f31426a:PackageElementNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+              <item name="hurcpu" type="616d4139:PackageViewModuleNode" />
+              <item name="com.computedsynergy.hurtrade.hurcpu" type="1f31426a:PackageElementNode" />
+              <item name="cpu" type="1f31426a:PackageElementNode" />
+              <item name="Tasks" type="1f31426a:PackageElementNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+              <item name="hurtrade" type="616d4139:PackageViewModuleNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+              <item name="sharedcomponents" type="616d4139:PackageViewModuleNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+              <item name="sharedcomponents" type="616d4139:PackageViewModuleNode" />
+              <item name="com.computedsynergy.hurtrade.sharedcomponents" type="1f31426a:PackageElementNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+              <item name="sharedcomponents" type="616d4139:PackageViewModuleNode" />
+              <item name="com.computedsynergy.hurtrade.sharedcomponents" type="1f31426a:PackageElementNode" />
+              <item name="amqp" type="1f31426a:PackageElementNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+              <item name="sharedcomponents" type="616d4139:PackageViewModuleNode" />
+              <item name="com.computedsynergy.hurtrade.sharedcomponents" type="1f31426a:PackageElementNode" />
+              <item name="commandline" type="1f31426a:PackageElementNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+              <item name="sharedcomponents" type="616d4139:PackageViewModuleNode" />
+              <item name="com.computedsynergy.hurtrade.sharedcomponents" type="1f31426a:PackageElementNode" />
+              <item name="models" type="1f31426a:PackageElementNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+              <item name="sharedcomponents" type="616d4139:PackageViewModuleNode" />
+              <item name="com.computedsynergy.hurtrade.sharedcomponents" type="1f31426a:PackageElementNode" />
+              <item name="models" type="1f31426a:PackageElementNode" />
+              <item name="impl" type="1f31426a:PackageElementNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+              <item name="sharedcomponents" type="616d4139:PackageViewModuleNode" />
+              <item name="com.computedsynergy.hurtrade.sharedcomponents" type="1f31426a:PackageElementNode" />
+              <item name="models" type="1f31426a:PackageElementNode" />
+              <item name="interfaces" type="1f31426a:PackageElementNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+              <item name="sharedcomponents" type="616d4139:PackageViewModuleNode" />
+              <item name="com.computedsynergy.hurtrade.sharedcomponents" type="1f31426a:PackageElementNode" />
+              <item name="models" type="1f31426a:PackageElementNode" />
+              <item name="pojos" type="1f31426a:PackageElementNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+              <item name="sharedcomponents" type="616d4139:PackageViewModuleNode" />
+              <item name="com.computedsynergy.hurtrade.sharedcomponents" type="1f31426a:PackageElementNode" />
+              <item name="util" type="1f31426a:PackageElementNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+              <item name="webauth" type="616d4139:PackageViewModuleNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="hurtrade and modules" type="eaaa3913:PackageViewModuleGroupNode" />
+              <item name="webauth" type="616d4139:PackageViewModuleNode" />
+              <item name="com.computedsynergy.hurtrade.webauth" type="1f31426a:PackageElementNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="mqstats" type="616d4139:PackageViewModuleNode" />
+            </path>
+            <path>
+              <item name="hurtrade" type="58d84e3e:PackageViewProjectNode" />
+              <item name="mqstats" type="616d4139:PackageViewModuleNode" />
+              <item name="com.computedsynergy.hurtrade.collectors" type="1f31426a:PackageElementNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scratches" />
+      <pane id="Scope" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="settings.editor.selected.configurable" value="MavenSettings" />
+    <property name="SearchEverywhereHistoryKey" value="not so often&#9;null&#9;null&#10;not found.&#9;null&#9;null&#10;Object&#9;FILE&#9;file://D:/dump/hurtrade/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/util/ObjectUtils.java" />
+    <property name="last_directory_selection" value="$PROJECT_DIR$/mqstats/src/main/java" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.computedsynergy.hurtrade.sharedcomponents.models.impl" />
+      <recent name="com.computedsynergy.hurtrade.sharedcomponents.models.interfaces" />
+      <recent name="com.computedsynergy.hurtrade.sharedcomponents.amqp" />
+      <recent name="com.computedsynergy.hurtrade.hurcpu.cpu.Tasks" />
+      <recent name="com.computedsynergy.hurtrade.hurcpu.cpu.RequestConsumers" />
+    </key>
+    <key name="CreateClassDialog.RecentsKey">
+      <recent name="com.computedsynergy.hurtrade.sharedcomponents.models.impl" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Application.HurCpu">
+    <configuration name="FxYahoo" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="com.computedsynergy.hurtrade.fxyahoo.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="MAIN_CLASS_NAME" value="com.computedsynergy.hurtrade.fxyahoo.FxYahoo" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="fxyahoo" />
+      <envs />
+    </configuration>
+    <configuration name="HurCpu" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="com.computedsynergy.hurtrade.hurcpu.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="MAIN_CLASS_NAME" value="com.computedsynergy.hurtrade.hurcpu.HurCpu" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="hurcpu" />
+      <envs />
+    </configuration>
+    <configuration name="RabbitMqStats" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="com.computedsynergy.hurtrade.collectors.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="MAIN_CLASS_NAME" value="com.computedsynergy.hurtrade.collectors.RabbitMqStats" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="mqstats" />
+      <envs />
+    </configuration>
+    <configuration name="Webauth" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="com.computedsynergy.hurtrade.webauth.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="MAIN_CLASS_NAME" value="com.computedsynergy.hurtrade.webauth.Webauth" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="webauth" />
+      <envs />
+    </configuration>
+    <configuration default="true" type="Applet" factoryName="Applet">
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <module />
+    </configuration>
+    <configuration default="true" type="Application" factoryName="Application">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="" />
+      <envs />
+    </configuration>
+    <configuration default="true" type="JUnit" factoryName="JUnit">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <envs />
+      <patterns />
+    </configuration>
+    <configuration default="true" type="JetRunConfigurationType" factoryName="Kotlin">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="webauth" />
+      <envs />
+    </configuration>
+    <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin">
+      <module name="" />
+      <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
+      <option name="PROGRAM_PARAMETERS" />
+      <predefined_log_file id="idea.log" enabled="true" />
+    </configuration>
+    <configuration default="true" type="Remote" factoryName="Remote">
+      <option name="USE_SOCKET_TRANSPORT" value="true" />
+      <option name="SERVER_MODE" value="false" />
+      <option name="SHMEM_ADDRESS" value="javadebug" />
+      <option name="HOST" value="localhost" />
+      <option name="PORT" value="5005" />
+    </configuration>
+    <configuration default="true" type="TestNG" factoryName="TestNG">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="SUITE_NAME" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="GROUP_NAME" />
+      <option name="TEST_OBJECT" value="CLASS" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <option name="OUTPUT_DIRECTORY" />
+      <option name="ANNOTATION_TYPE" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <option name="USE_DEFAULT_REPORTERS" value="false" />
+      <option name="PROPERTIES_FILE" />
+      <envs />
+      <properties />
+      <listeners />
+    </configuration>
+    <configuration default="true" type="GradleRunConfiguration" factoryName="Gradle">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list />
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <method />
+    </configuration>
+    <configuration default="true" type="JarApplication" factoryName="JAR Application">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="Java Scratch" factoryName="Java Scratch">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="SCRATCH_FILE_ID" value="0" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType" factoryName="Kotlin script">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="filePath" />
+      <option name="vmParameters" />
+      <option name="alternativeJrePath" />
+      <option name="programParameters" />
+      <option name="passParentEnvs" value="true" />
+      <option name="workingDirectory" />
+      <option name="isAlternativeJrePathEnabled" value="false" />
+      <envs />
+      <method />
+    </configuration>
+    <list size="4">
+      <item index="0" class="java.lang.String" itemvalue="Application.FxYahoo" />
+      <item index="1" class="java.lang.String" itemvalue="Application.HurCpu" />
+      <item index="2" class="java.lang.String" itemvalue="Application.Webauth" />
+      <item index="3" class="java.lang.String" itemvalue="Application.RabbitMqStats" />
+    </list>
+    <recent_temporary>
+      <list size="4">
+        <item index="0" class="java.lang.String" itemvalue="Application.Webauth" />
+        <item index="1" class="java.lang.String" itemvalue="Application.RabbitMqStats" />
+        <item index="2" class="java.lang.String" itemvalue="Application.HurCpu" />
+        <item index="3" class="java.lang.String" itemvalue="Application.FxYahoo" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f8298c3e-3541-451c-b61e-72de481f1a64" name="Default" comment="" />
+      <created>1495699303238</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1495699303238</updated>
+    </task>
+    <task id="LOCAL-00001" summary="WIP. implemented &#10;- http backend auth for rabbit, needs to be revisited to harden auth&#10;- basic integration with desktop client">
+      <created>1495972238908</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1495972238908</updated>
+    </task>
+    <task id="LOCAL-00002" summary="WIP. implemented &#10;- Integration with desktop client for opening positions">
+      <created>1496310312569</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1496310312569</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Added interface for BackOffice/dealers.&#10;Pending orders for office now sent to dealers.&#10;Refactored code and introduced tasks.&#10;Bug fixes in utils and calculations.">
+      <created>1496748923580</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1496748923581</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Enabled Backoffice/dealer command interpreter and implemented approve and reject commands.">
+      <created>1496836063841</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1496836063841</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Added timestamps to the positions. Enabled history for each state transition on a position. Refactored.">
+      <created>1496916958314</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1496916958314</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Saving user quotes to db.">
+      <created>1496918628877</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1496918628877</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Bug Fixes, refactoring &amp; ground work for financials.">
+      <created>1497958121747</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1497958121747</updated>
+    </task>
+    <task id="LOCAL-00008" summary="WIP. Account status. Refactoring and optimization.">
+      <created>1498748137072</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1498748137072</updated>
+    </task>
+    <task id="LOCAL-00009" summary="completed account ledger related work. &#10;wip on candle stick charts">
+      <created>1499089304679</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1499089304679</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Added candlestick charting.">
+      <created>1499166015642</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1499166015642</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Restructured code.">
+      <created>1499174105537</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1499174105537</updated>
+    </task>
+    <task id="LOCAL-00012" summary="minor optimization">
+      <created>1499265332289</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1499265332289</updated>
+    </task>
+    <task id="LOCAL-00013" summary="MQ Refactoring. Updated format for office updates.">
+      <created>1499611497573</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1499611497574</updated>
+    </task>
+    <task id="LOCAL-00014" summary="    WIP. issue [6] - cover accounts and positions.">
+      <created>1499864921797</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1499864921797</updated>
+    </task>
+    <task id="LOCAL-00015" summary="    WIP. issue [6] - create, remove and sending cover positions to &#10;    dealers done, cover positions update on quote reception pending.">
+      <created>1499871475083</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1499871475083</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Issues [8] &amp; [6] - floating status and cover positions addressed.">
+      <created>1499956201682</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1499956201682</updated>
+    </task>
+    <task id="LOCAL-00017" summary="Issues [8] &amp; [6] - floating status and cover positions addressed.">
+      <created>1499956819141</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1499956819141</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Issues [8] &amp; [6] - floating status and cover positions addressed.">
+      <created>1499956835826</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1499956835826</updated>
+    </task>
+    <task id="LOCAL-00019" summary="Implemented issue [6] - account liquidation.&#10;Bug fixes on used margin, reactoring, improvements.">
+      <created>1500225340151</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1500225340151</updated>
+    </task>
+    <task id="LOCAL-00020" summary="Implemented issue [11] - usable margin availability for new order.&#10;Refactoring.">
+      <created>1500360722357</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1500360722358</updated>
+    </task>
+    <task id="LOCAL-00021" summary="Implemented issue [9] - flag to prevent liquidation of account.">
+      <created>1500362237092</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1500362237092</updated>
+    </task>
+    <task id="LOCAL-00022" summary="Implemented issue [14] - fee and commission implementation. refactoring.">
+      <created>1500369756206</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1500369756206</updated>
+    </task>
+    <task id="LOCAL-00023" summary="Implemented issue [15] - friendly order id. refactoring.">
+      <created>1500387382206</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1500387382207</updated>
+    </task>
+    <task id="LOCAL-00024" summary="Implemented market order requote issue #12">
+      <created>1500469034078</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1500469034079</updated>
+    </task>
+    <task id="LOCAL-00025" summary="WIP #10">
+      <created>1500557656840</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1500557656840</updated>
+    </task>
+    <task id="LOCAL-00026" summary="Implemented #10">
+      <created>1500794353128</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1500794353128</updated>
+    </task>
+    <task id="LOCAL-00027" summary="Resolved #18">
+      <created>1500805246037</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1500805246037</updated>
+    </task>
+    <task id="LOCAL-00028" summary="Resolved #17">
+      <created>1500876160816</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1500876160816</updated>
+    </task>
+    <task id="LOCAL-00029" summary="Resolved #3">
+      <created>1500902796475</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1500902796475</updated>
+    </task>
+    <task id="LOCAL-00030" summary="Resolved #7">
+      <created>1500963643015</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1500963643015</updated>
+    </task>
+    <task id="LOCAL-00031" summary="Resolved #19">
+      <created>1501056711732</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1501056711732</updated>
+    </task>
+    <task id="LOCAL-00032" summary="WIP #5">
+      <created>1501144042653</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1501144042653</updated>
+    </task>
+    <task id="LOCAL-00033" summary="resolved #5">
+      <created>1501157191616</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1501157191616</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
+    <servers />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <layout>
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936078" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32826087" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3531961" sideWeight="0.5154584" order="1" side_tool="true" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32942432" sideWeight="0.4940978" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.48454157" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22391304" sideWeight="0.49092284" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="SLIDING" type="FLOATING" visible="false" show_stripe_button="true" weight="0.32936078" sideWeight="0.4978678" order="10" side_tool="false" content_ui="tabs" x="784" y="142" width="950" height="343" />
+      <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.23933902" sideWeight="0.49369368" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.4940978" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32391304" sideWeight="0.49092284" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.18443497" sideWeight="0.5063063" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug Logs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17590618" sideWeight="0.5059022" order="3" side_tool="true" content_ui="tabs" />
+      <window_info id="Execute Anonymous" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32934782" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Salesforce" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+    </layout>
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ORDER">
+      <list>
+        <option value="0" />
+        <option value="2" />
+        <option value="3" />
+        <option value="1" />
+      </list>
+    </option>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="RECENTLY_FILTERED_USER_GROUPS">
+                <collection />
+              </option>
+              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+                <collection />
+              </option>
+              <option name="COLUMN_ORDER">
+                <list>
+                  <option value="0" />
+                  <option value="1" />
+                  <option value="2" />
+                  <option value="3" />
+                </list>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Bug Fixes, refactoring &amp; ground work for financials." />
+    <MESSAGE value="WIP. Account status. Refactoring and optimization." />
+    <MESSAGE value="completed account ledger related work. &#10;wip on candle stick charts" />
+    <MESSAGE value="Added candlestick charting." />
+    <MESSAGE value="Restructured code." />
+    <MESSAGE value="minor optimization" />
+    <MESSAGE value="MQ Refactoring. Updated format for office updates." />
+    <MESSAGE value="    WIP. issue [6] - cover accounts and positions." />
+    <MESSAGE value="    WIP. issue [6] - create, remove and sending cover positions to &#10;    dealers done, cover positions update on quote reception pending." />
+    <MESSAGE value="Issues [8] &amp; [6] - floating status and cover positions addressed." />
+    <MESSAGE value="Implemented issue [6] - account liquidation.&#10;Bug fixes on used margin, reactoring, improvements." />
+    <MESSAGE value="Implemented issue [11] - usable margin availability for new order.&#10;Refactoring." />
+    <MESSAGE value="Implemented issue [9] - flag to prevent liquidation of account." />
+    <MESSAGE value="Implemented issue [14] - fee and commission implementation. refactoring." />
+    <MESSAGE value="Implemented issue [15] - friendly order id. refactoring." />
+    <MESSAGE value="Implemented market order requote issue #12" />
+    <MESSAGE value="WIP #10" />
+    <MESSAGE value="Implemented #10" />
+    <MESSAGE value="Resolved #18" />
+    <MESSAGE value="Resolved #17" />
+    <MESSAGE value="Resolved #3" />
+    <MESSAGE value="Resolved #7" />
+    <MESSAGE value="Resolved #19" />
+    <MESSAGE value="WIP #5" />
+    <MESSAGE value="resolved #5" />
+    <option name="LAST_COMMIT_MESSAGE" value="resolved #5" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/pojos/CoverAccount.java</url>
+          <line>15</line>
+          <properties />
+          <option name="timeStamp" value="78" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/webauth/src/main/java/com/computedsynergy/hurtrade/webauth/Webauth.java</url>
+          <line>234</line>
+          <properties />
+          <option name="timeStamp" value="145" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/UserModel.java</url>
+          <line>133</line>
+          <properties />
+          <option name="timeStamp" value="157" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/cpu/RequestConsumers/BackOfficeRequestConsumer.java</url>
+          <line>258</line>
+          <properties />
+          <option name="timeStamp" value="158" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="159" />
+    </breakpoint-manager>
+    <watches-manager />
+  </component>
+  <component name="antWorkspaceConfiguration">
+    <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />
+    <option name="FILTER_TARGETS" value="false" />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/dataexchange/updates/ClientUpdate.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="38" column="34" lean-forward="true" selection-start-line="38" selection-start-column="34" selection-end-line="38" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/dataexchange/trade/TradeResponse.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="23" column="13" lean-forward="false" selection-start-line="23" selection-start-column="13" selection-end-line="23" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/com/google/code/gson/gson/2.3.1/gson-2.3.1.jar!/com/google/gson/internal/LinkedTreeMap.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="49" column="0" lean-forward="false" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/ILedgerModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="221">
+          <caret line="17" column="19" lean-forward="false" selection-start-line="17" selection-start-column="19" selection-end-line="17" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/ICoverPositionModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="11" column="32" lean-forward="false" selection-start-line="11" selection-start-column="32" selection-end-line="11" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/ICoverAccountModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="11" column="24" lean-forward="false" selection-start-line="11" selection-start-column="24" selection-end-line="11" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/CoverAccountModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="221">
+          <caret line="16" column="31" lean-forward="true" selection-start-line="16" selection-start-column="31" selection-end-line="16" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/INotificationModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="12" column="1" lean-forward="false" selection-start-line="12" selection-start-column="1" selection-end-line="12" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/NotificationModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="442">
+          <caret line="32" column="28" lean-forward="false" selection-start-line="32" selection-start-column="28" selection-end-line="32" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/amqp/CustomDefaultConsumer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1275">
+          <caret line="82" column="13" lean-forward="false" selection-start-line="82" selection-start-column="13" selection-end-line="82" selection-end-column="13" />
+          <folding>
+            <element signature="imports" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/pojos/CommodityUser.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="31" column="33" lean-forward="false" selection-start-line="31" selection-start-column="33" selection-end-line="31" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/util/ObjectUtils.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="119">
+          <caret line="10" column="13" lean-forward="false" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/IScheduleModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="11" column="13" lean-forward="false" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/ICommodityUserModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="24" column="17" lean-forward="false" selection-start-line="24" selection-start-column="17" selection-end-line="24" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/SerialsModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="357">
+          <caret line="25" column="37" lean-forward="true" selection-start-line="25" selection-start-column="37" selection-end-line="25" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/ScheduleModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="27" column="18" lean-forward="false" selection-start-line="27" selection-start-column="18" selection-end-line="27" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/CommodityUserModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="36" column="60" lean-forward="false" selection-start-line="36" selection-start-column="60" selection-end-line="36" selection-end-column="60" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/ISavedPositionModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="27" column="4" lean-forward="false" selection-start-line="27" selection-start-column="4" selection-end-line="27" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/pojos/SavedPosition.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="123">
+          <caret line="34" column="0" lean-forward="true" selection-start-line="34" selection-start-column="0" selection-end-line="34" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/SavedPositionModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="36" column="42" lean-forward="false" selection-start-line="36" selection-start-column="42" selection-end-line="36" selection-end-column="42" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/com/sparkjava/spark-core/2.3/spark-core-2.3.jar!/spark/Route.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="8" column="11" lean-forward="false" selection-start-line="8" selection-start-column="11" selection-end-line="8" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/pojos/Schedule.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="392">
+          <caret line="48" column="24" lean-forward="false" selection-start-line="48" selection-start-column="24" selection-end-line="48" selection-end-column="24" />
+          <folding>
+            <element signature="e#844#845#0" expanded="false" />
+            <element signature="e#875#876#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/util/GeneralUtil.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="122" column="79" lean-forward="false" selection-start-line="122" selection-start-column="79" selection-end-line="122" selection-end-column="79" />
+          <folding>
+            <element signature="imports" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/PositionModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="398">
+          <caret line="64" column="37" lean-forward="false" selection-start-line="64" selection-start-column="37" selection-end-line="64" selection-end-column="37" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/pojos/Position.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="76" column="4" lean-forward="false" selection-start-line="76" selection-start-column="4" selection-end-line="76" selection-end-column="82" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/IOfficeModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="27" column="33" lean-forward="true" selection-start-line="27" selection-start-column="33" selection-end-line="27" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/OfficeModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="361">
+          <caret line="70" column="9" lean-forward="false" selection-start-line="70" selection-start-column="9" selection-end-line="70" selection-end-column="9" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/cpu/AuthRequestProcessor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="284">
+          <caret line="54" column="11" lean-forward="false" selection-start-line="54" selection-start-column="11" selection-end-line="54" selection-end-column="11" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fxyahoo/src/main/java/com/computedsynergy/hurtrade/fxyahoo/FxYahoo.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="54" column="4" lean-forward="false" selection-start-line="54" selection-start-column="4" selection-end-line="54" selection-end-column="65" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mqstats/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="18" column="21" lean-forward="false" selection-start-line="18" selection-start-column="21" selection-end-line="18" selection-end-column="21" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/bootstrap/Bootstrap.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-340">
+          <caret line="44" column="25" lean-forward="false" selection-start-line="44" selection-start-column="16" selection-end-line="44" selection-end-column="25" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/pojos/ConnectionInfo.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="459">
+          <caret line="39" column="5" lean-forward="true" selection-start-line="39" selection-start-column="5" selection-end-line="39" selection-end-column="5" />
+          <folding>
+            <element signature="e#368#369#0" expanded="true" />
+            <element signature="e#399#400#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/cpu/BackOfficeRequestProcessor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="617">
+          <caret line="85" column="40" lean-forward="true" selection-start-line="85" selection-start-column="40" selection-end-line="85" selection-end-column="40" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/LedgerModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="691">
+          <caret line="91" column="97" lean-forward="true" selection-start-line="91" selection-start-column="97" selection-end-line="91" selection-end-column="97" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/ModelBase.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="33" column="25" lean-forward="false" selection-start-line="33" selection-start-column="21" selection-end-line="33" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/IUserModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="30" column="28" lean-forward="false" selection-start-line="30" selection-start-column="28" selection-end-line="30" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/pojos/User.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="353">
+          <caret line="41" column="27" lean-forward="false" selection-start-line="41" selection-start-column="27" selection-end-line="41" selection-end-column="27" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/CommodityModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="26" column="13" lean-forward="false" selection-start-line="26" selection-start-column="13" selection-end-line="26" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/QuoteModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="42" column="87" lean-forward="false" selection-start-line="42" selection-start-column="70" selection-end-line="42" selection-end-column="87" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/amqp/AmqpBase.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="419">
+          <caret line="66" column="58" lean-forward="false" selection-start-line="66" selection-start-column="39" selection-end-line="66" selection-end-column="58" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/util/MqNamingUtil.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="340">
+          <caret line="34" column="31" lean-forward="true" selection-start-line="34" selection-start-column="31" selection-end-line="34" selection-end-column="54" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/cpu/RequestConsumers/ClientRequestConsumer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="310">
+          <caret line="109" column="53" lean-forward="true" selection-start-line="109" selection-start-column="16" selection-end-line="109" selection-end-column="53" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/cpu/Tasks/ClientAccountTask.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="276" column="16" lean-forward="true" selection-start-line="276" selection-start-column="16" selection-end-line="276" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/util/Constants.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="40" column="40" lean-forward="true" selection-start-line="40" selection-start-column="23" selection-end-line="40" selection-end-column="40" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/cpu/Tasks/OfficePositionsDispatchTask.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="233">
+          <caret line="217" column="59" lean-forward="true" selection-start-line="217" selection-start-column="59" selection-end-line="217" selection-end-column="59" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/UserModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="421">
+          <caret line="152" column="0" lean-forward="false" selection-start-line="152" selection-start-column="0" selection-end-line="152" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/cpu/RequestConsumers/BackOfficeRequestConsumer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="351">
+          <caret line="267" column="52" lean-forward="false" selection-start-line="267" selection-start-column="52" selection-end-line="267" selection-end-column="52" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/commandline/CommandLineOptions.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="430">
+          <caret line="53" column="42" lean-forward="false" selection-start-line="53" selection-start-column="42" selection-end-line="53" selection-end-column="42" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/util/RedisUtil.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="214">
+          <caret line="391" column="0" lean-forward="false" selection-start-line="391" selection-start-column="0" selection-end-line="391" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/webauth/src/main/java/com/computedsynergy/hurtrade/webauth/Webauth.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="301">
+          <caret line="160" column="0" lean-forward="true" selection-start-line="160" selection-start-column="0" selection-end-line="160" selection-end-column="0" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mqstats/src/main/java/com/computedsynergy/hurtrade/collectors/RabbitMqStats.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="446">
+          <caret line="134" column="60" lean-forward="true" selection-start-line="134" selection-start-column="60" selection-end-line="134" selection-end-column="60" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1371#1372#0" expanded="true" />
+            <element signature="e#1448#1449#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>
