@@ -20,15 +20,27 @@ import com.computedsynergy.hurtrade.hurcpu.bootstrap.Bootstrap;
 import com.computedsynergy.hurtrade.hurcpu.cpu.AuthRequestProcessor;
 import com.computedsynergy.hurtrade.hurcpu.cpu.BackOfficeRequestProcessor;
 import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
+import com.computedsynergy.hurtrade.sharedcomponents.db.DbConnectivityChecker;
+
+import java.util.logging.Logger;
 
 /**
  *
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
  */
 public class HurCpu {
+
+    private static final Logger _log = Logger.getLogger(HurCpu.class.getName());
+
     public static void main(String[] args) throws Exception{
         
         new JCommander(CommandLineOptions.getInstance(), args);
+
+        if( !new DbConnectivityChecker().IsDbReady()){
+            _log.info("Unable to connect to db. Exiting.");
+            return;
+        }
+
         Bootstrap bs = new Bootstrap();
         bs.bootstrap();
 

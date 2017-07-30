@@ -15,6 +15,9 @@
  */
 package com.computedsynergy.hurtrade.webauth;
 
+import com.beust.jcommander.JCommander;
+import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
+import com.computedsynergy.hurtrade.sharedcomponents.db.DbConnectivityChecker;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.OfficeModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Office;
@@ -36,6 +39,8 @@ import static spark.Spark.post;
 /**
  *
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
+ *
+ *     https://rawcdn.githack.com/rabbitmq/rabbitmq-management/rabbitmq_v3_6_10/priv/www/api/index.html
  */
 public class Webauth {
 
@@ -130,6 +135,14 @@ public class Webauth {
     }
 
     public static void main(String[] args){
+
+        new JCommander(CommandLineOptions.getInstance(), args);
+
+        if( !new DbConnectivityChecker().IsDbReady()){
+            _log.info("Unable to connect to db. Exiting.");
+            return;
+        }
+
 
         bootstrap();
 

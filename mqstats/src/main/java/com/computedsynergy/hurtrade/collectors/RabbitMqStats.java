@@ -1,8 +1,8 @@
 package com.computedsynergy.hurtrade.collectors;
 
+import com.beust.jcommander.JCommander;
 import com.computedsynergy.hurtrade.sharedcomponents.amqp.AmqpBase;
 import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
-import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.SourceQuote;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.ConnectionInfo;
 import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
 import com.computedsynergy.hurtrade.sharedcomponents.util.MqNamingUtil;
@@ -10,7 +10,6 @@ import com.google.gson.*;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
-import com.rabbitmq.client.impl.AMQBasicProperties;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -31,6 +30,8 @@ public class RabbitMqStats extends AmqpBase {
     private Gson _gson = new Gson();
 
     public static void main(String[] args) {
+
+        new JCommander(CommandLineOptions.getInstance(), args);
 
         RabbitMqStats mqStats = new RabbitMqStats();
 

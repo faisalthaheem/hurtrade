@@ -18,15 +18,21 @@ package com.computedsynergy.hurtrade.fxyahoo;
 import com.beust.jcommander.JCommander;
 import com.computedsynergy.hurtrade.sharedcomponents.amqp.AmqpBase;
 import com.computedsynergy.hurtrade.sharedcomponents.commandline.CommandLineOptions;
-import com.computedsynergy.hurtrade.sharedcomponents.models.impl.CommodityModel;
-import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Commodity;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.Quote;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.SourceQuote;
+import com.computedsynergy.hurtrade.sharedcomponents.db.DbConnectivityChecker;
+import com.computedsynergy.hurtrade.sharedcomponents.models.impl.CommodityModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
+import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Commodity;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
 import com.google.gson.Gson;
+import org.apache.log4j.BasicConfigurator;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -40,19 +46,12 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
-import org.jdom2.Element;
-import org.jdom2.JDOMException;
-import org.jdom2.input.SAXBuilder;
-
 /**
  *
  * @author Faisal Thaheem <faisal.ajmal@gmail.com>
  */
 public class FxYahoo extends AmqpBase implements Runnable {
 
-    static final Logger logger = Logger.getLogger(FxYahoo.class);
     private Object lockCommodities = new Object();
     Map<String, Commodity> commodities;
     
@@ -62,6 +61,12 @@ public class FxYahoo extends AmqpBase implements Runnable {
         BasicConfigurator.configure();
 
         FxYahoo yahoo = new FxYahoo();
+
+        if( !new DbConnectivityChecker().IsDbReady()){
+            yahoo._log.info("Unable to connect to db. Exiting.");
+            return;
+        }
+
         yahoo.refreshCommodities();
         yahoo.setupAMQP();
         yahoo.run();
@@ -98,7 +103,7 @@ public class FxYahoo extends AmqpBase implements Runnable {
                     }
                 }
                 
-                logger.info("symbolsToQuery: " + symbolsToQuery);
+                _log.info("symbolsToQuery: " + symbolsToQuery);
                 
                 symbolsToQuery = symbolsToQuery.substring(0, symbolsToQuery.length()-1);
                 
@@ -126,7 +131,7 @@ public class FxYahoo extends AmqpBase implements Runnable {
                             commodities.get(commodity).getLotsize()
                     );
 
-                    logger.info("Commodity: " + quote.name + " B: " + quote.bid + " A: " + quote.ask);
+                    _log.info("Commodity: " + quote.name + " B: " + quote.bid + " A: " + quote.ask);
                     quotes.put(commodity, quote);
 
                 }
@@ -146,7 +151,7 @@ public class FxYahoo extends AmqpBase implements Runnable {
 
 
                 Date endTime = new Date();
-                logger.info("Publishing took [" + (endTime.getTime() - startTime.getTime()) + "] ms.");
+                _log.info("Publishing took [" + (endTime.getTime() - startTime.getTime()) + "] ms.");
                 
                 Thread.sleep(CommandLineOptions.getInstance().yahooFxFrequency);
             }catch(Exception ex){
