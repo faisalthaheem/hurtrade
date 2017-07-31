@@ -101,6 +101,9 @@ public class AmqpConnectionFactory {
         Channel chan = null;
 
         try{
+            if(connection == null){
+                setupAMQP();
+            }
             chan = connection.createChannel();
         }catch(Exception ex) {
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
