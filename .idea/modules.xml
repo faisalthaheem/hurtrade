@@ -7,9 +7,13 @@
       <module fileurl="file://$PROJECT_DIR$/hurcpu/hurcpu.iml" filepath="$PROJECT_DIR$/hurcpu/hurcpu.iml" group="hurtrade and modules" />
       <module fileurl="file://$PROJECT_DIR$/hurtrade.iml" filepath="$PROJECT_DIR$/hurtrade.iml" group="hurtrade and modules" />
       <module fileurl="file://$PROJECT_DIR$/fxyahoo/target/maven-archiver/maven-archiver (1).iml" filepath="$PROJECT_DIR$/fxyahoo/target/maven-archiver/maven-archiver (1).iml" />
+      <module fileurl="file://$PROJECT_DIR$/fxyahoo/target/maven-archiver/maven-archiver (1).iml" filepath="$PROJECT_DIR$/fxyahoo/target/maven-archiver/maven-archiver (1).iml" />
+      <module fileurl="file://$PROJECT_DIR$/hurcpu/target/maven-archiver/maven-archiver (2).iml" filepath="$PROJECT_DIR$/hurcpu/target/maven-archiver/maven-archiver (2).iml" />
       <module fileurl="file://$PROJECT_DIR$/hurcpu/target/maven-archiver/maven-archiver (2).iml" filepath="$PROJECT_DIR$/hurcpu/target/maven-archiver/maven-archiver (2).iml" />
       <module fileurl="file://$PROJECT_DIR$/sharedcomponents/target/maven-archiver/maven-archiver (3).iml" filepath="$PROJECT_DIR$/sharedcomponents/target/maven-archiver/maven-archiver (3).iml" />
+      <module fileurl="file://$PROJECT_DIR$/sharedcomponents/target/maven-archiver/maven-archiver (3).iml" filepath="$PROJECT_DIR$/sharedcomponents/target/maven-archiver/maven-archiver (3).iml" />
       <module fileurl="file://$PROJECT_DIR$/TestClient/target/maven-archiver/maven-archiver (4).iml" filepath="$PROJECT_DIR$/TestClient/target/maven-archiver/maven-archiver (4).iml" />
+      <module fileurl="file://$PROJECT_DIR$/webauth/target/maven-archiver/maven-archiver (5).iml" filepath="$PROJECT_DIR$/webauth/target/maven-archiver/maven-archiver (5).iml" />
       <module fileurl="file://$PROJECT_DIR$/webauth/target/maven-archiver/maven-archiver (5).iml" filepath="$PROJECT_DIR$/webauth/target/maven-archiver/maven-archiver (5).iml" />
       <module fileurl="file://$PROJECT_DIR$/mqstats/mqstats.iml" filepath="$PROJECT_DIR$/mqstats/mqstats.iml" group="hurtrade and modules" />
       <module fileurl="file://$PROJECT_DIR$/sharedcomponents/sharedcomponents.iml" filepath="$PROJECT_DIR$/sharedcomponents/sharedcomponents.iml" group="hurtrade and modules" />

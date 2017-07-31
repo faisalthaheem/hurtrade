@@ -8,7 +8,6 @@
         <version>1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>mqstats</artifactId>
 	<packaging>jar</packaging>
     <dependencies>
@@ -23,10 +22,26 @@
             <artifactId>okhttp</artifactId>
             <version>3.8.1</version>
         </dependency>
-
     </dependencies>
 	<properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+	<build>
+	  <plugins>
+		<plugin>
+		  <artifactId>maven-assembly-plugin</artifactId>
+		  <configuration>
+			<archive>
+			  <manifest>
+				<mainClass>com.computedsynergy.hurtrade.collectors.RabbitMqStats</mainClass>
+			  </manifest>
+			</archive>
+			<descriptorRefs>
+			  <descriptorRef>jar-with-dependencies</descriptorRef>
+			</descriptorRefs>
+		  </configuration>
+		</plugin>
+	  </plugins>
+	</build>
 </project>
