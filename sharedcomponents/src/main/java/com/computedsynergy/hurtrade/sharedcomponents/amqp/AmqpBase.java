@@ -49,23 +49,36 @@ public class AmqpBase {
      */
     protected void setupAMQP() {
 
+        channel = CreateNewChannel();
+
+    }
+    
+    protected void cleanup()
+    {
+
+    }
+
+    protected Channel CreateNewChannel()
+    {
+
+        Channel ret;
+
         int triesLeft = 10;
         boolean ready = false;
 
         do {
 
-            try {
-                channel = AmqpConnectionFactory.GetInstance().CreateChannel();
+            ret = AmqpConnectionFactory.GetInstance().CreateChannel();
 
+            if(ret !=  null){
                 ready = true;
 
                 _log.info("AMQP Connectivty Good to go.");
                 break;
-
-            }catch (Exception ex){
-                String message = String.format("Unable to connect to amqp, will wait for 30 seconds before trying again [%d] times.", triesLeft);
-                _log.log(Level.SEVERE, message, ex);
             }
+
+            String message = String.format("Unable to connect to amqp, will wait for 30 seconds before trying again [%d] times.", triesLeft);
+            _log.severe(message);
 
             try {
 
@@ -80,15 +93,8 @@ public class AmqpBase {
 
         }while(triesLeft-- > 0);
 
-    }
-    
-    protected void cleanup()
-    {
-        
-    }
 
-    protected Channel CreateNewChannel(){
-        return AmqpConnectionFactory.GetInstance().CreateChannel();
+        return ret;
     }
 
 

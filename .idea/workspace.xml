@@ -5,10 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f8298c3e-3541-451c-b61e-72de481f1a64" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fxyahoo/pom.xml" afterPath="$PROJECT_DIR$/fxyahoo/pom.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/amqp/AmqpBase.java" afterPath="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/amqp/AmqpBase.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/webauth/pom.xml" afterPath="$PROJECT_DIR$/webauth/pom.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/amqp/AmqpConnectionFactory.java" afterPath="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/amqp/AmqpConnectionFactory.java" />
     </list>
     <ignored path="$PROJECT_DIR$/webauth/target/" />
     <ignored path="$PROJECT_DIR$/sharedcomponents/target/" />
@@ -34,11 +32,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Webauth.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Webauth.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/webauth/src/main/java/com/computedsynergy/hurtrade/webauth/Webauth.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2023">
-              <caret line="140" column="8" lean-forward="false" selection-start-line="140" selection-start-column="8" selection-end-line="143" selection-end-column="9" />
+            <state relative-caret-position="255">
+              <caret line="138" column="63" lean-forward="true" selection-start-line="138" selection-start-column="63" selection-end-line="138" selection-end-column="63" />
               <folding>
                 <element signature="e#0#10013#0" expanded="true" />
                 <element signature="imports" expanded="true" />
@@ -60,8 +58,8 @@
       <file leaf-file-name="RabbitMqStats.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/mqstats/src/main/java/com/computedsynergy/hurtrade/collectors/RabbitMqStats.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="323">
-              <caret line="25" column="26" lean-forward="false" selection-start-line="25" selection-start-column="13" selection-end-line="25" selection-end-column="26" />
+            <state relative-caret-position="476">
+              <caret line="48" column="24" lean-forward="true" selection-start-line="48" selection-start-column="24" selection-end-line="48" selection-end-column="24" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -73,7 +71,7 @@
         <entry file="file://$PROJECT_DIR$/fxyahoo/src/main/java/com/computedsynergy/hurtrade/fxyahoo/FxYahoo.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="544">
-              <caret line="70" column="26" lean-forward="true" selection-start-line="70" selection-start-column="26" selection-end-line="70" selection-end-column="26" />
+              <caret line="70" column="26" lean-forward="false" selection-start-line="70" selection-start-column="26" selection-end-line="70" selection-end-column="26" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -84,8 +82,8 @@
       <file leaf-file-name="DbConnectivityChecker.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/db/DbConnectivityChecker.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="476">
-              <caret line="34" column="52" lean-forward="true" selection-start-line="33" selection-start-column="16" selection-end-line="34" selection-end-column="52" />
+            <state relative-caret-position="578">
+              <caret line="34" column="52" lean-forward="false" selection-start-line="33" selection-start-column="16" selection-end-line="34" selection-end-column="52" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -93,11 +91,31 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AmqpBase.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="AmqpBase.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/amqp/AmqpBase.java">
           <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-306">
+              <caret line="32" column="21" lean-forward="false" selection-start-line="32" selection-start-column="13" selection-end-line="32" selection-end-column="21" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AmqpConnectionFactory.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/amqp/AmqpConnectionFactory.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="187">
+              <caret line="71" column="77" lean-forward="true" selection-start-line="71" selection-start-column="77" selection-end-line="71" selection-end-column="77" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CommandLineOptions.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/commandline/CommandLineOptions.java">
+          <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="306">
-              <caret line="86" column="8" lean-forward="false" selection-start-line="86" selection-start-column="8" selection-end-line="86" selection-end-column="8" />
+              <caret line="46" column="41" lean-forward="true" selection-start-line="46" selection-start-column="41" selection-end-line="46" selection-end-column="41" />
               <folding />
             </state>
           </provider>
@@ -115,8 +133,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>Logger.getLogger(AuthRequestProcessor.class.getName())</find>
-      <find>Logger.getLogger(this.getClass().getName())</find>
       <find>ledger</find>
       <find>commodi</find>
       <find>userCommodities</find>
@@ -145,6 +161,8 @@
       <find>gson</find>
       <find>locked</find>
       <find>Command</find>
+      <find>redis</find>
+      <find>AmqpBase</find>
     </findStrings>
     <replaceStrings>
       <replace>Date</replace>
@@ -163,7 +181,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/ICoverPosition.java" />
         <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/ICoverAccount.java" />
         <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/CoverAccountModel.java" />
         <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/CoverPositionModel.java" />
@@ -214,6 +231,7 @@
         <option value="$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/HurCpu.java" />
         <option value="$PROJECT_DIR$/fxyahoo/src/main/java/com/computedsynergy/hurtrade/fxyahoo/FxYahoo.java" />
         <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/amqp/AmqpBase.java" />
+        <option value="$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/amqp/AmqpConnectionFactory.java" />
       </list>
     </option>
   </component>
@@ -461,7 +479,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.HurCpu">
+  <component name="RunManager" selected="Application.RabbitMqStats">
     <configuration name="FxYahoo" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
@@ -688,8 +706,8 @@
     </list>
     <recent_temporary>
       <list size="4">
-        <item index="0" class="java.lang.String" itemvalue="Application.Webauth" />
-        <item index="1" class="java.lang.String" itemvalue="Application.RabbitMqStats" />
+        <item index="0" class="java.lang.String" itemvalue="Application.RabbitMqStats" />
+        <item index="1" class="java.lang.String" itemvalue="Application.Webauth" />
         <item index="2" class="java.lang.String" itemvalue="Application.HurCpu" />
         <item index="3" class="java.lang.String" itemvalue="Application.FxYahoo" />
       </list>
@@ -964,20 +982,20 @@
     <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936078" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32826087" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3531961" sideWeight="0.5154584" order="1" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32391304" sideWeight="0.5143923" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32942432" sideWeight="0.4940978" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33695653" sideWeight="0.49092284" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.48454157" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.48454157" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="SLIDING" type="FLOATING" visible="false" show_stripe_button="true" weight="0.32936078" sideWeight="0.4978678" order="10" side_tool="false" content_ui="tabs" x="784" y="142" width="950" height="343" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24733475" sideWeight="0.49369368" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.4940978" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.18443497" sideWeight="0.5063063" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32391304" sideWeight="0.49092284" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32391304" sideWeight="0.48560768" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32826087" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Debug Logs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -1083,8 +1101,14 @@
           <properties />
           <option name="timeStamp" value="158" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/amqp/AmqpBase.java</url>
+          <line>65</line>
+          <properties />
+          <option name="timeStamp" value="161" />
+        </line-breakpoint>
       </breakpoints>
-      <option name="time" value="159" />
+      <option name="time" value="162" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -1093,13 +1117,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/impl/CoverAccountModel.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
-          <caret line="16" column="31" lean-forward="true" selection-start-line="16" selection-start-column="31" selection-end-line="16" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/models/interfaces/INotificationModel.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="170">
@@ -1391,7 +1408,7 @@
         <state relative-caret-position="255">
           <caret line="33" column="4" lean-forward="false" selection-start-line="33" selection-start-column="4" selection-end-line="33" selection-end-column="72" />
           <folding>
-            <element signature="imports" expanded="true" />
+            <element signature="imports" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1403,24 +1420,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/commandline/CommandLineOptions.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="42" column="4" lean-forward="true" selection-start-line="42" selection-start-column="4" selection-end-line="42" selection-end-column="4" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mqstats/src/main/java/com/computedsynergy/hurtrade/collectors/RabbitMqStats.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
-          <caret line="25" column="26" lean-forward="false" selection-start-line="25" selection-start-column="13" selection-end-line="25" selection-end-column="26" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/hurcpu/src/main/java/com/computedsynergy/hurtrade/hurcpu/HurCpu.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="153">
@@ -1429,21 +1428,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/webauth/src/main/java/com/computedsynergy/hurtrade/webauth/Webauth.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2023">
-          <caret line="140" column="8" lean-forward="false" selection-start-line="140" selection-start-column="8" selection-end-line="143" selection-end-column="9" />
-          <folding>
-            <element signature="e#0#10013#0" expanded="true" />
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/fxyahoo/src/main/java/com/computedsynergy/hurtrade/fxyahoo/FxYahoo.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="544">
-          <caret line="70" column="26" lean-forward="true" selection-start-line="70" selection-start-column="26" selection-end-line="70" selection-end-column="26" />
+          <caret line="70" column="26" lean-forward="false" selection-start-line="70" selection-start-column="26" selection-end-line="70" selection-end-column="26" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -1456,26 +1444,63 @@
           <caret line="32" column="0" lean-forward="false" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
           <folding>
             <element signature="e#0#1850#0" expanded="true" />
-            <element signature="imports" expanded="true" />
+            <element signature="imports" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/db/DbConnectivityChecker.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="476">
-          <caret line="34" column="52" lean-forward="true" selection-start-line="33" selection-start-column="16" selection-end-line="34" selection-end-column="52" />
+        <state relative-caret-position="578">
+          <caret line="34" column="52" lean-forward="false" selection-start-line="33" selection-start-column="16" selection-end-line="34" selection-end-column="52" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/amqp/AmqpBase.java">
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/commandline/CommandLineOptions.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="306">
-          <caret line="86" column="8" lean-forward="false" selection-start-line="86" selection-start-column="8" selection-end-line="86" selection-end-column="8" />
+          <caret line="46" column="41" lean-forward="true" selection-start-line="46" selection-start-column="41" selection-end-line="46" selection-end-column="41" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/amqp/AmqpConnectionFactory.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="71" column="77" lean-forward="true" selection-start-line="71" selection-start-column="77" selection-end-line="71" selection-end-column="77" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sharedcomponents/src/main/java/com/computedsynergy/hurtrade/sharedcomponents/amqp/AmqpBase.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-306">
+          <caret line="32" column="21" lean-forward="false" selection-start-line="32" selection-start-column="13" selection-end-line="32" selection-end-column="21" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mqstats/src/main/java/com/computedsynergy/hurtrade/collectors/RabbitMqStats.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="476">
+          <caret line="48" column="24" lean-forward="true" selection-start-line="48" selection-start-column="24" selection-end-line="48" selection-end-column="24" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/webauth/src/main/java/com/computedsynergy/hurtrade/webauth/Webauth.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="138" column="63" lean-forward="true" selection-start-line="138" selection-start-column="63" selection-end-line="138" selection-end-column="63" />
+          <folding>
+            <element signature="e#0#10013#0" expanded="true" />
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

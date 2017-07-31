@@ -38,6 +38,8 @@ public class AmqpConnectionFactory {
     protected Connection connection = null;
     private static AmqpConnectionFactory _instance = null;
 
+    //logging
+    private Logger _log = Logger.getLogger(this.getClass().getName());
 
     public static AmqpConnectionFactory GetInstance(){
 
@@ -58,7 +60,7 @@ public class AmqpConnectionFactory {
      * @throws IOException
      * @throws TimeoutException
      */
-    protected void setupAMQP() {
+    private void setupAMQP() {
 
         try {
             if (connection != null && connection.isOpen()) {
@@ -67,6 +69,7 @@ public class AmqpConnectionFactory {
 
             factory = new ConnectionFactory();
             factory.setHost(CommandLineOptions.getInstance().mqHost);
+            _log.info("mqHosts: " + CommandLineOptions.getInstance().mqHost);
             factory.setAutomaticRecoveryEnabled(true);
             factory.setUsername(CommandLineOptions.getInstance().mqUsername);
             factory.setPassword(CommandLineOptions.getInstance().mqPassword);
@@ -88,7 +91,7 @@ public class AmqpConnectionFactory {
 
 
         }catch(Exception ex){
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
 
     }
@@ -100,7 +103,7 @@ public class AmqpConnectionFactory {
         try{
             chan = connection.createChannel();
         }catch(Exception ex) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
 
         return chan;
