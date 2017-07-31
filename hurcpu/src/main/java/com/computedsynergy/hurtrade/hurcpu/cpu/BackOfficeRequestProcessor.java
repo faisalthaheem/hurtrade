@@ -62,10 +62,7 @@ public class BackOfficeRequestProcessor extends AmqpBase {
             String officeExchangeName = MqNamingUtil.getOfficeExchangeName(o.getOfficeuuid());
             String officeDealerInQName = MqNamingUtil.getOfficeDealerINQueueName(o.getOfficeuuid());
             String officeDealerOutQName = MqNamingUtil.getOfficeDealerOutQueueName(o.getOfficeuuid());
-
-            //bind the stats exchange to this office's exchange
-            channel.exchangeBind(officeExchangeName, CommandLineOptions.getInstance().mqExchangeNameStats, "connections");
-
+            
             //start office position dispatch task
             OfficePositionsDispatchTask officePositionsDispatchTask = new OfficePositionsDispatchTask(officeExchangeName, o.getId());
             officePositionsDispatchTask.initialize();
@@ -74,6 +71,9 @@ public class BackOfficeRequestProcessor extends AmqpBase {
             channel.exchangeDeclare(officeExchangeName, "direct", true);
             channel.queueDeclare(officeDealerOutQName, true, false, false, args);
             channel.queueDeclare(officeDealerInQName, true, false, false, args);
+
+            //bind the stats exchange to this office's exchange
+            channel.exchangeBind(officeExchangeName, CommandLineOptions.getInstance().mqExchangeNameStats, "connections");
 
             channel.queueBind(officeDealerOutQName, officeExchangeName, "connections");
             channel.queueBind(officeDealerOutQName, officeExchangeName, "todealer");
