@@ -38,7 +38,7 @@
 		  <configuration>
 			<archive>
 			  <manifest>
-				<mainClass>com.computedsynergy.hurtrade.webauth.Webauth</mainClass>
+				<mainClass>com.computedsynergy.hurtrade.fxyahoo.FxYahoo</mainClass>
 			  </manifest>
 			</archive>
 			<descriptorRefs>
