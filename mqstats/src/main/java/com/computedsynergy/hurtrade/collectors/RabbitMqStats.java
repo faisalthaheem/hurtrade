@@ -48,12 +48,16 @@ public class RabbitMqStats extends AmqpBase {
     private final ExecutorService _singleExecutorService;
     private JsonParser _par = new JsonParser();
     private Gson _gson = new Gson();
+    private static boolean _keepRunning = true;
 
     public static void main(String[] args) {
 
         new JCommander(CommandLineOptions.getInstance(), args);
 
         RabbitMqStats mqStats = new RabbitMqStats();
+
+        //ensure we exit gracefully
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> _keepRunning = false));
 
         mqStats.run();
     }
@@ -103,7 +107,7 @@ public class RabbitMqStats extends AmqpBase {
             return;
         }
 
-        while(true){
+        while(_keepRunning){
             queryAndPublish();
 
             try{

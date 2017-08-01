@@ -50,6 +50,7 @@ import java.util.logging.Level;
  */
 public class FxYahoo extends AmqpBase implements Runnable {
 
+    private static boolean _keepRunning = true;
     private Object lockCommodities = new Object();
     Map<String, Commodity> commodities;
     
@@ -64,6 +65,9 @@ public class FxYahoo extends AmqpBase implements Runnable {
             yahoo._log.info("Unable to connect to db. Exiting.");
             return;
         }
+
+        //ensure we exit gracefully
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> _keepRunning = false));
 
         yahoo.refreshCommodities();
         yahoo.setupAMQP();
@@ -88,7 +92,8 @@ public class FxYahoo extends AmqpBase implements Runnable {
     @Override
     public void run() {
                 
-        while(true){
+        while(_keepRunning){
+
             try{
                 
                 //todo exit on shutdown signal reception

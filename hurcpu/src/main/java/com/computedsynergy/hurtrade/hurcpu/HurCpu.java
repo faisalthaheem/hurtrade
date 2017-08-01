@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 public class HurCpu {
 
     private static final Logger _log = Logger.getLogger(HurCpu.class.getName());
+    private static boolean _keepRunning = true;
 
     public static void main(String[] args) throws Exception{
         
@@ -49,9 +50,12 @@ public class HurCpu {
 
         AuthRequestProcessor authProcessor = new AuthRequestProcessor();
         authProcessor.init();
+
+        //ensure we exit gracefully
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> _keepRunning = false));
         
-        while(true){
-            Thread.sleep(100000);
+        while(_keepRunning){
+            Thread.sleep(30 * 1000);
         }
     }
 }
