@@ -136,7 +136,7 @@ public class ClientAccountTask extends AmqpBase {
             channel.queueBind(_outgoingQueueName, _clientExchangeName, "response");
 
             channel.queueDeclare(_myRateQueueName, true, false, false, null);
-            channel.queueBind(_myRateQueueName, Constants.EXCHANGE_NAME_RATES, _self.getUseruuid().toString());
+            channel.queueBind(_myRateQueueName, Constants.EXCHANGE_NAME_RATES, "");
 
             //consume command related messages from user
 

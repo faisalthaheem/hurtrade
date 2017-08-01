@@ -23,9 +23,7 @@ import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.QuoteList;
 import com.computedsynergy.hurtrade.sharedcomponents.dataexchange.SourceQuote;
 import com.computedsynergy.hurtrade.sharedcomponents.db.DbConnectivityChecker;
 import com.computedsynergy.hurtrade.sharedcomponents.models.impl.CommodityModel;
-import com.computedsynergy.hurtrade.sharedcomponents.models.impl.UserModel;
 import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.Commodity;
-import com.computedsynergy.hurtrade.sharedcomponents.models.pojos.User;
 import com.computedsynergy.hurtrade.sharedcomponents.util.Constants;
 import com.google.gson.Gson;
 import org.apache.log4j.BasicConfigurator;
@@ -139,15 +137,10 @@ public class FxYahoo extends AmqpBase implements Runnable {
                 Date startTime = new Date();
                 Gson gson = new Gson();
                 SourceQuote quote = new SourceQuote(quotes);
-                
-                UserModel userModel = new UserModel();
-                List<User> users = userModel.getAllUsers();
+
                 String serialized = gson.toJson(quote);
 
-                for(User u: users){
-                    channel.basicPublish(Constants.EXCHANGE_NAME_RATES, u.getUseruuid().toString(), null, serialized.getBytes());
-                }
-                channel.basicPublish(Constants.EXCHANGE_NAME_RATES, Constants.QUEUE_NAME_RATES, null, serialized.getBytes());
+                channel.basicPublish(Constants.EXCHANGE_NAME_RATES, "", null, serialized.getBytes());
 
 
                 Date endTime = new Date();
@@ -177,9 +170,9 @@ public class FxYahoo extends AmqpBase implements Runnable {
         try {
             super.setupAMQP();
 
-            channel.exchangeDeclare(Constants.EXCHANGE_NAME_RATES, "direct", true);
+            channel.exchangeDeclare(Constants.EXCHANGE_NAME_RATES, "fanout", true);
             channel.queueDeclare(Constants.QUEUE_NAME_RATES, true, false, false, null);
-            channel.queueBind(Constants.QUEUE_NAME_RATES, Constants.EXCHANGE_NAME_RATES, Constants.QUEUE_NAME_RATES);
+            channel.queueBind(Constants.QUEUE_NAME_RATES, Constants.EXCHANGE_NAME_RATES, "");
         }catch (Exception ex){
             java.util.logging.Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, ex);
         }

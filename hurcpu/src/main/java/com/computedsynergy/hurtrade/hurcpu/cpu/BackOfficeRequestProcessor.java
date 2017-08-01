@@ -62,7 +62,7 @@ public class BackOfficeRequestProcessor extends AmqpBase {
             String officeExchangeName = MqNamingUtil.getOfficeExchangeName(o.getOfficeuuid());
             String officeDealerInQName = MqNamingUtil.getOfficeDealerINQueueName(o.getOfficeuuid());
             String officeDealerOutQName = MqNamingUtil.getOfficeDealerOutQueueName(o.getOfficeuuid());
-            
+
             //start office position dispatch task
             OfficePositionsDispatchTask officePositionsDispatchTask = new OfficePositionsDispatchTask(officeExchangeName, o.getId());
             officePositionsDispatchTask.initialize();
