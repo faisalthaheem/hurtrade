@@ -4,7 +4,9 @@
 
 
 # HUR (حر) TRADE
-**Hur** (Free) **Trade** is a an open source trading platform that can be used to trade currency pairs, valuables etc. While this platform provides the means to track and process transactions, it does not provide anything related to the policies, compliance or processes needed to run a trading business. 
+**Hur** (Free) **Trade** is a an open source trading platform that can be used to trade currency pairs, valuables etc. While this platform provides the means to track and process transactions, it does not provide anything related to the policies, compliance or processes needed to run a trading business.
+
+*See [Wiki](https://github.com/faisalthaheem/hurtrade/wiki/Running-HurTrade) for instructions on how to quickly setup and test the platform.*
 
 Following video shows a quick side by side overview of logging in, placing orders and updating statuses from the point of view of a trader and a back office dealer.
 
