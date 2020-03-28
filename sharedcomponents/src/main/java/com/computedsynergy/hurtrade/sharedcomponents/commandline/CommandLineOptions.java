@@ -77,6 +77,9 @@ public class CommandLineOptions {
     @Parameter(names = {"--yahoo-fx-frequency"})
     public Integer yahooFxFrequency = 3000;
 
+    @Parameter(names = {"--gecko-query-frequency"})
+    public Integer geckoQueryFrequency = 1000;
+
     @Parameter(names = {"--requote-network-delay"})
     public Integer requoteNetworkDelay = 1; //how much grace period on top of the allowed time within which the client has to respond (in secs)
 

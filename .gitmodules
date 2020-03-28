@@ -1,0 +1,3 @@
+[submodule "CoinGecko-Java"]
+	path = CoinGecko-Java
+	url = https://github.com/faisalthaheem/CoinGecko-Java

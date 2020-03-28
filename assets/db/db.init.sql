@@ -347,42 +347,15 @@ VALUES(1, 10);
 
 INSERT INTO commodities
 (id, commodityname, commoditytype, created, modified, lotsize)
-VALUES(8, 'USDPKR', 'FX', NULL, NULL, 100000);
+VALUES(8, 'BTCUSD', 'FX', NULL, NULL, 100000);
 INSERT INTO commodities
 (id, commodityname, commoditytype, created, modified, lotsize)
-VALUES(9, 'USDJPY', 'FX', NULL, NULL, 100000);
+VALUES(9, 'BTCEUR', 'FX', NULL, NULL, 100000);
 INSERT INTO commodities
 (id, commodityname, commoditytype, created, modified, lotsize)
-VALUES(10, 'USDEUR', 'FX', NULL, NULL, 100000);
-INSERT INTO commodities
-(id, commodityname, commoditytype, created, modified, lotsize)
-VALUES(7, 'USDGBP', 'FX', NULL, NULL, 100000);
-INSERT INTO commodities
-(id, commodityname, commoditytype, created, modified, lotsize)
-VALUES(11, 'USDAUD', 'FX', NULL, NULL, 100000);
-INSERT INTO commodities
-(id, commodityname, commoditytype, created, modified, lotsize)
-VALUES(12, 'USDCHF', 'FX', NULL, NULL, 100000);
-INSERT INTO commodities
-(id, commodityname, commoditytype, created, modified, lotsize)
-VALUES(14, 'USDCAD', 'FX', NULL, NULL, 100000);
-INSERT INTO commodities
-(id, commodityname, commoditytype, created, modified, lotsize)
-VALUES(16, 'USDMXN', 'FX', NULL, NULL, 100000);
-INSERT INTO commodities
-(id, commodityname, commoditytype, created, modified, lotsize)
-VALUES(17, 'USDCNY', 'FX', NULL, NULL, 100000);
-INSERT INTO commodities
-(id, commodityname, commoditytype, created, modified, lotsize)
-VALUES(18, 'USDNZD', 'FX', NULL, NULL, 100000);
+VALUES(10, 'BTCPKR', 'FX', NULL, NULL, 100000);
 
 
-INSERT INTO commodities_users
-(commodity_id, user_id, spread, ratio, fee, commission, minamount, maxamount)
-VALUES(7, 9, 0.0005, 0.01, 15, 0.02, 0.01, 2.0);
-INSERT INTO commodities_users
-(commodity_id, user_id, spread, ratio, fee, commission, minamount, maxamount)
-VALUES(7, 10, 0, 0.01, 15, 0.02, 0.01, 2.0);
 INSERT INTO commodities_users
 (commodity_id, user_id, spread, ratio, fee, commission, minamount, maxamount)
 VALUES(8, 9, 0.0010, 0.01, 15, 0.02, 0.01, 2.0);
@@ -401,42 +374,6 @@ VALUES(9, 10, 0, 0.01, 15, 0.02, 0.01, 2.0);
 INSERT INTO commodities_users
 (commodity_id, user_id, spread, ratio, fee, commission, minamount, maxamount)
 VALUES(10, 10, 0, 0.01, 15, 0.02, 0.01, 2.0);
-INSERT INTO commodities_users
-(commodity_id, user_id, spread, ratio, fee, commission, minamount, maxamount)
-VALUES(11, 9, 0.001, 0.01, 15, 0.02, 0.01, 2.0);
-INSERT INTO commodities_users
-(commodity_id, user_id, spread, ratio, fee, commission, minamount, maxamount)
-VALUES(12, 9, 0.001, 0.01, 15, 0.02, 0.01, 2.0);
-INSERT INTO commodities_users
-(commodity_id, user_id, spread, ratio, fee, commission, minamount, maxamount)
-VALUES(14, 9, 0.001, 0.01, 15, 0.02, 0.01, 2.0);
-INSERT INTO commodities_users
-(commodity_id, user_id, spread, ratio, fee, commission, minamount, maxamount)
-VALUES(17, 9, 0.001, 0.01, 15, 0.02, 0.01, 2.0);
-INSERT INTO commodities_users
-(commodity_id, user_id, spread, ratio, fee, commission, minamount, maxamount)
-VALUES(18, 9, 0.001, 0.01, 15, 0.02, 0.01, 2.0);
-INSERT INTO commodities_users
-(commodity_id, user_id, spread, ratio, fee, commission, minamount, maxamount)
-VALUES(16, 9, 0.001, 0.01, 15, 0.02, 0.01, 2.0);
-INSERT INTO commodities_users
-(commodity_id, user_id, spread, ratio, fee, commission, minamount, maxamount)
-VALUES(11, 10, 0, 0.01, 15, 0.02, 0.01, 2.0);
-INSERT INTO commodities_users
-(commodity_id, user_id, spread, ratio, fee, commission, minamount, maxamount)
-VALUES(12, 10, 0, 0.01, 15, 0.02, 0.01, 2.0);
-INSERT INTO commodities_users
-(commodity_id, user_id, spread, ratio, fee, commission, minamount, maxamount)
-VALUES(14, 10, 0, 0.01, 15, 0.02, 0.01, 2.0);
-INSERT INTO commodities_users
-(commodity_id, user_id, spread, ratio, fee, commission, minamount, maxamount)
-VALUES(17, 10, 0, 0.01, 15, 0.02, 0.01, 2.0);
-INSERT INTO commodities_users
-(commodity_id, user_id, spread, ratio, fee, commission, minamount, maxamount)
-VALUES(18, 10, 0, 0.01, 15, 0.02, 0.01, 2.0);
-INSERT INTO commodities_users
-(commodity_id, user_id, spread, ratio, fee, commission, minamount, maxamount)
-VALUES(16, 10, 0, 0.01, 15, 0.02, 0.01, 2.0);
 
 
 
