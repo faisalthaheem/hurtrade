@@ -249,6 +249,11 @@ public class User {
     }
 
     public List<String> getTagsList() {
+        if(tagsList == null)
+        {
+            System.out.println("Encountered null tagsList for user " + this.username);
+            this.tagsList = new ArrayList();
+        }
         return tagsList;
     }
 
@@ -257,6 +262,11 @@ public class User {
     }
 
     public List<String> getResourcesList() {
+        if(resourcesList == null)
+        {
+            System.out.println("Encountered null resourcesList for user " + this.username);
+            this.resourcesList = new ArrayList();
+        }
         return resourcesList;
     }
 
