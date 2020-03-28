@@ -1,4 +1,5 @@
 language: java
+install: ./install-dependencies.sh
 script: mvn clean package
 jdk:
   - openjdk11
